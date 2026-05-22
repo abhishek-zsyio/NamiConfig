@@ -1,96 +1,54 @@
+-- Suppress deprecation warnings (lspconfig v2 → v3 transition)
 vim.deprecate = function() end
-vim.g.base46_cache = vim.fn.stdpath "data" .. "/nvchad/base46/"
+
+-- Leader keys must be set BEFORE lazy loads plugins
 vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
--- bootstrap lazy and all plugins
-local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
+-- Load core options immediately
+require("core.options")
 
+-- ── Bootstrap lazy.nvim ─────────────────────────────────────────────────────
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  local repo = "https://github.com/folke/lazy.nvim.git"
-  vim.fn.system { "git", "clone", "--filter=blob:none", repo, "--branch=stable", lazypath }
+  vim.fn.system({
+    "git", "clone", "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", lazypath,
+  })
 end
-
 vim.opt.rtp:prepend(lazypath)
 
-local lazy_config = require "configs.lazy"
-
-
--- load plugins
+-- ── Plugin setup ────────────────────────────────────────────────────────────
 require("lazy").setup({
-  {
-    "NvChad/NvChad",
-    lazy = false,
-    branch = "v2.5",
-    import = "nvchad.plugins",
-    config = function()
-      require "options"
-    end,
-  },
-
   { import = "plugins" },
- }, lazy_config)
+}, {
+  defaults = { lazy = true },
+  install  = { colorscheme = { "catppuccin" } },
+  ui = {
+    icons = {
+      ft        = "",
+      lazy      = "󰂠 ",
+      loaded    = "",
+      not_loaded = "",
+    },
+  },
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        "2html_plugin", "tohtml", "getscript", "getscriptPlugin",
+        "gzip", "logipat", "netrw", "netrwPlugin", "netrwSettings",
+        "netrwFileHandlers", "matchit", "tar", "tarPlugin",
+        "rrhelper", "spellfile_plugin", "vimball", "vimballPlugin",
+        "zip", "zipPlugin", "tutor", "rplugin", "syntax",
+        "synmenu", "optwin", "compiler", "bugreport", "ftplugin",
+      },
+    },
+  },
+})
 
--- load theme
-dofile(vim.g.base46_cache .. "defaults")
-dofile(vim.g.base46_cache .. "statusline")
-
-require "nvchad.autocmds"
-
+-- ── Load keymaps & autocmds after plugins ────────────────────────────────────
 vim.schedule(function()
-  require "mappings"
+  require("core.keymaps")
+  require("core.autocmds")
 end)
-
--- user added
-vim.opt.swapfile = false
-vim.opt.colorcolumn = "80"
-vim.opt.mouse = ""
-
--- custom key to move line
-vim.api.nvim_set_keymap("i", "<A-j>", "<Esc>:m .+1<CR>==gi", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("i", "<A-k>", "<Esc>:m .-2<CR>==gi", { noremap = true, silent = true })
-
---padding neovid
-vim.g.neovide_padding_top = 40
-vim.g.neovide_padding_bottom = 40
-vim.g.neovide_padding_right = 40
-vim.g.neovide_padding_left = 40
-
-local hardmode = true
-if hardmode then
-  -- Show an error message if a disabled key is pressed
-  local msg = [[<cmd>echohl Error | echo "KEY DISABLED" | echohl None<CR>]]
-
-  -- Disable arrow keys in insert mode with a styled message
-  vim.api.nvim_set_keymap("i", "<Up>", "<C-o>" .. msg, { noremap = true, silent = false })
-  vim.api.nvim_set_keymap("i", "<Down>", "<C-o>" .. msg, { noremap = true, silent = false })
-  vim.api.nvim_set_keymap("i", "<Left>", "<C-o>" .. msg, { noremap = true, silent = false })
-  vim.api.nvim_set_keymap("i", "<Right>", "<C-o>" .. msg, { noremap = true, silent = false })
-  -- vim.api.nvim_set_keymap('i', '<Del>', '<C-o>' .. msg, { noremap = true, silent = false })
-  -- vim.api.nvim_set_keymap('i', '<BS>', '<C-o>' .. msg, { noremap = true, silent = false })
-
-  -- Disable arrow keys in normal mode with a styled message
-  vim.api.nvim_set_keymap("n", "<Up>", msg, { noremap = true, silent = false })
-  vim.api.nvim_set_keymap("n", "<Down>", msg, { noremap = true, silent = false })
-  vim.api.nvim_set_keymap("n", "<Left>", msg, { noremap = true, silent = false })
-  vim.api.nvim_set_keymap("n", "<Right>", msg, { noremap = true, silent = false })
-  -- vim.api.nvim_set_keymap('n', '<BS>', msg, { noremap = true, silent = false })
-end
-
--- html python venv
--- Function to check if we're in a Python virtual environment
-local function in_virtual_env()
-  local venv = os.getenv("VIRTUAL_ENV")
-  return venv ~= nil
-end
-
--- Conditional autocommand based on virtual environment
-if in_virtual_env() then
-  vim.cmd([[
-    augroup FileTypeDjango
-      autocmd!
-      autocmd BufNewFile,BufRead *.html set filetype=htmldjango
-    augroup END
-  ]])
-end
-
--- git blame nvim

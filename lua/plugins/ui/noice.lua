@@ -1,32 +1,89 @@
+-- Noice: polished UI with aggressive filtering of annoying messages
 return {
   {
     "folke/noice.nvim",
-    event = "VeryLazy",
-    opts = {
-      lsp = {
-        -- override markdown rendering so that cmp docs and signature help use Treesitter
-        override = {
-          ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-          ["vim.lsp.util.stylize_markdown"] = true,
-          ["cmp.entry.get_documentation"] = true,
-        },
-      },
-      -- enable standard presets
-      presets = {
-        bottom_search = true, -- use a classic bottom search bar
-        command_palette = true, -- position the cmdline and popupmenu together in the center of the screen
-        long_message_to_split = true, -- long messages will be sent to a split
-        inc_rename = false, -- enables an input dialog for inc-rename.nvim
-        lsp_doc_border = false, -- add a border to hover docs and signature help
-      },
-    },
+    event        = "VeryLazy",
     dependencies = {
       "MunifTanjim/nui.nvim",
       {
         "rcarriga/nvim-notify",
         opts = {
+          timeout    = 2000,
+          max_height = function() return math.floor(vim.o.lines * 0.75) end,
+          max_width  = function() return math.floor(vim.o.columns * 0.75) end,
+          on_open    = function(win)
+            vim.api.nvim_win_set_config(win, { zindex = 100 })
+          end,
           background_colour = "#000000",
+          render  = "wrapped-compact",
+          stages  = "fade",
+          icons   = { ERROR = " ", WARN = " ", INFO = " " },
+          -- Minimum level to show — hide WARN and below from noisy sources
+          minimum_width = 10,
+          top_down = false,   -- show newest at bottom (less intrusive)
         },
+      },
+    },
+    opts = {
+      cmdline = {
+        enabled  = true,
+        view     = "cmdline_popup",
+        format   = {
+          cmdline       = { icon = ">" },
+          search_down   = { icon = "🔍⌄" },
+          search_up     = { icon = "🔍⌃" },
+          filter        = { icon = "$" },
+          lua           = { icon = "☾" },
+          help          = { icon = "?" },
+        },
+      },
+      messages = { enabled = true },
+      popupmenu = { enabled = true, backend = "nui" },
+      lsp = {
+        override = {
+          ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+          ["vim.lsp.util.stylize_markdown"]                = true,
+          ["cmp.entry.get_documentation"]                  = true,
+        },
+        progress = {
+          enabled = true,
+          format  = "lsp_progress",
+          format_done = "lsp_progress_done",
+          throttle    = 1000 / 30,
+          view        = "mini",
+        },
+      },
+      -- ── Route filters: silence common noise ──────────────────────────────
+      routes = {
+        -- Skip written/read file messages ("14L, 42B")
+        { filter = { event = "msg_show", find = "%d+L, %d+B" },           opts = { skip = true } },
+        { filter = { event = "msg_show", find = "; after #%d+" },          opts = { skip = true } },
+        { filter = { event = "msg_show", find = "; before #%d+" },         opts = { skip = true } },
+        { filter = { event = "msg_show", find = "%d fewer lines" },         opts = { skip = true } },
+        { filter = { event = "msg_show", find = "%d more lines" },          opts = { skip = true } },
+        { filter = { event = "msg_show", find = "already at newest change" }, opts = { skip = true } },
+        { filter = { event = "msg_show", find = "^/" },                    opts = { skip = true } }, -- search count
+        -- Silence lazy.nvim "Config Change Detected / Reloading" spam
+        { filter = { event = "notify", find = "Config Change Detected" },  opts = { skip = true } },
+        { filter = { event = "notify", find = "Reloading" },               opts = { skip = true } },
+        -- Silence lualine notices
+        { filter = { event = "notify", find = "lualine" },                 opts = { skip = true } },
+        -- Silence mason-lspconfig warnings about server names
+        { filter = { event = "notify", find = "mason%-lspconfig" },        opts = { skip = true } },
+        -- Silence nvim-tree deprecation warnings
+        { filter = { event = "notify", find = "NvimTree" },                opts = { skip = true } },
+        -- Send long messages to split instead of popup
+        {
+          filter = { event = "msg_show", min_height = 5 },
+          view   = "split",
+        },
+      },
+      presets = {
+        bottom_search         = true,
+        command_palette       = true,
+        long_message_to_split = true,
+        inc_rename            = false,
+        lsp_doc_border        = true,
       },
     },
   },
