@@ -6,9 +6,14 @@ return {
     priority = 1000,
     lazy     = false,
     config   = function()
+      local ok, settings = pcall(require, "settings")
+      if not ok then settings = {} end
+
+      local is_transparent = settings.transparent_background ~= false
+
       require("catppuccin").setup({
         flavour              = "mocha",
-        transparent_background = true,
+        transparent_background = is_transparent,
         show_end_of_buffer   = false,
         term_colors          = true,
         dim_inactive = {
@@ -60,7 +65,116 @@ return {
           }
         end,
       })
-      vim.cmd.colorscheme("catppuccin")
+      
+      -- Only load catppuccin if it is the selected theme
+      if settings.theme == "catppuccin" or settings.theme == nil then
+        vim.cmd.colorscheme("catppuccin")
+      end
+    end,
+  },
+  {
+    "navarasu/onedark.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      if not ok then settings = {} end
+
+      local is_transparent = settings.transparent_background ~= false
+
+      require('onedark').setup {
+        style = 'darker', -- dark, darker, cool, deep, warm, warmer, light
+        transparent = is_transparent,
+        term_colors = true,
+        ending_tildes = false,
+        cmp_itemkind_reverse = false,
+        -- toggle theme style ---
+        toggle_style_key = nil,
+        toggle_style_list = {'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light'},
+        -- plugins
+        diagnostics = {
+            darker = true, -- darker colors for diagnostic
+            undercurl = true,   -- use undercurl instead of underline for diagnostics
+            background = true,    -- use background color for virtual text
+        },
+      }
+      
+      -- Load onedark if selected
+      if settings.theme == "onedark" then
+        require('onedark').load()
+      end
+    end,
+  },
+  {
+    "folke/tokyonight.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      local transparent = ok and settings.transparent_background ~= false
+      require("tokyonight").setup({ transparent = transparent })
+      if settings.theme == "tokyonight" then vim.cmd.colorscheme("tokyonight") end
+    end,
+  },
+  {
+    "ellisonleao/gruvbox.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      local transparent = ok and settings.transparent_background ~= false
+      require("gruvbox").setup({ transparent_mode = transparent })
+      if settings.theme == "gruvbox" then vim.cmd.colorscheme("gruvbox") end
+    end,
+  },
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      local transparent = ok and settings.transparent_background ~= false
+      require("rose-pine").setup({
+        styles = { transparency = transparent }
+      })
+      if settings.theme == "rose-pine" then vim.cmd.colorscheme("rose-pine") end
+    end,
+  },
+  {
+    "shaunsingh/nord.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      if settings.theme == "nord" then
+        if ok and settings.transparent_background ~= false then
+          vim.g.nord_disable_background = true
+        end
+        vim.cmd.colorscheme("nord")
+      end
+    end,
+  },
+  {
+    "Mofiqul/dracula.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      local transparent = ok and settings.transparent_background ~= false
+      require("dracula").setup({ transparent_bg = transparent })
+      if settings.theme == "dracula" then vim.cmd.colorscheme("dracula") end
+    end,
+  },
+  {
+    "rebelot/kanagawa.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      local transparent = ok and settings.transparent_background ~= false
+      require("kanagawa").setup({ transparent = transparent })
+      if settings.theme == "kanagawa" then vim.cmd.colorscheme("kanagawa") end
     end,
   },
 }

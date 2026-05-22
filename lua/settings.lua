@@ -1,0 +1,87 @@
+-- ==============================================================================
+-- 🚀  User Configuration Settings
+-- ==============================================================================
+-- Feel free to edit these values to customize your Neovim experience without
+-- ever having to touch the complex Lua plugin files!
+
+---@alias Theme "catppuccin" | "onedark" | "tokyonight" | "gruvbox" | "rose-pine" | "nord" | "dracula" | "kanagawa"
+
+return {
+  -- ── UI & Aesthetics ────────────────────────────────────────────────────────
+  
+  -- The core colorscheme. (Default: "catppuccin")
+  ---@type Theme
+  theme = "kanagawa",
+  
+  -- Makes the editor background transparent to show your terminal wallpaper
+  transparent_background = true,
+  
+  -- Hide the tab bar at the top if there's only 1 file open
+  hide_empty_tabline = true,
+
+  -- Toggle the vertical lines that show indentation levels
+  show_indent_guides = true,
+
+  -- Enable smooth scrolling animations
+  smooth_scroll = true,
+
+  -- Dim panes that you aren't currently focused on
+  dim_inactive = false,
+
+  -- ── Editor Behavior ────────────────────────────────────────────────────────
+
+  -- Highlight the line your cursor is currently on
+  highlight_current_line = true,
+
+  -- Show line numbers on the left
+  show_line_numbers = true,
+  
+  -- Use relative line numbers (useful for jumping lines e.g., 5j, 4k)
+  relative_line_numbers = true,
+  
+  -- Automatically format code when you save the file
+  format_on_save = false,
+
+  -- Spaces per tab indentation
+  tab_size = 2,
+
+  -- Enable mouse support in the editor
+  mouse_support = true,
+
+  -- Toggle line wrapping for long lines of code
+  wrap_lines = ture,
+
+  -- Keep a certain number of lines visible above and below your cursor when scrolling
+  scrolloff = 8,
+
+  -- Automatically save the file when you lose focus or after a delay
+  auto_save = false,
+
+  -- Choose whether the cursor should blink in normal/insert modes
+  blink_cursor = true,
+
+  -- Draw a vertical line at a specific column (e.g. "80", or "" to disable)
+  color_column = "80",
+
+  -- Open new horizontal splits below the current window
+  split_below = true,
+
+  -- Open new vertical splits to the right of the current window
+  split_right = true,
+
+  -- Search is case-insensitive by default (unless you use a capital letter)
+  ignore_case_search = true,
+
+  -- ── Code Intelligence (LSP) ────────────────────────────────────────────────
+
+  -- Show inline variable types and parameter names
+  enable_inlay_hints = true,
+
+  -- Show errors and warnings directly at the end of the line
+  show_inline_errors = true,
+
+  -- ── File Explorer ──────────────────────────────────────────────────────────
+
+  -- Show hidden files like .env or .gitignore in your file tree
+  show_hidden_files = true,
+}

@@ -5,6 +5,7 @@ return {
     cmd          = "Telescope",
     dependencies = {
       "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope-ui-select.nvim",
       {
         "nvim-telescope/telescope-fzf-native.nvim",
         build = "make",
@@ -64,10 +65,16 @@ return {
             override_file_sorter    = true,
             case_mode               = "smart_case",
           },
+          ["ui-select"] = {
+            require("telescope.themes").get_dropdown {
+              -- You can add options for the dropdown here
+            }
+          }
         },
       })
 
       pcall(telescope.load_extension, "fzf")
+      pcall(telescope.load_extension, "ui-select")
     end,
   },
 }

@@ -59,6 +59,61 @@ map("n", "<leader>fw", "<cmd>Telescope live_grep<CR>",      { desc = "Live grep"
 map("n", "<leader>fb", "<cmd>Telescope buffers<CR>",        { desc = "Find buffers" })
 map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>",      { desc = "Help tags" })
 map("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>",       { desc = "Old files" })
+map("n", "<leader>th", function()
+  -- Force Telescope to load so telescope-ui-select patches vim.ui.select
+  require("telescope")
+  
+  local themes = { "catppuccin", "onedark", "tokyonight", "gruvbox", "rose-pine", "nord", "dracula", "kanagawa" }
+  
+  local ghostty_themes = {
+    ["catppuccin"] = "Catppuccin Mocha",
+    ["onedark"]    = "Atom One Dark",
+    ["tokyonight"] = "TokyoNight",
+    ["gruvbox"]    = "Gruvbox Dark",
+    ["rose-pine"]  = "Rose Pine",
+    ["nord"]       = "Nord",
+    ["dracula"]    = "Dracula",
+    ["kanagawa"]   = "Kanagawa Wave"
+  }
+
+  vim.ui.select(themes, { prompt = "Select Theme:" }, function(choice)
+    if choice then
+      -- 1. Hot reload the Neovim theme
+      vim.cmd.colorscheme(choice)
+      
+      -- 2. Save it permanently to settings.lua
+      local settings_path = vim.fn.stdpath("config") .. "/lua/settings.lua"
+      local lines = vim.fn.readfile(settings_path)
+      for i, line in ipairs(lines) do
+        if line:match('^%s*theme%s*=%s*["\']') then
+          lines[i] = '  theme = "' .. choice .. '",'
+          break
+        end
+      end
+      vim.fn.writefile(lines, settings_path)
+      
+      -- 3. Hot reload Ghostty terminal to match
+      local ghostty_path = vim.fn.expand("~/.config/ghostty/config")
+      if vim.fn.filereadable(ghostty_path) == 1 then
+        local g_lines = vim.fn.readfile(ghostty_path)
+        for i, line in ipairs(g_lines) do
+          if line:match('^theme%s*=') then
+            g_lines[i] = 'theme = "' .. ghostty_themes[choice] .. '"'
+            break
+          end
+        end
+        -- Use standard Lua I/O to preserve the inode so Ghostty's file watcher triggers
+        local file = io.open(ghostty_path, "w")
+        if file then
+          file:write(table.concat(g_lines, "\n") .. "\n")
+          file:close()
+        end
+      end
+
+      vim.notify("Theme synced to " .. choice .. " (Neovim + Ghostty)!", vim.log.levels.INFO)
+    end
+  end)
+end, { desc = "Select & Save Theme (Sync Ghostty)" })
 map("n", "<leader>gt", "<cmd>Telescope git_status<CR>",     { desc = "Git status" })
 map("n", "<leader>gc", "<cmd>Telescope git_commits<CR>",    { desc = "Git commits" })
 map("n", "<leader>ma", "<cmd>Telescope marks<CR>",          { desc = "Find marks" })

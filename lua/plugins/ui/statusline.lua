@@ -10,12 +10,12 @@ return {
     config = function()
       require("lualine").setup({
         options = {
-          theme                = "catppuccin-mocha",
-          globalstatus         = true,   -- single bar across all windows
+          theme                = "auto",   -- Dynamically match the current Neovim theme!
+          globalstatus         = true,     -- Single bar across all windows
           always_divide_middle = true,
-          component_separators = { left = "", right = "" },
-          section_separators   = { left = "", right = "" },
-          -- only hide statusline for the dashboard, NOT NvimTree
+          component_separators = { left = "│", right = "│" },
+          section_separators   = { left = "", right = "" },
+          -- Only hide statusline for the dashboard, NOT NvimTree
           disabled_filetypes   = { statusline = { "dashboard", "alpha" } },
         },
         sections = {

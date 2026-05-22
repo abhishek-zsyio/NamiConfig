@@ -9,45 +9,14 @@ return {
       vim.g.loaded_netrw       = 1
       vim.g.loaded_netrwPlugin = 1
 
-      -- Custom highlights to match catppuccin mocha
-      local function setup_highlights()
-        local hi = vim.api.nvim_set_hl
-        hi(0, "NvimTreeNormal",         { bg = "NONE" })          -- transparent bg
-        hi(0, "NvimTreeNormalNC",        { bg = "NONE" })
-        hi(0, "NvimTreeWinSeparator",    { fg = "#313244", bg = "NONE" })
-        hi(0, "NvimTreeIndentMarker",    { fg = "#45475a" })
-        hi(0, "NvimTreeFolderIcon",      { fg = "#89b4fa" })       -- catppuccin blue
-        hi(0, "NvimTreeFolderName",      { fg = "#cdd6f4" })
-        hi(0, "NvimTreeOpenedFolderName",{ fg = "#89b4fa", bold = true })
-        hi(0, "NvimTreeRootFolder",      { fg = "#cba6f7", bold = true }) -- mauve
-        hi(0, "NvimTreeGitDirty",        { fg = "#f9e2af" })       -- yellow
-        hi(0, "NvimTreeGitNew",          { fg = "#a6e3a1" })       -- green
-        hi(0, "NvimTreeGitDeleted",      { fg = "#f38ba8" })       -- red
-        hi(0, "NvimTreeGitStaged",       { fg = "#a6e3a1" })
-        hi(0, "NvimTreeGitMerge",        { fg = "#fab387" })
-        hi(0, "NvimTreeGitRenamed",      { fg = "#cba6f7" })
-        hi(0, "NvimTreeGitIgnored",      { fg = "#6c7086" })
-        hi(0, "NvimTreeSymlink",         { fg = "#94e2d5" })
-        hi(0, "NvimTreeExecFile",        { fg = "#a6e3a1", bold = true })
-        hi(0, "NvimTreeSpecialFile",     { fg = "#f5c2e7", underline = true })
-        hi(0, "NvimTreeCursorLine",      { bg = "#313244" })
-      end
-
-      setup_highlights()
-
-      -- Re-apply after colorscheme changes
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        callback = setup_highlights,
-      })
-
       -- Pre-define the signs nvim-tree diagnostics needs
       -- (prevents "Unknown sign: NvimTreeDiagnosticXxxIcon" errors)
       local signs = {
-        NvimTreeDiagnosticErrorIcon = " ",
-        NvimTreeDiagnosticWarnIcon  = " ",
-        NvimTreeDiagnosticWarningIcon = " ",
-        NvimTreeDiagnosticInfoIcon  = " ",
-        NvimTreeDiagnosticHintIcon  = " ",
+        NvimTreeDiagnosticErrorIcon = " ",
+        NvimTreeDiagnosticWarnIcon  = " ",
+        NvimTreeDiagnosticWarningIcon = " ",
+        NvimTreeDiagnosticInfoIcon  = " ",
+        NvimTreeDiagnosticHintIcon  = " ",
       }
       for name, text in pairs(signs) do
         vim.fn.sign_define(name, { text = text, texthl = name })
@@ -114,7 +83,7 @@ return {
             },
             glyphs = {
               default   = "󰈚",
-              symlink   = "",
+              symlink   = "",
               bookmark  = "󰆤",
               modified  = "●",
               folder = {
@@ -128,12 +97,12 @@ return {
                 symlink_open = "",
               },
               git = {
-                unstaged  = "",
-                staged    = "",
-                unmerged  = "",
+                unstaged  = "✗",
+                staged    = "✓",
+                unmerged  = "",
                 renamed   = "➜",
-                untracked = "",
-                deleted   = "",
+                untracked = "★",
+                deleted   = "",
                 ignored   = "",
               },
             },

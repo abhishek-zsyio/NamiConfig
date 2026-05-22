@@ -9,6 +9,9 @@ return {
       "catppuccin/nvim",
     },
     config = function()
+      local ok, settings = pcall(require, "settings")
+      if not ok then settings = {} end
+
       require("bufferline").setup({
         options = {
           mode            = "buffers",
@@ -36,7 +39,7 @@ return {
           show_close_icon   = false,
           show_tab_indicators = true,
           separator_style   = { "", "" },  -- Minimal: no structural separators, just colors
-          always_show_bufferline = false,  -- Hide tabline if no files (or only 1) are open
+          always_show_bufferline = settings.hide_empty_tabline == false,  -- Hide tabline if no files (or only 1) are open
           custom_filter = function(buf_number)
             -- Filter out completely empty/unnamed buffers
             if vim.api.nvim_buf_get_name(buf_number) == "" then
