@@ -9,7 +9,7 @@ return {
       local ok, settings = pcall(require, "settings")
       if not ok then settings = {} end
 
-      local is_transparent = settings.transparent_background ~= false
+      local is_transparent = settings.background == "transparent"
 
       require("catppuccin").setup({
         flavour              = "mocha",
@@ -80,7 +80,7 @@ return {
       local ok, settings = pcall(require, "settings")
       if not ok then settings = {} end
 
-      local is_transparent = settings.transparent_background ~= false
+      local is_transparent = settings.background == "transparent"
 
       require('onedark').setup {
         style = 'darker', -- dark, darker, cool, deep, warm, warmer, light
@@ -111,7 +111,7 @@ return {
     priority = 1000,
     config = function()
       local ok, settings = pcall(require, "settings")
-      local transparent = ok and settings.transparent_background ~= false
+      local transparent = ok and settings.background == "transparent"
       require("tokyonight").setup({ transparent = transparent })
       if settings.theme == "tokyonight" then vim.cmd.colorscheme("tokyonight") end
     end,
@@ -122,8 +122,12 @@ return {
     priority = 1000,
     config = function()
       local ok, settings = pcall(require, "settings")
-      local transparent = ok and settings.transparent_background ~= false
-      require("gruvbox").setup({ transparent_mode = transparent })
+      local transparent = ok and settings.background == "transparent"
+      vim.o.background = "dark" -- Ensure dark mode is active
+      require("gruvbox").setup({
+        transparent_mode = transparent,
+        contrast = "hard", -- 'hard' contrast provides the darkest gruvbox background
+      })
       if settings.theme == "gruvbox" then vim.cmd.colorscheme("gruvbox") end
     end,
   },
@@ -134,7 +138,7 @@ return {
     priority = 1000,
     config = function()
       local ok, settings = pcall(require, "settings")
-      local transparent = ok and settings.transparent_background ~= false
+      local transparent = ok and settings.background == "transparent"
       require("rose-pine").setup({
         styles = { transparency = transparent }
       })
@@ -148,7 +152,7 @@ return {
     config = function()
       local ok, settings = pcall(require, "settings")
       if settings.theme == "nord" then
-        if ok and settings.transparent_background ~= false then
+        if ok and settings.background == "transparent" then
           vim.g.nord_disable_background = true
         end
         vim.cmd.colorscheme("nord")
@@ -161,7 +165,7 @@ return {
     priority = 1000,
     config = function()
       local ok, settings = pcall(require, "settings")
-      local transparent = ok and settings.transparent_background ~= false
+      local transparent = ok and settings.background == "transparent"
       require("dracula").setup({ transparent_bg = transparent })
       if settings.theme == "dracula" then vim.cmd.colorscheme("dracula") end
     end,
@@ -172,9 +176,98 @@ return {
     priority = 1000,
     config = function()
       local ok, settings = pcall(require, "settings")
-      local transparent = ok and settings.transparent_background ~= false
+      local transparent = ok and settings.background == "transparent"
       require("kanagawa").setup({ transparent = transparent })
       if settings.theme == "kanagawa" then vim.cmd.colorscheme("kanagawa") end
+    end,
+  },
+  {
+    "EdenEast/nightfox.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      local transparent = ok and settings.background == "transparent"
+      require("nightfox").setup({ options = { transparent = transparent } })
+      if settings.theme == "nightfox" then vim.cmd.colorscheme("nightfox") end
+    end,
+  },
+  {
+    "scottmckendry/cyberdream.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      local transparent = ok and settings.background == "transparent"
+      require("cyberdream").setup({ transparent = transparent })
+      if settings.theme == "cyberdream" then vim.cmd.colorscheme("cyberdream") end
+    end,
+  },
+  {
+    "sainnhe/sonokai",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      if ok and settings.background == "transparent" then
+        vim.g.sonokai_transparent_background = 1
+      end
+      if settings.theme == "sonokai" then vim.cmd.colorscheme("sonokai") end
+    end,
+  },
+  {
+    "marko-cerovac/material.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      if settings.theme == "material" then vim.cmd.colorscheme("material") end
+    end,
+  },
+  {
+    "nyoom-engineering/oxocarbon.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      if settings.theme == "oxocarbon" then vim.cmd.colorscheme("oxocarbon") end
+    end,
+  },
+  {
+    "tanvirtin/monokai.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      if settings.theme == "monokai" then vim.cmd.colorscheme("monokai") end
+    end,
+  },
+  {
+    "transparent-override",
+    name = "transparent-override",
+    dir = "", -- dummy plugin
+    virtual = true,
+    lazy = false,
+    priority = 1001, -- run after themes
+    config = function()
+      local ok, settings = pcall(require, "settings")
+      if ok and settings.background == "transparent" then
+        vim.api.nvim_create_autocmd("ColorScheme", {
+          pattern = "*",
+          callback = function()
+            local hl_groups = {
+              "Normal", "NormalNC", "Comment", "Constant", "Special", "Identifier",
+              "Statement", "PreProc", "Type", "Underlined", "Todo", "String", "Function",
+              "Conditional", "Repeat", "Operator", "Structure", "LineNr", "NonText",
+              "SignColumn", "CursorLineNr", "EndOfBuffer", "NormalFloat", "FloatBorder",
+              "NvimTreeNormal", "NvimTreeNormalNC", "TelescopeNormal", "TelescopeBorder",
+            }
+            for _, name in ipairs(hl_groups) do
+              vim.cmd(string.format("hi %s ctermbg=NONE guibg=NONE", name))
+            end
+          end,
+        })
+      end
     end,
   },
 }

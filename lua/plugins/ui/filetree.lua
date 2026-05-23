@@ -4,10 +4,12 @@ return {
     "nvim-tree/nvim-tree.lua",
     cmd          = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeOpen" },
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    config       = function()
+    init = function()
       -- Disable netrw (NvChad does this)
       vim.g.loaded_netrw       = 1
       vim.g.loaded_netrwPlugin = 1
+    end,
+    config       = function()
 
       -- Pre-define the signs nvim-tree diagnostics needs
       -- (prevents "Unknown sign: NvimTreeDiagnosticXxxIcon" errors)
@@ -43,7 +45,7 @@ return {
 
         view = {
           width           = 30,
-          side            = "left",
+          side            = "right",
           preserve_window_proportions = false,
           number          = false,
           relativenumber  = false,
@@ -69,7 +71,10 @@ return {
             },
           },
           icons = {
-            webdev_colors   = true,
+            web_devicons = {
+              file = { enable = true, color = true },
+              folder = { enable = true, color = true },
+            },
             git_placement   = "before",
             modified_placement = "after",
             padding         = " ",
@@ -87,14 +92,14 @@ return {
               bookmark  = "󰆤",
               modified  = "●",
               folder = {
-                arrow_closed = "",
-                arrow_open   = "",
-                default      = "",
-                open         = "",
-                empty        = "",
-                empty_open   = "",
-                symlink      = "",
-                symlink_open = "",
+                arrow_closed = "▸",
+                arrow_open   = "▾",
+                default      = "󰉋",
+                open         = "󰝰",
+                empty        = "󰜌",
+                empty_open   = "󰜌",
+                symlink      = "󰉒",
+                symlink_open = "󰉒",
               },
               git = {
                 unstaged  = "✗",

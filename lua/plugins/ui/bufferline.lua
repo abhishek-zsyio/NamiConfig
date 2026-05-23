@@ -38,7 +38,7 @@ return {
           show_buffer_close_icons = false, -- Minimal: hide close icons per buffer
           show_close_icon   = false,
           show_tab_indicators = true,
-          separator_style   = { "", "" },  -- Minimal: no structural separators, just colors
+          separator_style   = "thin",  -- Added a thin divider between tabs
           always_show_bufferline = settings.hide_empty_tabline == false,  -- Hide tabline if no files (or only 1) are open
           custom_filter = function(buf_number)
             -- Filter out completely empty/unnamed buffers

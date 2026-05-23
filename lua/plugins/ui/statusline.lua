@@ -48,7 +48,6 @@ return {
               symbols = { error = " ", warn = " ", hint = " ", info = " " },
             },
             { "filetype", icon_only = false },
-            { "encoding" },
           },
           lualine_y = { { "progress" } },
           lualine_z = { { "location" } },

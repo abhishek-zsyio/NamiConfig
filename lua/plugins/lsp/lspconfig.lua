@@ -27,10 +27,7 @@ return {
 
       -- ── on_attach: keymaps set per-buffer when LSP attaches ──────────────
       local on_attach = function(client, bufnr)
-        -- Disable semantic tokens (cleaner with Treesitter highlighting)
-        if client.supports_method("textDocument/semanticTokens") then
-          client.server_capabilities.semanticTokensProvider = nil
-        end
+        -- (Semantic tokens are left enabled, themes will override them properly)
 
         local map = vim.keymap.set
         local bufopts = { buffer = bufnr, silent = true }

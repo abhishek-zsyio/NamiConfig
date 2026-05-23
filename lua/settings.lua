@@ -4,17 +4,17 @@
 -- Feel free to edit these values to customize your Neovim experience without
 -- ever having to touch the complex Lua plugin files!
 
----@alias Theme "catppuccin" | "onedark" | "tokyonight" | "gruvbox" | "rose-pine" | "nord" | "dracula" | "kanagawa"
+---@alias Theme "catppuccin" | "onedark" | "tokyonight" | "gruvbox" | "rose-pine" | "nord" | "dracula" | "kanagawa" | "nightfox" | "cyberdream" | "sonokai" | "material" | "oxocarbon" | "monokai"
 
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   
   -- The core colorscheme. (Default: "catppuccin")
   ---@type Theme
-  theme = "kanagawa",
+  theme = "catppuccin",
   
-  -- Makes the editor background transparent to show your terminal wallpaper
-  transparent_background = true,
+  -- Background mode for the editor: "transparent" or "solid"
+  background = "transparent",
   
   -- Hide the tab bar at the top if there's only 1 file open
   hide_empty_tabline = true,

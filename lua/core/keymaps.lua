@@ -63,7 +63,7 @@ map("n", "<leader>th", function()
   -- Force Telescope to load so telescope-ui-select patches vim.ui.select
   require("telescope")
   
-  local themes = { "catppuccin", "onedark", "tokyonight", "gruvbox", "rose-pine", "nord", "dracula", "kanagawa" }
+  local themes = { "catppuccin", "onedark", "tokyonight", "gruvbox", "rose-pine", "nord", "dracula", "kanagawa", "nightfox", "cyberdream", "sonokai", "material", "oxocarbon", "monokai" }
   
   local ghostty_themes = {
     ["catppuccin"] = "Catppuccin Mocha",
@@ -73,7 +73,13 @@ map("n", "<leader>th", function()
     ["rose-pine"]  = "Rose Pine",
     ["nord"]       = "Nord",
     ["dracula"]    = "Dracula",
-    ["kanagawa"]   = "Kanagawa Wave"
+    ["kanagawa"]   = "Kanagawa Wave",
+    ["nightfox"]   = "Nightfox",
+    ["cyberdream"] = "TokyoNight Moon", -- Ghostty doesn't have cyberdream, fallback to TokyoNight Moon
+    ["sonokai"]    = "Sonokai",
+    ["material"]   = "Material",
+    ["oxocarbon"]  = "Oxocarbon",
+    ["monokai"]    = "Monokai Classic"
   }
 
   vim.ui.select(themes, { prompt = "Select Theme:" }, function(choice)
@@ -98,7 +104,7 @@ map("n", "<leader>th", function()
         local g_lines = vim.fn.readfile(ghostty_path)
         for i, line in ipairs(g_lines) do
           if line:match('^theme%s*=') then
-            g_lines[i] = 'theme = "' .. ghostty_themes[choice] .. '"'
+            g_lines[i] = 'theme = ' .. ghostty_themes[choice]
             break
           end
         end
@@ -108,6 +114,9 @@ map("n", "<leader>th", function()
           file:write(table.concat(g_lines, "\n") .. "\n")
           file:close()
         end
+        
+        -- Automatically send Cmd+Shift+, to Ghostty to force reload the config
+        os.execute([[osascript -e 'tell application "System Events" to keystroke "," using {command down, shift down}']])
       end
 
       vim.notify("Theme synced to " .. choice .. " (Neovim + Ghostty)!", vim.log.levels.INFO)
