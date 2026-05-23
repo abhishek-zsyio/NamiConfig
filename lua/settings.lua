@@ -13,7 +13,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "rose-pine",
+  theme = "poimandres",
   background = "dark",
   hide_empty_tabline = true,
   show_indent_guides = true,
