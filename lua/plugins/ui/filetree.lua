@@ -62,7 +62,7 @@ return {
 					root_folder_label = false,
 					indent_width = 2,
 					indent_markers = {
-						enable = true,
+						enable = false,
 						inline_arrows = true,
 						icons = {
 							corner = "└",
@@ -126,7 +126,7 @@ return {
 				git = {
 					enable = true,
 					ignore = false,
-					show_on_dirs = true,
+					show_on_dirs = false,
 					timeout = 400,
 				},
 
@@ -174,8 +174,8 @@ return {
 
 				diagnostics = {
 					enable = true,
-					show_on_dirs = true,
-					show_on_open_dirs = true,
+					show_on_dirs = false,
+					show_on_open_dirs = false,
 					debounce_delay = 50,
 					severity = {
 						min = vim.diagnostic.severity.HINT,

@@ -1,42 +1,63 @@
 return {
   {
     "goolord/alpha-nvim",
-    lazy = false,
+    event = "VimEnter",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       local dashboard = require("alpha.themes.dashboard")
 
-      -- Premium Custom Header for NamiConfig
+      -- Sleek Minimalist Header
       dashboard.section.header.val = {
-        [[                                                               ]],
-        [[    _   __               _ ______           _____          ]],
-        [[   / | / /___ _____ ___  (_) ____/___  ____  / __/(_)___ _   ]],
-        [[  /  |/ / __ `/ __ `__ \/ / /   / __ \/ __ \/ /_/ / / __ `/  ]],
-        [[ / /|  / /_/ / / / / / / / /___/ /_/ / / / / __/ / / /_/ /   ]],
-        [[/_/ |_/\__,_/_/ /_/ /_/_/\____/\____/_/ /_/_/ /_/_/\__, /    ]],
-        [[                                                  /____/     ]],
-        [[                                                               ]]
+        [[                               __                ]],
+        [[  ___     ___    ___   __  __ /\_\    ___ ___    ]],
+        [[ / _ `\  / __`\ / __`\/\ \/\ \\/\ \  / __` __`\  ]],
+        [[/\ \/\ \/\  __//\ \_\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
+        [[\ \_\ \_\ \____\ \____/\ \___/  \ \_\ \_\ \_\ \_\]],
+        [[ \/_/\/_/\/____/\/___/  \/__/    \/_/\/_/\/_/\/_/]],
+        [[                                                 ]],
       }
 
-      -- Clean, centered buttons with NamiConfig specific shortcuts
+      -- Clean, centered buttons with neat spacing
       dashboard.section.buttons.val = {
-        dashboard.button("f", "  Find file",       ":Telescope find_files<CR>"),
-        dashboard.button("n", "  New file",        ":ene <BAR> startinsert <CR>"),
-        dashboard.button("r", "  Recent files",    ":Telescope oldfiles<CR>"),
+        dashboard.button("f", "  Find File",       ":Telescope find_files<CR>"),
+        dashboard.button("n", "  New File",        ":ene <BAR> startinsert <CR>"),
+        dashboard.button("r", "  Recent Files",    ":Telescope oldfiles<CR>"),
+        dashboard.button("g", "󰊢  Find Text",       ":Telescope live_grep<CR>"),
         dashboard.button("s", "  Settings",        ":e ~/.config/nvim/lua/settings.lua<CR>"),
-        dashboard.button("t", "  Change Theme",    ":lua vim.api.nvim_feedkeys(' th', 'm', false)<CR>"),
+        dashboard.button("l", "󰒲  Lazy",            ":Lazy<CR>"),
         dashboard.button("q", "  Quit",            ":qa<CR>"),
       }
 
-      -- Styling
+      -- Modern Highlighting
       dashboard.section.header.opts.hl = "Keyword"
-      dashboard.section.buttons.opts.hl = "Function"
+      dashboard.section.buttons.opts.hl = "String"
       dashboard.section.footer.opts.hl = "Comment"
 
-      -- Footer text
-      local version = vim.version()
-      local v_string = "NamiConfig ⚡ NVIM v" .. version.major .. "." .. version.minor .. "." .. version.patch
-      dashboard.section.footer.val = { "", "", v_string }
+      dashboard.opts.layout = {
+        { type = "padding", val = 4 },
+        dashboard.section.header,
+        { type = "padding", val = 2 },
+        dashboard.section.buttons,
+        { type = "padding", val = 2 },
+        dashboard.section.footer,
+      }
+
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "LazyVimStarted",
+        callback = function()
+          local stats = require("lazy").stats()
+          local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+          local version = vim.version()
+          local v_string = "NVIM v" .. version.major .. "." .. version.minor .. "." .. version.patch
+          
+          dashboard.section.footer.val = {
+            "⚡ Neovim loaded " .. stats.loaded .. " plugins in " .. ms .. "ms",
+            "",
+            v_string,
+          }
+          pcall(vim.cmd.AlphaRedraw)
+        end,
+      })
 
       require("alpha").setup(dashboard.opts)
     end,

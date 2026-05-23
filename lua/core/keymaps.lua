@@ -50,7 +50,7 @@ end, { desc = "Close buffer" })
 
 -- ── File Tree (NvimTree) ─────────────────────────────────────────────────
 map("n", "<C-n>",     "<cmd>NvimTreeToggle<CR>",   { desc = "Toggle NvimTree" })
-map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>",   { desc = "Toggle NvimTree" })
+map("n", "<leader>e", "<cmd>NvimTreeFocus<CR>",    { desc = "Focus NvimTree" })
 
 -- ── Telescope ─────────────────────────────────────────────────────────────
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>",     { desc = "Find files" })

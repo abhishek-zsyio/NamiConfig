@@ -12,13 +12,24 @@ opt.cursorlineopt  = "both" -- highlight both the number and the lines"
 opt.signcolumn     = "yes"
 opt.termguicolors  = true
 opt.showmode       = false      -- lualine shows the mode
-opt.cmdheight      = 1
+opt.cmdheight      = settings.cmdheight or 0 -- 0 provides a modern clean UI
 opt.pumheight      = 10         -- max items in popup menu
 opt.scrolloff      = settings.scrolloff or 8
 opt.sidescrolloff  = settings.scrolloff or 8
 opt.wrap           = settings.wrap_lines == true
 opt.colorcolumn    = settings.color_column or "80"
-opt.fillchars      = { eob = " " }  -- hide the ~ on empty lines
+opt.linespace      = settings.line_height or 2 -- Extra vertical padding (GUIs)
+
+-- Sleek window borders and hidden end of buffer markers
+opt.fillchars      = { 
+  eob = " ", 
+  fold = " ", 
+  foldopen = "", 
+  foldsep = " ", 
+  foldclose = "", 
+  vert = "│", 
+  diff = "╱" 
+}
 
 -- ── Indentation ──────────────────────────────────────────────────────────
 opt.expandtab   = true
@@ -54,8 +65,15 @@ opt.mouse = settings.mouse_support == true and "a" or ""
 
 -- ── Neovide (GUI) ────────────────────────────────────────────────────────
 if vim.g.neovide then
-  vim.g.neovide_padding_top    = 5
-  vim.g.neovide_padding_bottom = 5
-  vim.g.neovide_padding_right  = 5
-  vim.g.neovide_padding_left   = 5
+  vim.g.neovide_padding_top    = 10
+  vim.g.neovide_padding_bottom = 10
+  vim.g.neovide_padding_right  = 15
+  vim.g.neovide_padding_left   = 15
+  vim.g.neovide_transparency   = settings.neovide_transparency or 0.9
+  vim.g.neovide_window_blurred = true
+  vim.g.neovide_floating_blur_amount_x = 2.0
+  vim.g.neovide_floating_blur_amount_y = 2.0
+  vim.g.neovide_hide_mouse_when_typing = true
+  vim.g.neovide_cursor_animation_length = 0.05
+  vim.g.neovide_cursor_trail_size = 0.4
 end

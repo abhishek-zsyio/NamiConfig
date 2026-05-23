@@ -73,6 +73,8 @@ table.insert(plugins, {
 
           if bg and fg and alt_bg then
             local set_hl = vim.api.nvim_set_hl
+            
+            -- Telescope NvChad Borderless
             set_hl(0, "TelescopeNormal", { bg = bg, fg = fg })
             set_hl(0, "TelescopeBorder", { bg = bg, fg = bg })
             set_hl(0, "TelescopePromptNormal", { bg = alt_bg, fg = fg })
@@ -85,6 +87,29 @@ table.insert(plugins, {
             set_hl(0, "TelescopePreviewNormal", { bg = alt_bg, fg = fg })
             set_hl(0, "TelescopePreviewBorder", { bg = alt_bg, fg = alt_bg })
             set_hl(0, "TelescopePreviewTitle", { bg = alt_bg, fg = alt_bg })
+
+            -- Premium Global Highlight Adjustments
+            -- Make line numbers subtle but the active line number pop out
+            set_hl(0, "LineNr", { fg = get_hl("Comment").fg or "#5c6370", italic = true })
+            set_hl(0, "CursorLineNr", { fg = accent, bold = true })
+            
+            -- Blend virtual text diagnostics elegantly into the background
+            local function make_diag_bg(diag_name)
+              local diag_fg = get_hl(diag_name).fg
+              if diag_fg then
+                -- In Neovim 0.9+, blend colors using nvim_set_hl, 
+                -- or just fallback to the original fg with no bg for transparency
+                set_hl(0, diag_name .. "VirtualText", { fg = diag_fg, bg = "NONE", italic = true })
+              end
+            end
+            make_diag_bg("DiagnosticError")
+            make_diag_bg("DiagnosticWarn")
+            make_diag_bg("DiagnosticInfo")
+            make_diag_bg("DiagnosticHint")
+            
+            -- Sleek Pmenu (Autocomplete)
+            set_hl(0, "Pmenu", { bg = alt_bg, fg = fg })
+            set_hl(0, "PmenuSel", { bg = accent, fg = bg, bold = true })
           end
         end,
       })

@@ -87,7 +87,13 @@ return {
     plugin = "rebelot/kanagawa.nvim",
     icon = "󰗚 ",
     ghostty = "Kanagawa Wave",
-    setup = function(transparent) require("kanagawa").setup({ transparent = transparent }) end
+    setup = function(transparent) 
+      require("kanagawa").setup({ 
+        transparent = transparent,
+        theme = "wave",
+        background = { dark = "wave", light = "lotus" },
+      }) 
+    end
   },
   {
     id = "nightfox",
@@ -110,21 +116,33 @@ return {
     plugin = "marko-cerovac/material.nvim",
     icon = "󰔉 ",
     ghostty = "Material",
-    setup = function(transparent) end
+    setup = function(transparent)
+      vim.g.material_style = "deep ocean"
+      require("material").setup({
+        disable = { background = transparent },
+        high_visibility = { lighter = false, darker = true },
+      })
+    end
   },
   {
     id = "oxocarbon",
     plugin = "nyoom-engineering/oxocarbon.nvim",
     icon = "󰏗 ",
     ghostty = "Oxocarbon",
-    setup = function(transparent) end
+    setup = function(transparent)
+      -- Oxocarbon relies mostly on colorscheme application, 
+      -- but setting background is needed
+      vim.opt.background = "dark"
+    end
   },
   {
     id = "monokai",
     plugin = "tanvirtin/monokai.nvim",
     icon = "󰏘 ",
     ghostty = "Monokai Classic",
-    setup = function(transparent) end
+    setup = function(transparent)
+      -- Monokai requires loading via setup if we want options
+    end
   },
   {
     id = "everforest",
@@ -132,6 +150,8 @@ return {
     icon = "󰔎 ",
     ghostty = "Everforest Dark Hard",
     setup = function(transparent)
+      vim.g.everforest_background = "hard"
+      vim.g.everforest_better_performance = 1
       if transparent then vim.g.everforest_transparent_background = 1 end
     end
   },
@@ -149,7 +169,12 @@ return {
     plugin = "olivercederborg/poimandres.nvim",
     icon = "󰖔 ",
     ghostty = "Poimandres",
-    setup = function(transparent) end
+    setup = function(transparent)
+      require('poimandres').setup {
+        disable_background = transparent,
+        disable_float_background = transparent,
+      }
+    end
   },
   {
     id = "github_dark",
