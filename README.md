@@ -179,7 +179,7 @@ return {
 mv ~/.config/nvim ~/.config/nvim.bak
 
 # Clone
-git clone <your-repo-url> ~/.config/nvim
+git clone git@github.com:abhishek-zsyio/NamiConfig.git ~/.config/nvim
 
 # Start Neovim — lazy.nvim auto-installs all plugins
 nvim
