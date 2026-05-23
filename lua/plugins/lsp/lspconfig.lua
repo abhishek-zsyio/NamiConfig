@@ -128,12 +128,23 @@ return {
         volar = { filetypes = { "vue" } },
       }
       for name, extra_opts in pairs(extras) do
-        local server_opts = vim.tbl_deep_extend("force", {
-          on_attach    = on_attach,
-          capabilities = capabilities,
-        }, extra_opts)
-        -- pcall: server may not be installed yet — silently skip
-        pcall(lspconfig[name].setup, server_opts)
+        -- Only setup if the command is executable (installed by Mason or globally)
+        -- This prevents errors when a server is configured but not installed
+        local has_cmd = false
+        pcall(function()
+          local cmd = lspconfig[name].document_config.default_config.cmd
+          if cmd and cmd[1] and vim.fn.executable(cmd[1]) == 1 then
+            has_cmd = true
+          end
+        end)
+        
+        if has_cmd then
+          local server_opts = vim.tbl_deep_extend("force", {
+            on_attach    = on_attach,
+            capabilities = capabilities,
+          }, extra_opts)
+          pcall(lspconfig[name].setup, server_opts)
+        end
       end
     end,
   },

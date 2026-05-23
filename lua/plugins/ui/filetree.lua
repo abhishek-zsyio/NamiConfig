@@ -10,6 +10,9 @@ return {
 			vim.g.loaded_netrwPlugin = 1
 		end,
 		config = function()
+			local ok, settings = pcall(require, "settings")
+			if not ok then settings = {} end
+
 			-- Pre-define the signs nvim-tree diagnostics needs
 			-- (prevents "Unknown sign: NvimTreeDiagnosticXxxIcon" errors)
 			local signs = {
@@ -44,7 +47,7 @@ return {
 
 				view = {
 					width = 30,
-					side = "right",
+					side = settings.file_explorer_position or "right",
 					preserve_window_proportions = false,
 					number = false,
 					relativenumber = false,

@@ -14,14 +14,14 @@
 
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
-  
+
   -- The core colorscheme. (Default: "catppuccin")
   ---@type Theme
-  theme = "nightfox",
-  
+  theme = "tokyonight",
+
   -- Background mode for the editor: "transparent" or "solid"
   background = "transparent",
-  
+
   -- Hide the tab bar at the top if there's only 1 file open
   hide_empty_tabline = true,
 
@@ -41,10 +41,10 @@ return {
 
   -- Show line numbers on the left
   show_line_numbers = true,
-  
+
   -- Use relative line numbers (useful for jumping lines e.g., 5j, 4k)
   relative_line_numbers = false,
-  
+
   -- Automatically format code when you save the file
   format_on_save = true,
 
@@ -91,6 +91,9 @@ return {
   -- Show hidden files like .env or .gitignore in your file tree
   show_hidden_files = true,
 
+  -- Position of the file explorer: "left" or "right"
+  file_explorer_position = "left",
+
   -- ── Linting ────────────────────────────────────────────────────────────────
 
   -- Enable asynchronous linting (shellcheck, ruff, eslint_d, etc.)
@@ -124,7 +127,7 @@ return {
 
   -- List any extra formatters or linters you want automatically installed.
   mason_tools = {
-    -- "prettier",
-    -- "stylua",
+    "prettier",
+    "stylua",
   },
 }

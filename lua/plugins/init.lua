@@ -8,6 +8,7 @@ return {
   { import = "plugins.ui.noice" },
   { import = "plugins.ui.terminal" },
   { import = "plugins.ui.misc" },
+  { import = "plugins.ui.alpha" },
   -- Editor
   { import = "plugins.editor.treesitter" },
   { import = "plugins.editor.cmp" },
