@@ -3,27 +3,29 @@ local plugins = {}
 
 -- 1. Dynamically load all themes from the registry
 for _, theme in ipairs(registry) do
-  table.insert(plugins, {
-    theme.plugin,
-    name = theme.plugin:match("([^/]+)$"):gsub("%.nvim$", ""),
-    lazy = false,
-    priority = 1000,
-    config = function()
       local ok, settings = pcall(require, "settings")
       if not ok then settings = {} end
-      local transparent = settings.background == "transparent"
-      
-      -- Run the theme's specific setup logic if it has any
-      if theme.setup then
-        theme.setup(transparent)
-      end
-      
-      -- Apply it if it's the globally selected theme
-      if (settings.theme or "catppuccin") == theme.id then
-        vim.cmd.colorscheme(theme.id)
-      end
-    end,
-  })
+      local is_active = (settings.theme or "catppuccin") == theme.id
+
+      table.insert(plugins, {
+        theme.plugin,
+        name = theme.id,
+        lazy = not is_active,
+        priority = 1000,
+        config = function()
+          local ok2, s2 = pcall(require, "settings")
+          local transparent = (ok2 and s2.background == "transparent")
+          
+          -- Run the theme's specific setup logic if it has any
+          if theme.setup then
+            theme.setup(transparent)
+          end
+          
+          if is_active then
+            vim.cmd.colorscheme(theme.id)
+          end
+        end,
+      })
 end
 
 -- 2. Inject the Universal Theme Overrides (applies after whichever theme loads)
