@@ -1,5 +1,5 @@
--- UI
 return {
+  -- UI
   { import = "plugins.ui.theme" },
   { import = "plugins.ui.statusline" },
   { import = "plugins.ui.bufferline" },
@@ -15,6 +15,7 @@ return {
   { import = "plugins.editor.comment" },
   { import = "plugins.editor.indent" },
   { import = "plugins.editor.utils" },
+  { import = "plugins.editor.neoconf" },   -- project-local LSP config
   -- Git
   { import = "plugins.git.gitsigns" },
   { import = "plugins.git.lazygit" },
@@ -27,6 +28,8 @@ return {
   { import = "plugins.lsp.dap" },
   -- Formatting
   { import = "plugins.formatting.conform" },
+  -- Linting (async, registry-driven)
+  { import = "plugins.linting.lint" },
   -- Lang
   { import = "plugins.lang.django" },
 }

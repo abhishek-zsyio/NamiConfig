@@ -6,12 +6,18 @@
 
 ---@alias Theme "catppuccin" | "onedark" | "tokyonight" | "gruvbox" | "rose-pine" | "nord" | "dracula" | "kanagawa" | "nightfox" | "cyberdream" | "sonokai" | "material" | "oxocarbon" | "monokai"
 
+---@alias Extra
+---| "plugins.extras.lang.go"         Go language support (LSP + DAP)
+---| "plugins.extras.lang.rust"        Rust language support (rust-analyzer)
+---| "plugins.extras.lang.sql"         SQL language support + DB explorer
+---| "plugins.extras.testing.neotest"  Unified test runner (pytest, jest, vitest)
+
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   
   -- The core colorscheme. (Default: "catppuccin")
   ---@type Theme
-  theme = "catppuccin",
+  theme = "gruvbox",
   
   -- Background mode for the editor: "transparent" or "solid"
   background = "solid",
@@ -40,7 +46,7 @@ return {
   relative_line_numbers = false,
   
   -- Automatically format code when you save the file
-  format_on_save = false,
+  format_on_save = true,
 
   -- Spaces per tab indentation
   tab_size = 2,
@@ -84,4 +90,41 @@ return {
 
   -- Show hidden files like .env or .gitignore in your file tree
   show_hidden_files = true,
+
+  -- ── Linting ────────────────────────────────────────────────────────────────
+
+  -- Enable asynchronous linting (shellcheck, ruff, eslint_d, etc.)
+  -- Linters are defined per-language in lua/core/lang_registry.lua
+  enable_linting = true,
+
+  -- ── Project-Local Config ───────────────────────────────────────────────────
+
+  -- Allow per-project overrides via .neoconf.json in the project root.
+  -- Example: disable a linter or change typeCheckingMode for one project.
+  enable_project_config = true,
+
+  -- ── Extras (Opt-in Modules) ────────────────────────────────────────────────
+
+  -- Uncomment any extras to enable them. Each extra installs its own
+  -- plugins, LSPs, debuggers, and test adapters automatically.
+  ---@type Extra[]
+  extras = {
+    -- "plugins.extras.lang.go",
+    -- "plugins.extras.lang.rust",
+    -- "plugins.extras.lang.sql",
+    -- "plugins.extras.testing.neotest",
+  },
+
+  -- ── Custom Tools (NvChad Style) ────────────────────────────────────────────
+  -- List any extra LSP servers you want automatically installed and configured.
+  lsp_servers = {
+    -- "clangd",
+    -- "tailwindcss",
+  },
+
+  -- List any extra formatters or linters you want automatically installed.
+  mason_tools = {
+    -- "prettier",
+    -- "stylua",
+  },
 }

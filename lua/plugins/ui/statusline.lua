@@ -19,42 +19,42 @@ return {
           disabled_filetypes   = { statusline = { "dashboard", "alpha" } },
         },
         sections = {
-          -- Left Side: Mode, Branch, Diagnostics (Errors/Warnings)
           lualine_a = {
-            { "mode", fmt = function(str) return " " .. str .. " " end },
+            { "mode", icon = "" },
           },
           lualine_b = {
-            { "branch", icon = "" },
+            { "filename", path = 0, symbols = { modified = " ●", readonly = " ", unnamed = "[No Name]" } },
+            { "branch", icon = "" },
             {
               "diagnostics",
               sources = { "nvim_lsp" },
               symbols = { error = " ", warn = " ", hint = " ", info = " " },
             },
           },
-          -- Middle: Filename
-          lualine_c = {
+          lualine_c = {},
+          lualine_x = {
+            { "diff", symbols = { added = " ", modified = " ", removed = " " } },
+            { function() return "|" end, color = { fg = "#504945" }, padding = { left = 1, right = 1 } },
+            { "location", fmt = function() return string.format("Ln %d, Col %d", vim.fn.line("."), vim.fn.col(".")) end },
+            { "encoding" },
+            { "filetype", icon_only = false },
             {
-              "filename",
-              path    = 1,
-              symbols = { modified = " ●", readonly = " ", unnamed = "[No Name]" },
+              function()
+                local clients = vim.lsp.get_clients({ bufnr = 0 })
+                if next(clients) == nil then return "" end
+                local c = {}
+                for _, client in ipairs(clients) do
+                  table.insert(c, client.name)
+                end
+                return " " .. table.concat(c, "|")
+              end,
+              color = { fg = "#a6e3a1", gui = "bold" }
             },
           },
-          -- Right Side: Encoding, Format, Language, Line/Col
-          lualine_x = {
-            { "encoding" },
-            { "fileformat" },
-            { "filetype", icon_only = false },
+          lualine_y = {},
+          lualine_z = {
+            { function() return " " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") end },
           },
-          lualine_y = {
-            -- Format location to look exactly like VS Code: "Ln X, Col Y"
-            { "location", fmt = function(str)
-                local line = vim.fn.line(".")
-                local col = vim.fn.col(".")
-                return string.format("Ln %d, Col %d", line, col)
-              end 
-            }
-          },
-          lualine_z = {}, -- Empty like VS Code
         },
         inactive_sections = {
           lualine_a = {},

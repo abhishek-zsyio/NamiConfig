@@ -99,13 +99,84 @@ return {
     config = function(_, opts)
       local wk = require("which-key")
       wk.setup(opts)
+
+      -- ── Register ALL <leader> group prefixes ──────────────────────────────
       wk.add({
-        { "<leader>f",  group = "Find/Files" },
-        { "<leader>g",  group = "Git" },
-        { "<leader>l",  group = "LSP" },
-        { "<leader>d",  group = "Debug/DAP" },
-        { "<leader>u",  group = "UI" },
+        -- Top-level navigation / editor
+        { "<leader>e",  group = "󰙅 Explorer" },
+        { "<leader>x",  group = " Close Buffer" },
+        { "<leader>n",  group = "󰎦 Numbers" },
+
+        -- Find / Files / Telescope
+        { "<leader>f",  group = "󰍉 Find" },
+        { "<leader>ff", desc = "Find files" },
+        { "<leader>fw", desc = "Live grep" },
+        { "<leader>fb", desc = "Find buffers" },
+        { "<leader>fh", desc = "Help tags" },
+        { "<leader>fo", desc = "Recent files" },
+        { "<leader>fz", desc = "Fuzzy in buffer" },
+
+        -- Git
+        { "<leader>g",  group = " Git" },
+        { "<leader>gg", desc = "LazyGit" },
+        { "<leader>gd", desc = "Diffview toggle" },
+        { "<leader>gt", desc = "Git status" },
+        { "<leader>gc", desc = "Git commits" },
+
+        -- Code / LSP
+        { "<leader>c",  group = " Code / LSP" },
+        { "<leader>ca", desc = "Code action" },
+        { "<leader>cf", desc = "Format buffer" },
+        { "<leader>cl", desc = "Lint file" },
+        { "<leader>cn", desc = "Dismiss notification" },
+
+        -- Rename / Refactor
+        { "<leader>r",  group = "󰑕 Rename / Refactor" },
+        { "<leader>ra", desc = "LSP rename" },
+        { "<leader>rn", desc = "Toggle relative numbers" },
+
+        -- Diagnostics
+        { "<leader>d",  group = "󰃤 Diagnostics / Debug" },
+        { "<leader>ds", desc = "Diagnostics list" },
+        { "<leader>db", desc = "DAP: Toggle breakpoint" },
+        { "<leader>dc", desc = "DAP: Continue" },
+        { "<leader>dso",desc = "DAP: Step over" },
+        { "<leader>dsi",desc = "DAP: Step in" },
+        { "<leader>dt", desc = "DAP: Terminate" },
+
+        -- Format
+        { "<leader>fm", desc = "LSP format" },
+
+        -- Toggle / UI
+        { "<leader>t",  group = "󰔡 Toggles" },
+        { "<leader>tl", desc = "Toggle linting" },
+        { "<leader>th", desc = "Select theme" },
+
+        -- Testing (neotest extra)
+        { "<leader>T",  group = "󰙨 Tests" },
+        { "<leader>Tr", desc = "Run nearest test" },
+        { "<leader>Tf", desc = "Run file tests" },
+        { "<leader>Ta", desc = "Run all tests" },
+        { "<leader>Td", desc = "Debug nearest test" },
+        { "<leader>Ts", desc = "Stop tests" },
+        { "<leader>To", desc = "Test output" },
+        { "<leader>TS", desc = "Test summary" },
+        { "<leader>Tw", desc = "Watch file tests" },
+
+        -- Database (sql extra)
+        { "<leader>D",  group = "󰆼 Database" },
+        { "<leader>Du", desc = "DB: Toggle UI" },
+        { "<leader>Da", desc = "DB: Add connection" },
+        { "<leader>Df", desc = "DB: Find buffer" },
+
+        -- Misc
+        { "<leader>ma", desc = "Find marks" },
+        { "<leader>op", desc = "Toggle Markdown preview" },
+        { "<leader>sc", desc = "Screenshot code" },
+        { "<leader>vs", desc = "Select Python venv" },
+        { "<leader>/",  desc = "Toggle comment" },
       })
     end,
   },
 }
+

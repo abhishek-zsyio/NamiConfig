@@ -71,6 +71,7 @@ return {
           end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
+          { name = "lazydev", group_index = 0 }, -- Skip loading LuaLS completions
           { name = "nvim_lsp", priority = 1000 },
           { name = "luasnip",  priority = 750 },
           { name = "nvim_lua", priority = 500 },

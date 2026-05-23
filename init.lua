@@ -20,9 +20,16 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- ── Plugin setup ────────────────────────────────────────────────────────────
-require("lazy").setup({
-  { import = "plugins" },
-}, {
+local ok, settings = pcall(require, "settings")
+if not ok then settings = {} end
+
+-- Build the spec: core plugins + any user-enabled extras
+local spec = { { import = "plugins" } }
+for _, extra in ipairs(settings.extras or {}) do
+  table.insert(spec, { import = extra })
+end
+
+require("lazy").setup(spec, {
   defaults = { lazy = true },
   install  = { colorscheme = { "catppuccin" } },
   ui = {
@@ -46,6 +53,7 @@ require("lazy").setup({
     },
   },
 })
+
 
 -- ── Load keymaps & autocmds after plugins ────────────────────────────────────
 vim.schedule(function()

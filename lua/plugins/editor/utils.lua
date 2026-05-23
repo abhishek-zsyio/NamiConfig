@@ -32,7 +32,11 @@ return {
     },
     lazy   = false,
     config = function()
-      require("venv-selector").setup({})
+      require("venv-selector").setup({
+        options = {
+          override_notify = false,
+        }
+      })
     end,
     keys = {
       { "<leader>vs", "<cmd>VenvSelect<CR>", desc = "Select Python venv" },
