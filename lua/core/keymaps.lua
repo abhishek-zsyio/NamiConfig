@@ -50,7 +50,7 @@ end, { desc = "Close buffer" })
 
 -- ── File Tree (NvimTree) ─────────────────────────────────────────────────
 map("n", "<C-n>",     "<cmd>NvimTreeToggle<CR>",   { desc = "Toggle NvimTree" })
-map("n", "<leader>e", "<cmd>NvimTreeFocus<CR>",    { desc = "Focus NvimTree" })
+map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>",   { desc = "Toggle NvimTree" })
 
 -- ── Telescope ─────────────────────────────────────────────────────────────
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>",     { desc = "Find files" })
@@ -160,6 +160,13 @@ map("n", "<leader>dt",  "<cmd>DapTerminate<CR>",         { desc = "DAP Terminate
 
 -- ── Git ───────────────────────────────────────────────────────────────────
 map("n", "<leader>gg",  "<cmd>LazyGit<CR>",              { desc = "Open LazyGit" })
+map("n", "<leader>gd", function()
+  if next(require('diffview.lib').views) == nil then
+    vim.cmd('DiffviewOpen')
+  else
+    vim.cmd('DiffviewClose')
+  end
+end, { desc = "Toggle Git Diffview" })
 
 -- ── Noice ─────────────────────────────────────────────────────────────────
 map("n", "<leader>cn",  "<cmd>NoiceDismiss<CR>",         { desc = "Dismiss Noice message" })
