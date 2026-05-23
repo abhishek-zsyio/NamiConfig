@@ -73,6 +73,8 @@ table.insert(plugins, {
 
           if bg and fg and alt_bg then
             local set_hl = vim.api.nvim_set_hl
+            set_hl(0, "TelescopeNormal", { bg = bg, fg = fg })
+            set_hl(0, "TelescopeBorder", { bg = bg, fg = bg })
             set_hl(0, "TelescopePromptNormal", { bg = alt_bg, fg = fg })
             set_hl(0, "TelescopePromptBorder", { bg = alt_bg, fg = alt_bg })
             set_hl(0, "TelescopePromptTitle", { bg = accent, fg = bg, bold = true })

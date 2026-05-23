@@ -17,10 +17,10 @@ return {
   
   -- The core colorscheme. (Default: "catppuccin")
   ---@type Theme
-  theme = "gruvbox",
+  theme = "nightfox",
   
   -- Background mode for the editor: "transparent" or "solid"
-  background = "solid",
+  background = "transparent",
   
   -- Hide the tab bar at the top if there's only 1 file open
   hide_empty_tabline = true,
