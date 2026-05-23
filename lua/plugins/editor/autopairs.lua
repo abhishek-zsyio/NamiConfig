@@ -34,7 +34,7 @@ return {
   -- Bulletproof HTML/JSX/TSX auto-closing
   {
     "alvan/vim-closetag",
-    lazy = false,
+    event = "InsertEnter",
     init = function()
       vim.g.closetag_filenames = "*.html,*.xhtml,*.phtml,*.js,*.jsx,*.ts,*.tsx,*.vue"
       vim.g.closetag_emptyTags_caseSensitive = 1

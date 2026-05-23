@@ -17,7 +17,7 @@ return {
 
   -- The core colorscheme. (Default: "catppuccin")
   ---@type Theme
-  theme = "tokyonight",
+  theme = "catppuccin",
 
   -- Background mode for the editor: "transparent" or "solid"
   background = "transparent",

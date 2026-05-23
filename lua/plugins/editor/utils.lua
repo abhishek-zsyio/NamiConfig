@@ -30,7 +30,6 @@ return {
       "mfussenegger/nvim-dap-python",
       "nvim-telescope/telescope.nvim",
     },
-    lazy   = false,
     config = function()
       require("venv-selector").setup({
         options = {

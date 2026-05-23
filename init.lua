@@ -1,3 +1,4 @@
+if vim.loader then vim.loader.enable() end
 -- Suppress deprecation warnings (lspconfig v2 → v3 transition)
 vim.deprecate = function() end
 
