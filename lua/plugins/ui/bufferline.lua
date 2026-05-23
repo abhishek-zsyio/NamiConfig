@@ -19,9 +19,9 @@ return {
           close_command   = function(n) require("mini.bufremove").delete(n, false) end,
           right_mouse_command = "vertical sbuffer %d",
           indicator       = { style = "none" },  -- Minimal: no bold underline
-          buffer_close_icon = "󰅖",
+          buffer_close_icon = "×",
           modified_icon     = "●",
-          close_icon        = "",
+          close_icon        = "×",
           left_trunc_marker  = "",
           right_trunc_marker = "",
           max_name_length   = 18,
@@ -35,7 +35,7 @@ return {
           end,
           color_icons       = true,
           show_buffer_icons = true,
-          show_buffer_close_icons = false, -- Minimal: hide close icons per buffer
+          show_buffer_close_icons = true, -- Changed to true to match image
           show_close_icon   = false,
           show_tab_indicators = true,
           separator_style   = "thin",  -- Added a thin divider between tabs
@@ -45,6 +45,14 @@ return {
             if vim.api.nvim_buf_get_name(buf_number) == "" then
               return false
             end
+            
+            -- Hide NvimTree, ToggleTerm, and generic terminal buffers
+            local ft = vim.bo[buf_number].filetype
+            local bt = vim.bo[buf_number].buftype
+            if ft == "NvimTree" or ft == "toggleterm" or bt == "terminal" then
+              return false
+            end
+            
             return true
           end,
           hover = { enabled = true, delay = 150, reveal = { "close" } },

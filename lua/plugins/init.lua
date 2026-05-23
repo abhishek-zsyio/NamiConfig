@@ -19,6 +19,8 @@ return {
   { import = "plugins.git.gitsigns" },
   { import = "plugins.git.lazygit" },
   { import = "plugins.git.diffview" },
+  -- AI
+  { import = "plugins.ai.supermaven" },
   -- LSP
   { import = "plugins.lsp.mason" },
   { import = "plugins.lsp.lspconfig" },

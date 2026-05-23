@@ -7,16 +7,16 @@ return {
 
   -- Inline color highlighting
   {
-    "norcalli/nvim-colorizer.lua",
-    event  = { "BufReadPre", "BufNewFile" },
+    "brenoprata10/nvim-highlight-colors",
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
-      require("colorizer").setup({
-        "*",                  -- apply to all filetypes
-        css    = { rgb_fn = true, hsl_fn = true, names = true },
-        html   = { names = true },
-        javascript = { names = false },
-        typescript = { names = false },
-      }, { mode = "background" })
+      require("nvim-highlight-colors").setup({
+        render = "virtual",
+        virtual_symbol = "■",
+        virtual_symbol_position = "inline",
+        enable_tailwind = true, -- Also enables UnoCSS LSP color support
+        enable_short_hex = true,
+      })
     end,
   },
 

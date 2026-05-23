@@ -10,30 +10,28 @@ return {
     config = function()
       require("lualine").setup({
         options = {
-          theme                = "auto",   -- Dynamically match the current Neovim theme!
-          globalstatus         = true,     -- Single bar across all windows
+          theme                = "auto",   -- Dynamically match the current Neovim theme
+          globalstatus         = true,     -- Single bar across all windows (VS Code style)
           always_divide_middle = true,
-          component_separators = { left = "│", right = "│" },
-          section_separators   = { left = "", right = "" },
-          -- Only hide statusline for the dashboard, NOT NvimTree
+          -- Remove all bubbles and powerline separators for a flat, modern VS Code look
+          component_separators = { left = "", right = "" },
+          section_separators   = { left = "", right = "" },
           disabled_filetypes   = { statusline = { "dashboard", "alpha" } },
         },
         sections = {
+          -- Left Side: Mode, Branch, Diagnostics (Errors/Warnings)
           lualine_a = {
-            { "mode", fmt = function(str) return " " .. str end },
+            { "mode", fmt = function(str) return " " .. str .. " " end },
           },
           lualine_b = {
             { "branch", icon = "" },
             {
-              "diff",
-              symbols = { added = " ", modified = " ", removed = " " },
-              diff_color = {
-                added    = { fg = "#a6e3a1" },
-                modified = { fg = "#f9e2af" },
-                removed  = { fg = "#f38ba8" },
-              },
+              "diagnostics",
+              sources = { "nvim_lsp" },
+              symbols = { error = " ", warn = " ", hint = " ", info = " " },
             },
           },
+          -- Middle: Filename
           lualine_c = {
             {
               "filename",
@@ -41,16 +39,22 @@ return {
               symbols = { modified = " ●", readonly = " ", unnamed = "[No Name]" },
             },
           },
+          -- Right Side: Encoding, Format, Language, Line/Col
           lualine_x = {
-            {
-              "diagnostics",
-              sources = { "nvim_lsp" },
-              symbols = { error = " ", warn = " ", hint = " ", info = " " },
-            },
+            { "encoding" },
+            { "fileformat" },
             { "filetype", icon_only = false },
           },
-          lualine_y = { { "progress" } },
-          lualine_z = { { "location" } },
+          lualine_y = {
+            -- Format location to look exactly like VS Code: "Ln X, Col Y"
+            { "location", fmt = function(str)
+                local line = vim.fn.line(".")
+                local col = vim.fn.col(".")
+                return string.format("Ln %d, Col %d", line, col)
+              end 
+            }
+          },
+          lualine_z = {}, -- Empty like VS Code
         },
         inactive_sections = {
           lualine_a = {},

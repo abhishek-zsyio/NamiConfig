@@ -14,7 +14,7 @@ return {
   theme = "catppuccin",
   
   -- Background mode for the editor: "transparent" or "solid"
-  background = "transparent",
+  background = "solid",
   
   -- Hide the tab bar at the top if there's only 1 file open
   hide_empty_tabline = true,
@@ -37,7 +37,7 @@ return {
   show_line_numbers = true,
   
   -- Use relative line numbers (useful for jumping lines e.g., 5j, 4k)
-  relative_line_numbers = true,
+  relative_line_numbers = false,
   
   -- Automatically format code when you save the file
   format_on_save = false,
@@ -49,7 +49,7 @@ return {
   mouse_support = true,
 
   -- Toggle line wrapping for long lines of code
-  wrap_lines = ture,
+  wrap_lines = true,
 
   -- Keep a certain number of lines visible above and below your cursor when scrolling
   scrolloff = 8,

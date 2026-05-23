@@ -243,31 +243,40 @@ return {
     end,
   },
   {
-    "transparent-override",
-    name = "transparent-override",
+    "theme-overrides",
+    name = "theme-overrides",
     dir = "", -- dummy plugin
     virtual = true,
     lazy = false,
     priority = 1001, -- run after themes
     config = function()
       local ok, settings = pcall(require, "settings")
-      if ok and settings.background == "transparent" then
-        vim.api.nvim_create_autocmd("ColorScheme", {
-          pattern = "*",
-          callback = function()
+      
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        pattern = "*",
+        callback = function()
+          -- 1. Apply transparency to main editor if requested
+          if ok and settings.background == "transparent" then
             local hl_groups = {
               "Normal", "NormalNC", "Comment", "Constant", "Special", "Identifier",
               "Statement", "PreProc", "Type", "Underlined", "Todo", "String", "Function",
               "Conditional", "Repeat", "Operator", "Structure", "LineNr", "NonText",
-              "SignColumn", "CursorLineNr", "EndOfBuffer", "NormalFloat", "FloatBorder",
-              "NvimTreeNormal", "NvimTreeNormalNC", "TelescopeNormal", "TelescopeBorder",
+              "SignColumn", "CursorLineNr", "EndOfBuffer", 
+              "NvimTreeNormal", "NvimTreeNormalNC",
             }
             for _, name in ipairs(hl_groups) do
               vim.cmd(string.format("hi %s ctermbg=NONE guibg=NONE", name))
             end
-          end,
-        })
-      end
+          end
+
+          -- 2. Ensure popups and borders perfectly match the editor background
+          -- by removing any special dark backgrounds they might have by default
+          local popup_groups = { "FloatBorder", "Pmenu", "NormalFloat" }
+          for _, name in ipairs(popup_groups) do
+            vim.cmd(string.format("hi %s guibg=NONE ctermbg=NONE", name))
+          end
+        end,
+      })
     end,
   },
 }
