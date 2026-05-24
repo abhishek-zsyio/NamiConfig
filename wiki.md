@@ -197,7 +197,7 @@ extras = {
 
 Uncomment any line to activate that feature pack. Plugins, LSPs, formatters, linters, and debuggers all install automatically.
 
-### Custom Tools (NvChad Style)
+### Custom Tools
 
 If you just want to install a server or formatter without building a full language registry entry, you can add them to these lists in `settings.lua`:
 

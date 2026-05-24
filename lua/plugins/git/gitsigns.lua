@@ -1,4 +1,4 @@
--- Gitsigns: inline git diff indicators (NvChad has this built-in)
+-- Gitsigns: inline git diff indicators
 return {
   {
     "lewis6991/gitsigns.nvim",

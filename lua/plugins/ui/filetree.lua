@@ -1,11 +1,11 @@
--- NvimTree: polished file explorer matching NvChad's look
+-- NvimTree: polished file explorer
 return {
 	{
 		"nvim-tree/nvim-tree.lua",
 		cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeOpen" },
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		init = function()
-			-- Disable netrw (NvChad does this)
+			-- Disable netrw
 			vim.g.loaded_netrw = 1
 			vim.g.loaded_netrwPlugin = 1
 		end,

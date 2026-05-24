@@ -1,4 +1,4 @@
--- nvim-cmp: autocomplete (NvChad-style with lspkind icons)
+-- nvim-cmp: autocomplete with lspkind icons
 return {
   {
     "hrsh7th/nvim-cmp",

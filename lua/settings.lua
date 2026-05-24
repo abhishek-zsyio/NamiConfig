@@ -62,7 +62,7 @@ return {
     "plugins.extras.testing.neotest",
   },
 
-  -- ── Custom Tools (NvChad Style) ────────────────────────────────────────────
+  -- ── Custom Tools ───────────────────────────────────────────────────────────
   lsp_servers = {
     "clangd",
     "tailwindcss",

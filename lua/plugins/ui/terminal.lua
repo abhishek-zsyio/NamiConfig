@@ -1,4 +1,4 @@
--- ToggleTerm: NvChad-style floating terminal (A-i) and horizontal (A-h)
+-- ToggleTerm: floating terminal (A-i) and horizontal (A-h)
 return {
   {
     "akinsho/toggleterm.nvim",
@@ -55,7 +55,7 @@ return {
         end,
       })
 
-      -- Key mappings (same as NvChad)
+      -- Key mappings
       local map = vim.keymap.set
 
       -- Floating terminal  <A-i>

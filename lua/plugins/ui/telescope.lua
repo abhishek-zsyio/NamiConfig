@@ -1,4 +1,4 @@
--- Telescope: borderless vertical layout (matching NvChad's style)
+-- Telescope: borderless vertical layout
 return {
   {
     "nvim-telescope/telescope.nvim",

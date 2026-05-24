@@ -63,7 +63,7 @@ table.insert(plugins, {
             vim.cmd(string.format("hi %s guibg=NONE ctermbg=NONE", name))
           end
 
-          -- 3. Universal Telescope Theme (NvChad borderless style)
+          -- 3. Universal Telescope Theme (borderless style)
           local function get_hl(name)
             local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
             return ok and hl or {}
@@ -76,7 +76,7 @@ table.insert(plugins, {
           if bg and fg and alt_bg then
             local set_hl = vim.api.nvim_set_hl
             
-            -- Telescope NvChad Borderless
+            -- Telescope Borderless
             set_hl(0, "TelescopeNormal", { bg = bg, fg = fg })
             set_hl(0, "TelescopeBorder", { bg = bg, fg = bg })
             set_hl(0, "TelescopePromptNormal", { bg = alt_bg, fg = fg })

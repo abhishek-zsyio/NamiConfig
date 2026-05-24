@@ -6,7 +6,7 @@ map("i", "jk", "<ESC>",            { desc = "Escape insert mode" })
 map("n", ";",  ":",                 { desc = "Command mode", noremap = true })
 map("n", "<Esc>", "<cmd>nohl<CR>", { desc = "Clear highlights" })
 
--- Insert Mode Navigation (NvChad style)
+-- Insert Mode Navigation
 map("i", "<C-h>", "<Left>",  { desc = "Move left" })
 map("i", "<C-l>", "<Right>", { desc = "Move right" })
 map("i", "<C-j>", "<Down>",  { desc = "Move down" })
@@ -40,7 +40,7 @@ map("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Move to below window" })
 map("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Move to above window" })
 map("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Move to right window" })
 
--- ── Buffer Navigation (NvChad style) ─────────────────────────────────────
+-- ── Buffer Navigation ────────────────────────────────────────────────────
 map("n", "<Tab>",   "<cmd>bnext<CR>",     { desc = "Next buffer" })
 map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Prev buffer" })
 map("n", "<leader>x", function()
