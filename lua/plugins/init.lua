@@ -16,6 +16,7 @@ return {
   { import = "plugins.editor.utils" },
   { import = "plugins.editor.neoconf" },   -- project-local LSP config
   { import = "plugins.editor.persistence" },
+  { import = "plugins.editor.leetcode" },
   -- Git
   { import = "plugins.git.gitsigns" },
   { import = "plugins.git.diffview" },

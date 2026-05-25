@@ -21,6 +21,7 @@
 | 🐛 **Debugging** | nvim-dap + UI (Python, Go extra, Rust extra) |
 | 🔀 **Git** | Gitsigns · LazyGit · Diffview · inline blame |
 | 🤖 **AI** | Supermaven inline completions |
+| 🏆 **LeetCode** | Full native integration (dashboard, description split, async test/submit) |
 | 📦 **Extras** | Opt-in packs for Go, Rust, Testing |
 | 🏠 **Project Config** | Per-project LSP overrides via `.neoconf.json` |
 
@@ -170,6 +171,15 @@ return {
 | `<leader>db` | Toggle breakpoint |
 | `<leader>dc` | Continue |
 | `<leader>dso` / `dsi` | Step over / in |
+
+### LeetCode
+| Key | Action |
+|-----|--------|
+| `<leader>lc` | Open LeetCode native dashboard |
+| `<leader>lr` | Save & asynchronously run test cases |
+| `<leader>ls` | Save & asynchronously submit solution |
+| `<leader>ld` | Open problem description panel |
+| `<leader>li` | Show problem statistics/info |
 
 ---
 

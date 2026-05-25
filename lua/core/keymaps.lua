@@ -6,13 +6,21 @@ map("i", "jk", "<ESC>",            { desc = "Escape insert mode" })
 map("n", ";",  ":",                 { desc = "Command mode", noremap = true })
 map("n", "<Esc>", "<cmd>nohl<CR>", { desc = "Clear highlights" })
 map("n", "<leader>ch", function()
+  local filepath = vim.fn.stdpath("config") .. "/cheatsheet.md"
   Snacks.scratch({ 
     icon = "󱗼", 
     name = "Cheat Sheet", 
-    file = vim.fn.stdpath("config") .. "/cheatsheet.md", 
+    file = filepath, 
     wo = { wrap = false, number = false, relativenumber = false, cursorline = false, signcolumn = "no" },
     bo = { modifiable = false, readonly = true }
   })
+  vim.schedule(function()
+    local buf = vim.fn.bufnr(filepath)
+    if buf ~= -1 and vim.api.nvim_buf_is_valid(buf) then
+      vim.bo[buf].modifiable = false
+      vim.bo[buf].readonly = true
+    end
+  end)
 end, { desc = "Open Cheat Sheet" })
 
 map("n", "<leader>ce", "<cmd>edit " .. vim.fn.stdpath("config") .. "/cheatsheet.md<CR>", { desc = "Edit Cheat Sheet" })
@@ -331,6 +339,13 @@ map("n", "<leader>vs", function()
     end,
   })
 end, { desc = "Select Python venv" })
+
+-- ── LeetCode Native Integration ─────────────────────────────────────────────
+map("n", "<leader>lc", "<cmd>Leet<CR>", { desc = "Open LeetCode Dashboard" })
+map("n", "<leader>lr", "<cmd>Leet run<CR>", { desc = "LeetCode Run Test" })
+map("n", "<leader>ls", "<cmd>Leet submit<CR>", { desc = "LeetCode Submit Solution" })
+map("n", "<leader>ld", "<cmd>Leet desc<CR>", { desc = "LeetCode Show Description" })
+map("n", "<leader>li", "<cmd>Leet info<CR>", { desc = "LeetCode Question Info" })
 
 -- ── Hard Mode: Disable Arrow Keys ─────────────────────────────────────────
 local disabled = [[<cmd>echohl Error | echo "KEY DISABLED" | echohl None<CR>]]

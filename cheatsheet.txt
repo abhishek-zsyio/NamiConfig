@@ -58,3 +58,12 @@
  │  <leader>ra    Rename Symbol                               │
  │  <leader>ds    LSP Diagnostics                             │
  ╰────────────────────────────────────────────────────────────╯
+
+ ╭───────────────────────── LeetCode ─────────────────────────╮
+ │                                                            │
+ │  <leader>lc    Open LeetCode Dashboard / Console           │
+ │  <leader>lr    Save & Run Test Cases Asynchronously        │
+ │  <leader>ls    Save & Submit Solution Asynchronously       │
+ │  <leader>ld    Open Problem Description Panel              │
+ │  <leader>li    Show Problem Info & Stats                   │
+ ╰────────────────────────────────────────────────────────────╯

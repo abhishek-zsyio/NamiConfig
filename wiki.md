@@ -89,6 +89,7 @@ init.lua
 │       │   ├── cmp.lua
 │       │   ├── comment.lua
 │       │   ├── indent.lua
+│       │   ├── leetcode.lua           # Native LeetCode plugin spec
 │       │   ├── neoconf.lua           # Project-local config
 │       │   ├── treesitter.lua
 │       │   └── utils.lua
@@ -485,6 +486,12 @@ Sources (priority order): LSP → LuaSnip → Neovim Lua API → Buffer → Path
 #### Python Venv (`venv-selector.nvim`)
 - `<leader>vs` — pick active virtualenv, notifies pyright automatically
 
+#### LeetCode (`leetcode.nvim`)
+- A fully native, async LeetCode workspace right inside Neovim.
+- Includes a gorgeous home dashboard (`<leader>lc` or `:Leet`) to browse questions by tags, state, and difficulty.
+- Automatically handles boilerplates, imports, splits (splits question description left and code editor right), and local caching.
+- Test and submit solutions asynchronously using `<leader>lr` (run test) and `<leader>ls` (submit).
+
 ---
 
 ### LSP & Intelligence
@@ -694,6 +701,16 @@ Sign column indicators: `│` added/changed · `` deleted · `‾` topdelete · 
 | `<leader>dso` | Step over |
 | `<leader>dsi` | Step into |
 | `<leader>dt` | Terminate |
+
+### LeetCode
+
+| Key | Action |
+|-----|--------|
+| `<leader>lc` | Open LeetCode Dashboard / Console |
+| `<leader>lr` | Save and Run Test cases asynchronously |
+| `<leader>ls` | Save and Submit Solution asynchronously |
+| `<leader>ld` | Open problem description panel |
+| `<leader>li` | Show problem information & statistics |
 
 ### Misc
 
