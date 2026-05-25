@@ -4,7 +4,7 @@ return {
     "akinsho/toggleterm.nvim",
     version = "*",
     keys = {
-      { "<A-i>", desc = "Toggle floating terminal" },
+      { "<C-`>", desc = "Toggle floating terminal" },
       { "<A-h>", desc = "Toggle horizontal terminal" },
       { "<A-v>", desc = "Toggle vertical terminal" },
     },
@@ -58,17 +58,17 @@ return {
       -- Key mappings
       local map = vim.keymap.set
 
-      -- Floating terminal  <A-i>
+      -- Floating terminal  <C-`>
       local float_term = require("toggleterm.terminal").Terminal:new({
         direction = "float",
         float_opts = { border = "curved" },
         on_open = function(t)
           vim.cmd("startinsert!")
           vim.api.nvim_buf_set_keymap(t.bufnr, "n", "q",    "<cmd>close<CR>", { noremap = true, silent = true })
-          vim.api.nvim_buf_set_keymap(t.bufnr, "t", "<A-i>","<cmd>close<CR>", { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(t.bufnr, "t", "<C-`>","<cmd>close<CR>", { noremap = true, silent = true })
         end,
       })
-      map({ "n", "t" }, "<A-i>", function() float_term:toggle() end, { desc = "Toggle floating terminal" })
+      map({ "n", "t" }, "<C-`>", function() float_term:toggle() end, { desc = "Toggle floating terminal" })
 
       -- Horizontal terminal  <A-h>
       local h_term = require("toggleterm.terminal").Terminal:new({

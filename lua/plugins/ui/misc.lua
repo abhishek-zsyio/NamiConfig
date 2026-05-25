@@ -5,6 +5,9 @@ return {
   { "nvim-tree/nvim-web-devicons", lazy = true },
   { "echasnovski/mini.icons", version = false },
 
+  -- Modern UI interfaces for vim.ui.select and vim.ui.input
+  { "stevearc/dressing.nvim", event = "VeryLazy" },
+
   -- Inline color highlighting
   {
     "brenoprata10/nvim-highlight-colors",
@@ -81,12 +84,6 @@ return {
     opts = { theme = "dark" },
   },
 
-  -- Buffer delete without closing windows (required for <leader>x)
-  {
-    "echasnovski/mini.bufremove",
-    version = false,
-    lazy    = true,
-  },
 
   -- Which-key: show keybinding hints on leader press
   {
@@ -168,6 +165,12 @@ return {
         { "<leader>Du", desc = "DB: Toggle UI" },
         { "<leader>Da", desc = "DB: Add connection" },
         { "<leader>Df", desc = "DB: Find buffer" },
+
+        -- Session
+        { "<leader>q",  group = "󰆓 Session" },
+
+        -- Zen Mode
+        { "<leader>z",  desc = "Toggle Zen Mode" },
 
         -- Misc
         { "<leader>ma", desc = "Find marks" },

@@ -2,6 +2,15 @@ return {
   {
     "sindrets/diffview.nvim",
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles" },
+    keys = {
+      { "<leader>gd", function()
+        if next(require('diffview.lib').views) == nil then
+          vim.cmd('DiffviewOpen')
+        else
+          vim.cmd('DiffviewClose')
+        end
+      end, desc = "Toggle Git Diffview" },
+    },
 
     opts = {
       enhanced_diff_hl = true,

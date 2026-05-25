@@ -48,21 +48,12 @@ map("n", "<leader>x", function()
   bd.delete(0, false)
 end, { desc = "Close buffer" })
 
--- ── File Tree (NvimTree) ─────────────────────────────────────────────────
-map("n", "<C-n>",     "<cmd>NvimTreeToggle<CR>",   { desc = "Toggle NvimTree" })
-map("n", "<leader>e", "<cmd>NvimTreeFocus<CR>",    { desc = "Focus NvimTree" })
+
 
 -- ── Telescope ─────────────────────────────────────────────────────────────
-map("n", "<leader>ff", "<cmd>Telescope find_files<CR>",     { desc = "Find files" })
-map("n", "<leader>fz", "<cmd>Telescope current_buffer_fuzzy_find theme=dropdown<CR>", { desc = "Fuzzy find in current buffer" })
-map("n", "<leader>fw", "<cmd>Telescope live_grep<CR>",      { desc = "Live grep" })
-map("n", "<leader>fb", "<cmd>Telescope buffers<CR>",        { desc = "Find buffers" })
-map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>",      { desc = "Help tags" })
-map("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>",       { desc = "Old files" })
+
+-- ── Theme Switcher ──────────────────────────────────────────────────────────
 map("n", "<leader>th", function()
-  -- Force Telescope to load so telescope-ui-select patches vim.ui.select
-  require("telescope")
-  
   local registry = require("core.theme_registry")
   local themes = {}
   local ghostty_themes = {}
@@ -74,91 +65,45 @@ map("n", "<leader>th", function()
     icons[t.id] = t.icon
   end
 
-  local pickers = require("telescope.pickers")
-  local finders = require("telescope.finders")
-  local conf = require("telescope.config").values
-  local actions = require("telescope.actions")
-  local action_state = require("telescope.actions.state")
-
-  local current_theme = vim.g.colors_name or "catppuccin"
-
-  pickers.new({}, {
-    prompt_title = "Select Theme",
-    finder = finders.new_table({
-      results = themes,
-      entry_maker = function(entry)
-        return {
-          value = entry,
-          display = (icons[entry] or "󰏘 ") .. " " .. entry,
-          ordinal = entry,
-        }
-      end
-    }),
-    sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr, map)
-      local function live_preview()
-        local selection = action_state.get_selected_entry()
-        if selection then
-          pcall(vim.cmd.colorscheme, selection.value)
-        end
-      end
-
-      map("i", "<C-j>", function() actions.move_selection_next(prompt_bufnr) live_preview() end)
-      map("i", "<C-k>", function() actions.move_selection_previous(prompt_bufnr) live_preview() end)
-      map("i", "<Down>", function() actions.move_selection_next(prompt_bufnr) live_preview() end)
-      map("i", "<Up>", function() actions.move_selection_previous(prompt_bufnr) live_preview() end)
-
-      local function restore_and_close()
-        pcall(vim.cmd.colorscheme, current_theme)
-        actions.close(prompt_bufnr)
-      end
-      map("i", "<Esc>", restore_and_close)
-      map("n", "<Esc>", restore_and_close)
-
-      actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        if not selection then return end
-        local choice = selection.value
-        
-        vim.cmd.colorscheme(choice)
-        
-        local settings_path = vim.fn.stdpath("config") .. "/lua/settings.lua"
-        local lines = vim.fn.readfile(settings_path)
-        for i, line in ipairs(lines) do
-          if line:match('^%s*theme%s*=%s*["\']') then
-            lines[i] = '  theme = "' .. choice .. '",'
-            break
-          end
-        end
-        vim.fn.writefile(lines, settings_path)
-        
-        local ghostty_path = vim.fn.expand("~/.config/ghostty/config")
-        if vim.fn.filereadable(ghostty_path) == 1 then
-          local g_lines = vim.fn.readfile(ghostty_path)
-          for i, line in ipairs(g_lines) do
-            if line:match('^theme%s*=') then
-              g_lines[i] = 'theme = ' .. ghostty_themes[choice]
-              break
-            end
-          end
-          local file = io.open(ghostty_path, "w")
-          if file then
-            file:write(table.concat(g_lines, "\n") .. "\n")
-            file:close()
-          end
-          os.execute([[osascript -e 'tell application "System Events" to keystroke "," using {command down, shift down}']])
-        end
-
-        vim.notify("Theme synced to " .. choice .. " (Neovim + Ghostty)!", vim.log.levels.INFO)
-      end)
-      return true
+  vim.ui.select(themes, {
+    prompt = "Select Theme (Syncs to Ghostty)",
+    format_item = function(item)
+      return (icons[item] or "󰏘 ") .. " " .. item
     end,
-  }):find()
+  }, function(choice)
+    if not choice then return end
+    vim.cmd.colorscheme(choice)
+    
+    local settings_path = vim.fn.stdpath("config") .. "/lua/settings.lua"
+    local lines = vim.fn.readfile(settings_path)
+    for i, line in ipairs(lines) do
+      if line:match('^%s*theme%s*=%s*["\']') then
+        lines[i] = '  theme = "' .. choice .. '",'
+        break
+      end
+    end
+    vim.fn.writefile(lines, settings_path)
+    
+    local ghostty_path = vim.fn.expand("~/.config/ghostty/config")
+    if vim.fn.filereadable(ghostty_path) == 1 then
+      local g_lines = vim.fn.readfile(ghostty_path)
+      for i, line in ipairs(g_lines) do
+        if line:match('^theme%s*=') then
+          g_lines[i] = 'theme = ' .. ghostty_themes[choice]
+          break
+        end
+      end
+      local file = io.open(ghostty_path, "w")
+      if file then
+        file:write(table.concat(g_lines, "\n") .. "\n")
+        file:close()
+      end
+      os.execute([[osascript -e 'tell application "System Events" to keystroke "," using {command down, shift down}']])
+    end
+
+    vim.notify("Theme synced to " .. choice .. " (Neovim + Ghostty)!", vim.log.levels.INFO)
+  end)
 end, { desc = "Select & Save Theme (Sync Ghostty)" })
-map("n", "<leader>gt", "<cmd>Telescope git_status<CR>",     { desc = "Git status" })
-map("n", "<leader>gc", "<cmd>Telescope git_commits<CR>",    { desc = "Git commits" })
-map("n", "<leader>ma", "<cmd>Telescope marks<CR>",          { desc = "Find marks" })
 
 -- ── Line Numbers ─────────────────────────────────────────────────────────
 map("n", "<leader>n", "<cmd>set nu!<CR>",   { desc = "Toggle line number" })
@@ -190,24 +135,10 @@ map("n", "[d",          vim.diagnostic.goto_prev,     { desc = "Prev diagnostic"
 map("n", "]d",          vim.diagnostic.goto_next,     { desc = "Next diagnostic" })
 
 -- ── DAP Debugging ─────────────────────────────────────────────────────────
-map("n", "<leader>db",  "<cmd>DapToggleBreakpoint<CR>",  { desc = "DAP Toggle breakpoint" })
-map("n", "<leader>dc",  "<cmd>DapContinue<CR>",          { desc = "DAP Continue" })
-map("n", "<leader>dso", "<cmd>DapStepOver<CR>",          { desc = "DAP Step over" })
-map("n", "<leader>dsi", "<cmd>DapStepIn<CR>",            { desc = "DAP Step in" })
-map("n", "<leader>dt",  "<cmd>DapTerminate<CR>",         { desc = "DAP Terminate" })
 
 -- ── Git ───────────────────────────────────────────────────────────────────
-map("n", "<leader>gg",  "<cmd>LazyGit<CR>",              { desc = "Open LazyGit" })
-map("n", "<leader>gd", function()
-  if next(require('diffview.lib').views) == nil then
-    vim.cmd('DiffviewOpen')
-  else
-    vim.cmd('DiffviewClose')
-  end
-end, { desc = "Toggle Git Diffview" })
 
--- ── Noice ─────────────────────────────────────────────────────────────────
-map("n", "<leader>cn",  "<cmd>NoiceDismiss<CR>",         { desc = "Dismiss Noice message" })
+
 
 -- ── Visual Code Screenshot ─────────────────────────────────────────────────
 map("v", "<leader>sc", ":Silicon<CR>",                   { desc = "Screenshot code" })

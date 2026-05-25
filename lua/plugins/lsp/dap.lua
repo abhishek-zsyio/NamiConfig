@@ -1,6 +1,16 @@
 -- DAP: Debug Adapter Protocol for Python (and extensible)
 return {
-  { "mfussenegger/nvim-dap",  lazy = true },
+  { 
+    "mfussenegger/nvim-dap",  
+    lazy = true,
+    keys = {
+      { "<leader>db", "<cmd>DapToggleBreakpoint<CR>", desc = "DAP Toggle breakpoint" },
+      { "<leader>dc", "<cmd>DapContinue<CR>", desc = "DAP Continue" },
+      { "<leader>dso", "<cmd>DapStepOver<CR>", desc = "DAP Step over" },
+      { "<leader>dsi", "<cmd>DapStepIn<CR>", desc = "DAP Step in" },
+      { "<leader>dt", "<cmd>DapTerminate<CR>", desc = "DAP Terminate" },
+    },
+  },
   { "nvim-neotest/nvim-nio",  lazy = true },
 
   {

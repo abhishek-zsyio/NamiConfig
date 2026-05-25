@@ -16,10 +16,10 @@ return {
         options = {
           mode            = "buffers",
           numbers         = "none",
-          close_command   = function(n) require("mini.bufremove").delete(n, false) end,
-          right_mouse_command = "vertical sbuffer %d",
-          indicator       = { style = "none" },  -- Removed underline indicator
-          buffer_close_icon = "󰅖",
+          close_command   = function(n) Snacks.bufdelete(n) end,
+          right_mouse_command = function(n) Snacks.bufdelete(n) end,
+          indicator       = { style = "none" },
+          buffer_close_icon = "",
           modified_icon     = "●",
           close_icon        = "",
           left_trunc_marker  = "",
@@ -35,33 +35,37 @@ return {
           end,
           color_icons       = true,
           show_buffer_icons = true,
-          show_buffer_close_icons = true,
+          show_buffer_close_icons = false,
           show_close_icon   = true,
-          show_tab_indicators = true,
-          separator_style   = "thin",  -- Thin vertical separators (no slanted edges)
+          show_tab_indicators = false,
+          separator_style   = "none",
           always_show_bufferline = settings.hide_empty_tabline == false,
           custom_filter = function(buf_number)
-            -- Filter out completely empty/unnamed buffers
-            if vim.api.nvim_buf_get_name(buf_number) == "" then
-              return false
-            end
-            
-            -- Hide NvimTree, ToggleTerm, and generic terminal buffers
+            if vim.api.nvim_buf_get_name(buf_number) == "" then return false end
             local ft = vim.bo[buf_number].filetype
             local bt = vim.bo[buf_number].buftype
-            if ft == "NvimTree" or ft == "toggleterm" or bt == "terminal" then
+            if ft == "toggleterm" or bt == "terminal" or ft:match("snacks") then
               return false
             end
-            
             return true
           end,
           hover = { enabled = true, delay = 150, reveal = { "close" } },
           offsets = {
             {
-              filetype   = "NvimTree",
+              filetype   = "snacks_layout_box",
               text       = "",
-              separator  = false,
+              separator  = true,
             },
+            {
+              filetype   = "snacks_picker_list",
+              text       = "",
+              separator  = true,
+            },
+            {
+              filetype   = "snacks_picker_input",
+              text       = "",
+              separator  = true,
+            }
           },
         },
       })
