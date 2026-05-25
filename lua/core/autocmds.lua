@@ -66,3 +66,12 @@ if in_django_project() then
     end,
   })
 end
+
+-- ── Disable Dropbar for Snacks Picker ──────────────────────────────────────
+autocmd("FileType", {
+  group = augroup("DisableDropbar", { clear = true }),
+  pattern = { "snacks_picker_list", "snacks_picker_input", "snacks_picker_preview", "snacks_layout_box", "snacks_terminal" },
+  callback = function(event)
+    vim.b[event.buf].dropbar_enable = false
+  end,
+})

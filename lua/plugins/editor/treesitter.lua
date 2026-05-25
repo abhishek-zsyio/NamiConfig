@@ -2,7 +2,7 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    event  = { "BufReadPost", "BufNewFile" },
+    event  = { "BufReadPost", "BufNewFile", "VeryLazy" },
     build  = ":TSUpdate",
     -- Use config function to call setup on the correct new module
     config = function(_, opts)

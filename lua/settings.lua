@@ -13,7 +13,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "terafox",
+  theme = "catppuccin-mocha",
   background = "dark",
   transparent = false,
   hide_empty_tabline = true,
