@@ -28,9 +28,14 @@ return {
       lazygit = { enabled = true },
       rename = { enabled = true },
       input = { enabled = true },
+      quickfile = { enabled = true },
       image = { 
         enabled = true,
         force = true,
+        formats = {
+          "png", "jpg", "jpeg", "gif", "bmp", "webp", "tiff", "heic", "avif",
+          "mp4", "mov", "avi", "mkv", "webm", "pdf", "icns", "svg"
+        },
         convert = { notify = true }, -- Show errors if imagemagick fails
       },
 
