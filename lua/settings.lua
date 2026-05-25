@@ -13,7 +13,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "everforest",
+  theme = "catppuccin-latte",
   background = "dark",
   hide_empty_tabline = true,
   show_indent_guides = true,
@@ -22,6 +22,12 @@ return {
   line_height = 2,           -- Additional spacing between lines (GUI only, e.g., Neovide)
   cmdheight = 0,             -- 0 for modern hidden cmdline, 1 for classic
   neovide_transparency = 0.9,-- Transparency level for Neovide (0.0 to 1.0)
+
+  -- ── Menus & Pickers (UI) ───────────────────────────────────────────────────
+  picker_layout = "dropdown", -- Options: "telescope", "ivy", "dropdown", "default", "vertical", "horizontal", "vscode"
+  picker_width = 0.85,
+  picker_height = 0.8,
+  menu_border = "none",     -- Options: "rounded", "single", "double", "solid", "shadow", "none"
 
   -- ── Editor Behavior ────────────────────────────────────────────────────────
   highlight_current_line = true,

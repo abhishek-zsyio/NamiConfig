@@ -37,6 +37,22 @@ return {
             { "diff", symbols = { added = " ", modified = " ", removed = " " } },
             {
               function()
+                local venv = vim.env.VIRTUAL_ENV
+                if not venv then return "" end
+                local name = vim.fs.basename(venv)
+                if name == ".venv" or name == "venv" then
+                  local parent = vim.fs.basename(vim.fs.dirname(venv))
+                  return " " .. parent .. " (" .. name .. ")"
+                end
+                return " " .. name
+              end,
+              cond = function()
+                return vim.bo.filetype == "python" or vim.env.VIRTUAL_ENV ~= nil
+              end,
+              color = { fg = "#38bdf8" }, -- Slick matching sky-blue tone
+            },
+            {
+              function()
                 local clients = vim.lsp.get_clients({ bufnr = 0 })
                 if next(clients) == nil then return "No LSP" end
                 local c = {}

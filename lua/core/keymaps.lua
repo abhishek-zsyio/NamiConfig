@@ -61,54 +61,146 @@ map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Prev buffer" })
 -- ── Theme Switcher ──────────────────────────────────────────────────────────
 map("n", "<leader>th", function()
   local registry = require("core.theme_registry")
-  local themes = {}
-  local ghostty_themes = {}
-  local icons = {}
-
+  local original_theme = vim.g.colors_name
+  local items = {}
   for _, t in ipairs(registry) do
-    table.insert(themes, t.id)
-    ghostty_themes[t.id] = t.ghostty
-    icons[t.id] = t.icon
+    table.insert(items, {
+      text = t.id,
+      value = t,
+    })
   end
 
-  vim.ui.select(themes, {
+  Snacks.picker.pick({
+    source = "themes",
+    items = items,
+    layout = {
+      preset = require("settings").picker_layout or "vertical",
+      width = require("settings").picker_width or 0.5,
+      height = require("settings").picker_height or 0.8,
+    },
+    win = {
+      input = { border = require("settings").menu_border or "rounded" },
+      list = { border = require("settings").menu_border or "rounded" },
+      preview = { border = require("settings").menu_border or "rounded" },
+    },
     prompt = "Select Theme (Syncs to Ghostty)",
-    format_item = function(item)
-      return (icons[item] or "󰏘 ") .. " " .. item
+    format = function(item)
+      local t = item.value
+      return {
+        { (t.icon or "󰏘 ") .. " ", "SnacksPickerIcon" },
+        { t.id, "SnacksPickerText" },
+      }
     end,
-  }, function(choice)
-    if not choice then return end
-    vim.cmd.colorscheme(choice)
-    
-    local settings_path = vim.fn.stdpath("config") .. "/lua/settings.lua"
-    local lines = vim.fn.readfile(settings_path)
-    for i, line in ipairs(lines) do
-      if line:match('^%s*theme%s*=%s*["\']') then
-        lines[i] = '  theme = "' .. choice .. '",'
-        break
+    preview = function(ctx)
+      local buf = ctx.buf
+      local lines = {
+        "// ── Theme Preview Showcase (JavaScript/React) ──────────────────",
+        "import React, { useState, useEffect } from 'react';",
+        "",
+        "const ThemeShowcase = ({ themeName, isAwesome }) => {",
+        "  const [active, setActive] = useState(false);",
+        "",
+        "  useEffect(() => {",
+        "    console.log(`Colorscheme previewed: ${themeName}`);",
+        "  }, [themeName]);",
+        "",
+        "  const colors = {",
+        "    accent: '#ff79c6',",
+        "    info: '#8be9fd',",
+        "    success: '#50fa7b',",
+        "  };",
+        "",
+        "  return (",
+        "    <div className=\"preview-container\" style={{ padding: '20px' }}>",
+        "      <h1 style={{ color: colors.accent }}>{themeName}</h1>",
+        "      <p style={{ color: colors.info }}>",
+        "        This is a live syntax preview showing how your JS code",
+        "        renders in this colorscheme.",
+        "      </p>",
+        "      <button",
+        "        onClick={() => setActive(!active)}",
+        "        disabled={!isAwesome}",
+        "        style={{ background: colors.success }}",
+        "      >",
+        "        Toggle Accent State (Current: {active ? 'On' : 'Off'})",
+        "      </button>",
+        "    </div>",
+        "  );",
+        "};",
+        "",
+        "export default ThemeShowcase;",
+      }
+      vim.bo[buf].modifiable = true
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+      vim.bo[buf].modifiable = false
+      vim.bo[buf].filetype = "javascriptreact"
+    end,
+    on_change = function(picker, item)
+      if item then
+        if item.value.setup then
+          local ok2, s2 = pcall(require, "settings")
+          local transparent = (ok2 and s2.background == "transparent")
+          item.value.setup(transparent)
+        end
+        local cs = item.value.colorscheme or item.value.id
+        pcall(vim.cmd.colorscheme, cs)
       end
-    end
-    vim.fn.writefile(lines, settings_path)
-    
-    local ghostty_path = vim.fn.expand("~/.config/ghostty/config")
-    if vim.fn.filereadable(ghostty_path) == 1 then
-      local g_lines = vim.fn.readfile(ghostty_path)
-      for i, line in ipairs(g_lines) do
-        if line:match('^theme%s*=') then
-          g_lines[i] = 'theme = ' .. ghostty_themes[choice]
+    end,
+    on_close = function(picker)
+      if not picker.confirmed and original_theme then
+        -- We must find the original theme's setup if it needs to be restored!
+        local orig_item
+        for _, t in ipairs(registry) do
+           if t.id == original_theme or t.colorscheme == original_theme then
+              orig_item = t
+              break
+           end
+        end
+        if orig_item and orig_item.setup then
+          local ok2, s2 = pcall(require, "settings")
+          orig_item.setup(ok2 and s2.background == "transparent")
+        end
+        pcall(vim.cmd.colorscheme, original_theme)
+      end
+    end,
+    confirm = function(picker, item)
+      picker.confirmed = true
+      picker:close()
+      if not item then return end
+      local choice = item.value.id
+      
+      local settings_path = vim.fn.stdpath("config") .. "/lua/settings.lua"
+      local lines = vim.fn.readfile(settings_path)
+      for i, line in ipairs(lines) do
+        if line:match('^%s*theme%s*=%s*["\']') then
+          lines[i] = '  theme = "' .. choice .. '",'
           break
         end
       end
-      local file = io.open(ghostty_path, "w")
-      if file then
-        file:write(table.concat(g_lines, "\n") .. "\n")
-        file:close()
+      vim.fn.writefile(lines, settings_path)
+      
+      local ghostty_path = vim.fn.expand("~/.config/ghostty/config")
+      if vim.fn.filereadable(ghostty_path) == 1 then
+        local g_lines = vim.fn.readfile(ghostty_path)
+        for i, line in ipairs(g_lines) do
+          if line:match('^theme%s*=') then
+            g_lines[i] = 'theme = ' .. item.value.ghostty
+            break
+          end
+        end
+        local file = io.open(ghostty_path, "w")
+        if file then
+          file:write(table.concat(g_lines, "\n") .. "\n")
+          file:close()
+        end
+        if vim.fn.has("mac") == 1 then
+          os.execute([[osascript -e 'tell application "System Events" to keystroke "," using {command down, shift down}']])
+        end
       end
-      os.execute([[osascript -e 'tell application "System Events" to keystroke "," using {command down, shift down}']])
-    end
 
-    vim.notify("Theme synced to " .. choice .. " (Neovim + Ghostty)!", vim.log.levels.INFO)
-  end)
+      vim.notify("Theme synced to " .. choice .. " (Neovim + Ghostty)!", vim.log.levels.INFO)
+    end,
+  })
 end, { desc = "Select & Save Theme (Sync Ghostty)" })
 
 -- ── Line Numbers ─────────────────────────────────────────────────────────
@@ -128,7 +220,114 @@ map("v", "<leader>/", "gc",          { desc = "Toggle comment", remap = true })
 map("v", "<leader>sc", ":Silicon<CR>",                   { desc = "Screenshot code" })
 
 -- ── Python Venv ───────────────────────────────────────────────────────────
-map("n", "<leader>vs",  "<cmd>VenvSelect<CR>",           { desc = "Select Python venv" })
+map("n", "<leader>vs", function()
+  local paths = {}
+  local cwd = vim.fn.getcwd()
+  
+  -- 1. Check workspace venvs
+  local local_venvs = { "/.venv", "/venv" }
+  for _, name in ipairs(local_venvs) do
+    local p = cwd .. name .. "/bin/python"
+    if vim.fn.executable(p) == 1 then
+      table.insert(paths, { name = "Local: ." .. name, path = p })
+    end
+  end
+  
+  -- 2. Check ~/.virtualenvs
+  local home_venv_dir = vim.fn.expand("~/.virtualenvs")
+  if vim.fn.isdirectory(home_venv_dir) == 1 then
+    local venvs = vim.fn.readdir(home_venv_dir)
+    for _, name in ipairs(venvs) do
+      local p = home_venv_dir .. "/" .. name .. "/bin/python"
+      if vim.fn.executable(p) == 1 then
+        table.insert(paths, { name = "Global: " .. name, path = p })
+      end
+    end
+  end
+
+  -- 3. Check poetry venvs
+  local poetry_dir = vim.fn.expand("~/.cache/pypoetry/virtualenvs")
+  if vim.fn.isdirectory(poetry_dir) == 1 then
+    local venvs = vim.fn.readdir(poetry_dir)
+    for _, name in ipairs(venvs) do
+      local p = poetry_dir .. "/" .. name .. "/bin/python"
+      if vim.fn.executable(p) == 1 then
+        table.insert(paths, { name = "Poetry: " .. name, path = p })
+      end
+    end
+  end
+
+  if #paths == 0 and vim.env.VIRTUAL_ENV == nil then
+    vim.notify("No virtual environments found!", vim.log.levels.WARN)
+    return
+  end
+
+  local items = {}
+  if vim.env.VIRTUAL_ENV ~= nil then
+    table.insert(items, {
+      text = "Deactivate Current Venv",
+      value = "deactivate",
+    })
+  end
+  for _, item in ipairs(paths) do
+    table.insert(items, {
+      text = item.name,
+      value = item.path,
+    })
+  end
+
+  Snacks.picker.pick({
+    source = "venvs",
+    items = items,
+    prompt = "Select Python Virtual Environment",
+    layout = {
+      preset = require("settings").picker_layout or "select",
+      width = require("settings").picker_width or 0.5,
+      height = require("settings").picker_height or 0.8,
+    },
+    win = {
+      input = { border = require("settings").menu_border or "rounded" },
+      list = { border = require("settings").menu_border or "rounded" },
+      preview = { border = require("settings").menu_border or "rounded" },
+    },
+    format = function(item)
+      local icon = item.value == "deactivate" and "󰅙  " or "  "
+      local hl = item.value == "deactivate" and "DiagnosticWarn" or "SnacksPickerText"
+      return {
+        { icon, "SnacksPickerIcon" },
+        { item.text, hl },
+      }
+    end,
+    confirm = function(picker, item)
+      picker:close()
+      if not item then return end
+      
+      if item.value == "deactivate" then
+        vim.env.VIRTUAL_ENV = nil
+        local default_py = vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
+        for _, client in ipairs(vim.lsp.get_active_clients({ name = "pyright" })) do
+          client.config.settings.python.pythonPath = default_py
+          client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+        end
+        vim.notify("Deactivated Python Virtual Environment", vim.log.levels.WARN)
+        return
+      end
+
+      local py_path = item.value
+      
+      -- Set environment variables
+      vim.env.VIRTUAL_ENV = py_path:gsub("/bin/python$", "")
+      
+      -- Update LSP clients
+      for _, client in ipairs(vim.lsp.get_active_clients({ name = "pyright" })) do
+        client.config.settings.python.pythonPath = py_path
+        client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+      end
+      
+      vim.notify("Activated Venv: " .. item.text, vim.log.levels.INFO)
+    end,
+  })
+end, { desc = "Select Python venv" })
 
 -- ── Hard Mode: Disable Arrow Keys ─────────────────────────────────────────
 local disabled = [[<cmd>echohl Error | echo "KEY DISABLED" | echohl None<CR>]]

@@ -11,6 +11,9 @@ return {
       cmdline = {
         enabled = true,
         view    = "cmdline_popup",
+        opts = {
+          border = { style = require("settings").menu_border or "rounded" },
+        },
       },
       messages  = { enabled = true },
       popupmenu = { enabled = true, backend = "nui" },

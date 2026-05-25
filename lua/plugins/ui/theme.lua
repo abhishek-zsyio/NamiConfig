@@ -22,7 +22,7 @@ for _, theme in ipairs(registry) do
           end
           
           if is_active then
-            vim.cmd.colorscheme(theme.id)
+            vim.cmd.colorscheme(theme.colorscheme or theme.id)
           end
         end,
       })

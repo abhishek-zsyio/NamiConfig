@@ -5,6 +5,7 @@ local ok, settings = pcall(require, "settings")
 if not ok then settings = {} end
 
 -- ── UI ────────────────────────────────────────────────────────────────────
+opt.background     = settings.background == "light" and "light" or "dark"
 opt.number         = settings.show_line_numbers ~= false
 opt.relativenumber = settings.relative_line_numbers == true
 opt.cursorline     = settings.highlight_current_line ~= false -- highlight the current line

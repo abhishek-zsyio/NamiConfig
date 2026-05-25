@@ -1,3 +1,5 @@
+local settings = require("settings")
+
 return {
   {
     "folke/snacks.nvim",
@@ -39,17 +41,50 @@ return {
 
       picker = {
         enabled = true,
-        sources = {
-          explorer = {
-            win = {
-              list = {
-                keys = {
-                  ["<C-n>"] = "close",
-                }
-              }
-            }
+        ui_select = true, -- Automatically override vim.ui.select (code actions, etc.)
+        win = {
+          input = {
+            keys = {
+              ["<Esc>"] = "close", -- Standard ESC to close
+            },
+            border = settings.menu_border or "rounded",
+          },
+          list = { border = settings.menu_border or "rounded" },
+          preview = { border = settings.menu_border or "rounded" },
+        },
+        layout = {
+          preset = settings.picker_layout or "telescope",
+          width = settings.picker_width or 0.85,
+          height = settings.picker_height or 0.8,
+        },
+        sources = (function()
+          local b = settings.menu_border or "rounded"
+          local w = {
+            input = { border = b },
+            list = { border = b },
+            preview = { border = b }
           }
-        }
+          local l = {
+            preset = settings.picker_layout or "telescope",
+            width = settings.picker_width or 0.85,
+            height = settings.picker_height or 0.8,
+          }
+          return {
+            explorer = {
+              win = { list = { keys = { ["<C-n>"] = "close" } } }
+            },
+            files = { layout = l, win = w },
+            grep = { layout = l, win = w },
+            buffers = { layout = l, win = w },
+            help = { layout = l, win = w },
+            recent = { layout = l, win = w },
+            lines = { layout = l, win = w },
+            marks = { layout = l, win = w },
+            git_status = { layout = l, win = w },
+            git_log = { layout = l, win = w },
+            diagnostics = { layout = l, win = w },
+          }
+        end)()
       },
 
       -- Custom Dashboard config

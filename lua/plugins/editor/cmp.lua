@@ -34,11 +34,11 @@ return {
         completion = { completeopt = "menu,menuone" },
         window = {
           completion = cmp.config.window.bordered({
-            border = "rounded",
+            border = require("settings").menu_border or "rounded",
             winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
           }),
           documentation = cmp.config.window.bordered({
-            border = "rounded",
+            border = require("settings").menu_border or "rounded",
             winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
           }),
         },
