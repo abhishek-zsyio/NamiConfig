@@ -4,7 +4,6 @@ return {
   { import = "plugins.ui.statusline" },
   { import = "plugins.ui.bufferline" },
   { import = "plugins.ui.noice" },
-  { import = "plugins.ui.terminal" },
   { import = "plugins.ui.misc" },
   { import = "plugins.ui.dropbar" },
   { import = "plugins.ui.snacks" },
@@ -18,7 +17,6 @@ return {
   { import = "plugins.editor.persistence" },
   -- Git
   { import = "plugins.git.gitsigns" },
-  { import = "plugins.git.lazygit" },
   { import = "plugins.git.diffview" },
   -- AI
   { import = "plugins.ai.supermaven" },

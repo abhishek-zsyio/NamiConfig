@@ -5,13 +5,7 @@ return {
     event        = "VeryLazy",
     dependencies = {
       "MunifTanjim/nui.nvim",
-      -- ⚠️  config = false is intentional:
-      -- If lazy.nvim auto-calls nvim-notify.setup() (via opts = {...}), it sets
-      -- vim.notify = require("notify") BEFORE Noice loads, triggering the
-      -- "vim.notify has been overwritten" warning.
-      -- Noice owns the notify pipeline; we configure nvim-notify through
-      -- Noice's views instead.
-      { "rcarriga/nvim-notify", config = false },
+      -- Snacks notifier is used instead of nvim-notify
     },
     opts = {
       cmdline = {
@@ -21,22 +15,9 @@ return {
       messages  = { enabled = true },
       popupmenu = { enabled = true, backend = "nui" },
 
-      -- ── nvim-notify settings — applied here so Noice controls the pipeline ──
-      views = {
-        notify = {
-          backend = "notify",
-          fallback = "mini",
-          format   = "notify",
-          replace  = false,
-          merge    = false,
-        },
-      },
 
-      -- ── notify backend options ────────────────────────────────────────────
-      -- These are passed through to nvim-notify via Noice's notify view.
       notify = {
-        enabled = true,
-        view    = "notify",
+        enabled = false,
       },
 
       lsp = {
@@ -105,27 +86,7 @@ return {
       },
     },
 
-    -- Apply nvim-notify display options before Noice takes ownership of vim.notify
     config = function(_, opts)
-      local notify_ok, notify = pcall(require, "notify")
-      if notify_ok then
-        notify.setup({
-          timeout    = 2000,
-          max_height = function() return math.floor(vim.o.lines * 0.75) end,
-          max_width  = function() return math.floor(vim.o.columns * 0.75) end,
-          on_open    = function(win)
-            vim.api.nvim_win_set_config(win, { zindex = 100 })
-          end,
-          background_colour = "#000000",
-          render            = "wrapped-compact",
-          stages            = "fade",
-          icons             = { ERROR = " ", WARN = " ", INFO = " " },
-          minimum_width     = 10,
-          top_down          = false,
-        })
-      end
-      
-      -- Now let Noice take over
       require("noice").setup(opts)
     end,
   },

@@ -5,8 +5,6 @@ return {
   { "nvim-tree/nvim-web-devicons", lazy = true },
   { "echasnovski/mini.icons", version = false },
 
-  -- Modern UI interfaces for vim.ui.select and vim.ui.input
-  { "stevearc/dressing.nvim", event = "VeryLazy" },
 
   -- Inline color highlighting
   {

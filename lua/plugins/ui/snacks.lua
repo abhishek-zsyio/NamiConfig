@@ -16,6 +16,18 @@ return {
       scratch = { enabled = true },
       notifier = { enabled = true },
       words = { enabled = true },
+      terminal = { 
+        enabled = true,
+        win = {
+          wo = {
+            winbar = "",
+            statuscolumn = "  ",
+          },
+        },
+      },
+      lazygit = { enabled = true },
+      rename = { enabled = true },
+      input = { enabled = true },
       image = { 
         enabled = true,
         force = true,
@@ -61,6 +73,11 @@ return {
       },
     },
     keys = {
+      -- Terminal
+      { "<C-`>", function() Snacks.terminal(nil, { count = 1, win = { position = "float" } }) end, mode = { "n", "t" }, desc = "Toggle Terminal" },
+      { "<A-h>", function() Snacks.terminal(nil, { count = 2, win = { position = "bottom", height = 15 } }) end, mode = { "n", "t" }, desc = "Toggle Terminal (Bottom)" },
+      { "<A-v>", function() Snacks.terminal(nil, { count = 3, win = { position = "right", width = 0.4 } }) end, mode = { "n", "t" }, desc = "Toggle Terminal (Right)" },
+
       -- UI / Toggles
       { "<leader>.",  function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
       { "<leader>S",  function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
@@ -91,6 +108,8 @@ return {
       { "<leader>ma", function() Snacks.picker.marks() end, desc = "Find Marks" },
       
       -- Git
+      { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
+      { "<leader>gf", function() Snacks.lazygit.log_file() end, desc = "Lazygit Current File" },
       { "<leader>gt", function() Snacks.picker.git_status() end, desc = "Git Status" },
       { "<leader>gc", function() Snacks.picker.git_log() end, desc = "Git Commits" },
 
