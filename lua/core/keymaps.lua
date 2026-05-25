@@ -56,14 +56,7 @@ map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 -- ── Buffer Navigation ────────────────────────────────────────────────────
 map("n", "<Tab>",   "<cmd>bnext<CR>",     { desc = "Next buffer" })
 map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Prev buffer" })
-map("n", "<leader>x", function()
-  local bd = require("mini.bufremove")
-  bd.delete(0, false)
-end, { desc = "Close buffer" })
 
-
-
--- ── Telescope ─────────────────────────────────────────────────────────────
 
 -- ── Theme Switcher ──────────────────────────────────────────────────────────
 map("n", "<leader>th", function()
@@ -127,29 +120,7 @@ map("n", "<leader>rn","<cmd>set rnu!<CR>",  { desc = "Toggle relative number" })
 map("n", "<leader>/", "gcc",         { desc = "Toggle comment", remap = true })
 map("v", "<leader>/", "gc",          { desc = "Toggle comment", remap = true })
 
--- ── LSP ───────────────────────────────────────────────────────────────────
-map("n", "gD",          vim.lsp.buf.declaration,      { desc = "LSP Declaration" })
-map("n", "gd",          vim.lsp.buf.definition,       { desc = "LSP Definition" })
-map("n", "gi",          vim.lsp.buf.implementation,   { desc = "LSP Implementation" })
-map("n", "gr",          vim.lsp.buf.references,       { desc = "LSP References" })
-map("n", "K",           vim.lsp.buf.hover,            { desc = "LSP Hover" })
-map("n", "<leader>ca",  vim.lsp.buf.code_action,      { desc = "LSP Code action" })
-map("n", "<leader>ra",  vim.lsp.buf.rename,           { desc = "LSP Rename" })
-map("n", "<leader>fm", function()
-  local ok, conform = pcall(require, "conform")
-  if ok then
-    conform.format({ async = true, lsp_format = "fallback" })
-  else
-    vim.lsp.buf.format({ async = true })
-  end
-end, { desc = "Format Buffer" })
-map("n", "<leader>ds",  "<cmd>Telescope diagnostics<CR>", { desc = "LSP diagnostics" })
-map("n", "[d",          vim.diagnostic.goto_prev,     { desc = "Prev diagnostic" })
-map("n", "]d",          vim.diagnostic.goto_next,     { desc = "Next diagnostic" })
 
--- ── DAP Debugging ─────────────────────────────────────────────────────────
-
--- ── Git ───────────────────────────────────────────────────────────────────
 
 
 

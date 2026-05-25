@@ -148,15 +148,4 @@ return {
       end
     end,
   },
-
-  -- Python venv-selector (relies on lspconfig)
-  {
-    "linux-cultist/venv-selector.nvim",
-    ft           = "python",
-    lazy         = true,
-    dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim" },
-    config       = function()
-      require("venv-selector").setup({})
-    end,
-  },
 }

@@ -5,10 +5,8 @@ return {
     lazy = false,
     opts = {
       -- Modules
-      dashboard = { enabled = true },
       zen = { enabled = true },
       dim = { enabled = true },
-      picker = { enabled = true },
       explorer = { enabled = true },
       indent = { enabled = true },
       bufdelete = { enabled = true },
