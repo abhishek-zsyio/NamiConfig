@@ -26,6 +26,7 @@ map("i", "<C-k>", "<Up>",    { desc = "Move up" })
 -- ── Save / Quit ──────────────────────────────────────────────────────────
 map("n", "<C-s>", "<cmd>w<CR>",  { desc = "Save file" })
 map("n", "<C-q>", "<cmd>q<CR>",  { desc = "Quit" })
+map("n", "<leader>q", "<cmd>qa<CR>", { desc = "Quit Neovim" })
 
 -- ── Move Lines (Alt + j/k) ───────────────────────────────────────────────
 map("i", "<A-j>", "<Esc>:m .+1<CR>==gi", opts)
