@@ -71,6 +71,7 @@ return {
           }
           return {
             explorer = {
+              layout = { preset = "sidebar", width = 40 },
               win = { list = { keys = { ["<C-n>"] = "close" } } }
             },
             files = { layout = l, win = w },

@@ -2,30 +2,47 @@ local registry = require("core.theme_registry")
 local plugins = {}
 
 -- 1. Dynamically load all themes from the registry
+local unique_plugins = {}
 for _, theme in ipairs(registry) do
-      local ok, settings = pcall(require, "settings")
-      if not ok then settings = {} end
-      local is_active = (settings.theme or "catppuccin") == theme.id
+  local repo = theme.plugin
+  if not unique_plugins[repo] then
+    unique_plugins[repo] = { is_active = false }
+  end
+  
+  local ok, settings = pcall(require, "settings")
+  local current = ok and settings.theme or "catppuccin"
+  if current == theme.id then
+    unique_plugins[repo].is_active = true
+  end
+end
 
-      table.insert(plugins, {
-        theme.plugin,
-        name = theme.id,
-        lazy = not is_active,
-        priority = 1000,
-        config = function()
-          local ok2, s2 = pcall(require, "settings")
-          local transparent = (ok2 and s2.background == "transparent")
-          
-          -- Run the theme's specific setup logic if it has any
-          if theme.setup then
-            theme.setup(transparent)
-          end
-          
-          if is_active then
-            vim.cmd.colorscheme(theme.colorscheme or theme.id)
-          end
-        end,
-      })
+for repo, data in pairs(unique_plugins) do
+  table.insert(plugins, {
+    repo,
+    lazy = not data.is_active,
+    priority = 1000,
+    config = function()
+      local ok2, s2 = pcall(require, "settings")
+      local current_theme = s2 and s2.theme or "catppuccin"
+      local transparent = (ok2 and s2.background == "transparent")
+      
+      -- Find the active theme object for this repository
+      local target_theme = nil
+      for _, t in ipairs(require("core.theme_registry")) do
+        if t.id == current_theme then
+          target_theme = t
+          break
+        end
+      end
+      
+      if target_theme and target_theme.plugin == repo then
+        if target_theme.setup then
+          target_theme.setup(transparent)
+        end
+        vim.cmd.colorscheme(target_theme.colorscheme or target_theme.id)
+      end
+    end,
+  })
 end
 
 -- 2. Inject the Universal Theme Overrides (applies after whichever theme loads)
