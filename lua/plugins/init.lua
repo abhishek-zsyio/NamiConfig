@@ -7,6 +7,7 @@ return {
   { import = "plugins.ui.misc" },
   { import = "plugins.ui.dropbar" },
   { import = "plugins.ui.snacks" },
+  { import = "plugins.ui.treesitter-context" },
   -- Editor
   { import = "plugins.editor.treesitter" },
   { import = "plugins.editor.cmp" },

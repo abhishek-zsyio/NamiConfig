@@ -17,11 +17,11 @@
 | ✍️ **Completion** | nvim-cmp + LuaSnip + Supermaven AI |
 | 🎯 **Formatting** | conform.nvim (registry-driven, per-language) |
 | 🔎 **Linting** | nvim-lint (async, registry-driven, per-language) |
-| 🌳 **Syntax** | Treesitter for 20+ languages |
+| 🌳 **Syntax** | Treesitter for 20+ languages · Treesitter Context (sticky headers) |
 | 🐛 **Debugging** | nvim-dap + UI (Python, Go extra, Rust extra) |
 | 🔀 **Git** | Gitsigns · LazyGit · Diffview · inline blame |
 | 🤖 **AI** | Supermaven inline completions |
-| 📦 **Extras** | Opt-in packs for Go, Rust, SQL, Testing |
+| 📦 **Extras** | Opt-in packs for Go, Rust, Testing |
 | 🏠 **Project Config** | Per-project LSP overrides via `.neoconf.json` |
 
 ---
@@ -153,6 +153,7 @@ return {
 | `<leader>ra` | Rename symbol |
 | `<leader>cf` | Format buffer |
 | `<leader>cl` | Lint file |
+| `<leader>tc` | Toggle Treesitter Context |
 | `[d` / `]d` | Prev / Next diagnostic |
 
 ### Git

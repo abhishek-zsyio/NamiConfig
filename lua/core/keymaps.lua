@@ -208,6 +208,7 @@ end, { desc = "Select & Save Theme (Sync Ghostty)" })
 -- ── Line Numbers ─────────────────────────────────────────────────────────
 map("n", "<leader>n", "<cmd>set nu!<CR>",   { desc = "Toggle line number" })
 map("n", "<leader>rn","<cmd>set rnu!<CR>",  { desc = "Toggle relative number" })
+map("n", "<leader>tc", "<cmd>TSContextToggle<CR>", { desc = "Toggle Treesitter Context" })
 
 -- ── Comments ─────────────────────────────────────────────────────────────
 -- Comment.nvim registers gcc/gc itself — these are the extra ones

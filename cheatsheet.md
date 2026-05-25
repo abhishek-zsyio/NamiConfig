@@ -19,6 +19,7 @@
 | `<C-q>` | Quit Neovim |
 | `<leader>th` | Select Theme |
 | `<leader>n` | Toggle Line Numbers |
+| `<leader>tc` | Toggle Treesitter Context |
 
 ## 📁 File Explorer
 

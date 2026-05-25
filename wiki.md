@@ -111,13 +111,16 @@ init.lua
 │       └── ui/
 │           ├── alpha.lua
 │           ├── bufferline.lua
+│           ├── dropbar.lua           # Breadcrumbs header
 │           ├── filetree.lua
 │           ├── misc.lua
 │           ├── noice.lua
+│           ├── snacks.lua            # Smooth scroll, indent guides, notification engine
 │           ├── statusline.lua
 │           ├── telescope.lua
 │           ├── terminal.lua
-│           └── theme.lua
+│           ├── theme.lua
+│           └── treesitter-context.lua # Sticky function/class context header
 ```
 
 ---
@@ -417,6 +420,22 @@ These servers are set up directly in `lspconfig.lua` because they don't map 1:1 
 #### Discord Presence (`neocord`)
 - Shows current file and project in Discord status automatically
 
+#### Dropbar Navigation (`dropbar.nvim`)
+- Contextual breadcrumbs showing your current location in the code hierarchy
+- Sleek folder/file icons with custom separators
+- Intelligent native filtering: disabled automatically in floating/popup windows, terminal/prompt buffers, empty/unnamed buffers, and layout managers (like snacks picker, nvim-tree, etc.)
+
+#### UI Utilities & Indent Scope (`snacks.nvim`)
+- **Indent & Scope Guides**: Sleek custom indent character lines (`│`), with bold highlights (`┃`) highlighting the current scope. Rich corner chunks (`┌`, `└`, `─`) with visual arrows (`►`) show precise code block context with smooth in/out animations.
+- **Notification Engine**: Layout-driven compact UI system sorting messages by level and time. Features beautiful custom icons for warnings, errors, info, debug, and trace logs.
+- **Other tools**: Dim unfocused code blocks, zen mode layout, seamless buffer deletion, smooth scrolling, and scratchpad capabilities.
+
+#### Sticky Code Context (`treesitter-context`)
+- Shows function, class, or loop header context sticky-pinned to the top of the editor pane as you scroll.
+- Keeps up to 3 lines of context with proper inline editor line numbers active.
+- Styled with modern custom highlights connecting seamlessly to active editor `CursorLine` themes.
+- Toggle anytime with `<leader>tc`.
+
 #### Which-Key (`which-key.nvim`)
 - Press `<leader>` and pause — popup shows all keymaps with group icons
 
@@ -661,6 +680,7 @@ Sign column indicators: `│` added/changed · `` deleted · `‾` topdelete · 
 |-----|--------|
 | `<leader>th` | Theme picker |
 | `<leader>tl` | Toggle linting |
+| `<leader>tc` | Toggle Treesitter Context |
 | `<leader>n` | Toggle line numbers |
 | `<leader>rn` | Toggle relative numbers |
 | `<leader>cn` | Dismiss notification |
