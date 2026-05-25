@@ -21,7 +21,7 @@
 | 🐛 **Debugging** | nvim-dap + UI (Python, Go extra, Rust extra) |
 | 🔀 **Git** | Gitsigns · LazyGit · Diffview · inline blame |
 | 🤖 **AI** | Supermaven inline completions |
-| 🏆 **LeetCode** | Full native integration (dashboard, description split, async test/submit) |
+| 🏆 **LeetCode** | Full native integration · **Git auto-sync to GitHub on save/submit** |
 | 📦 **Extras** | Opt-in packs for Go, Rust, Testing |
 | 🏠 **Project Config** | Per-project LSP overrides via `.neoconf.json` |
 

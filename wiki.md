@@ -491,6 +491,7 @@ Sources (priority order): LSP → LuaSnip → Neovim Lua API → Buffer → Path
 - Includes a gorgeous home dashboard (`<leader>lc` or `:Leet`) to browse questions by tags, state, and difficulty.
 - Automatically handles boilerplates, imports, splits (splits question description left and code editor right), and local caching.
 - Test and submit solutions asynchronously using `<leader>lr` (run test) and `<leader>ls` (submit).
+- **Asynchronous Git Syncing**: Every time you save or submit a solution, a high-performance background script automatically stages, commits (`sync: solved <filename>`), and pushes the updates asynchronously to your GitHub repository: `git@github.com:Itz-Abhishek-Tiwari/leetcode.git`. You'll get a sleek Neovim notification when the sync succeeds!
 
 ---
 
