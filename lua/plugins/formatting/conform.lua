@@ -18,6 +18,21 @@ return {
           timeout_ms   = 500,
           lsp_format   = "fallback",
         } or nil,
+
+        -- ── Custom Formatter Instructions ────────────────────────────────────
+        formatters = {
+          prettier = {
+            -- Custom styling for JS, TS, React, Vue, CSS, etc.
+            -- Change these arguments to match your preferred code style!
+            prepend_args = { 
+              "--single-quote", 
+              "--jsx-single-quote", 
+              "--tab-width", tostring(settings.tab_size or 2), 
+              "--trailing-comma", "es5",
+              "--print-width", "80"
+            },
+          },
+        },
       })
 
       -- Manual format keymap (works regardless of format_on_save setting)

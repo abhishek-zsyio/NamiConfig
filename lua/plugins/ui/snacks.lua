@@ -18,7 +18,8 @@ return {
       words = { enabled = true },
       image = { 
         enabled = true,
-        force = true, -- Force rendering for Ghostty (useful if inside tmux or detection fails)
+        force = true,
+        convert = { notify = true }, -- Show errors if imagemagick fails
       },
 
       picker = {
@@ -63,7 +64,7 @@ return {
       -- UI / Toggles
       { "<leader>.",  function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
       { "<leader>S",  function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
-      { "<leader>un", function() Snacks.notifier.hide() end, desc = "Dismiss All Notifications" },
+      { "<leader>cn", function() Snacks.notifier.hide() end, desc = "Dismiss All Notifications" },
       { "<leader>z",  function() Snacks.zen() end, desc = "Toggle Zen Mode" },
 
       -- Buffers

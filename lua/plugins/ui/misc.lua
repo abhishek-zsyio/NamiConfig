@@ -90,6 +90,7 @@ return {
     "folke/which-key.nvim",
     event = "VeryLazy",
     opts  = {
+      preset = "modern",
       plugins = { spelling = { enabled = true, suggestions = 20 } },
       win  = { border = "rounded" },
     },

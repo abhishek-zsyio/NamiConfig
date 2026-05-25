@@ -5,6 +5,17 @@ local opts = { noremap = true, silent = true }
 map("i", "jk", "<ESC>",            { desc = "Escape insert mode" })
 map("n", ";",  ":",                 { desc = "Command mode", noremap = true })
 map("n", "<Esc>", "<cmd>nohl<CR>", { desc = "Clear highlights" })
+map("n", "<leader>ch", function()
+  Snacks.scratch({ 
+    icon = "󱗼", 
+    name = "Cheat Sheet", 
+    file = vim.fn.stdpath("config") .. "/cheatsheet.md", 
+    wo = { wrap = false, number = false, relativenumber = false, cursorline = false, signcolumn = "no" },
+    bo = { modifiable = false, readonly = true }
+  })
+end, { desc = "Open Cheat Sheet" })
+
+map("n", "<leader>ce", "<cmd>edit " .. vim.fn.stdpath("config") .. "/cheatsheet.md<CR>", { desc = "Edit Cheat Sheet" })
 
 -- Insert Mode Navigation
 map("i", "<C-h>", "<Left>",  { desc = "Move left" })
