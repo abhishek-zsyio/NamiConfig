@@ -13,7 +13,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "kanagawa-dragon",
+  theme = "terafox",
   background = "dark",
   transparent = false,
   hide_empty_tabline = true,
