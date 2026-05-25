@@ -13,7 +13,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "catppuccin-latte",
+  theme = "catppuccin-mocha",
   background = "dark",
   hide_empty_tabline = true,
   show_indent_guides = true,
