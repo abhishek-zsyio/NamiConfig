@@ -139,7 +139,7 @@ map("n", "<leader>th", function()
       if item then
         if item.value.setup then
           local ok2, s2 = pcall(require, "settings")
-          local transparent = (ok2 and s2.background == "transparent")
+          local transparent = (ok2 and s2.transparent)
           item.value.setup(transparent)
         end
         local cs = item.value.colorscheme or item.value.id
@@ -158,7 +158,7 @@ map("n", "<leader>th", function()
         end
         if orig_item and orig_item.setup then
           local ok2, s2 = pcall(require, "settings")
-          orig_item.setup(ok2 and s2.background == "transparent")
+          orig_item.setup(ok2 and s2.transparent)
         end
         pcall(vim.cmd.colorscheme, original_theme)
       end
@@ -172,8 +172,10 @@ map("n", "<leader>th", function()
       local settings_path = vim.fn.stdpath("config") .. "/lua/settings.lua"
       local lines = vim.fn.readfile(settings_path)
       for i, line in ipairs(lines) do
-        if line:match('^%s*theme%s*=%s*["\']') then
-          lines[i] = '  theme = "' .. choice .. '",'
+        -- More robust match that preserves indentation and quote style
+        local prefix, quote = line:match("^(%s*theme%s*=%s*)([\"'])")
+        if prefix and quote then
+          lines[i] = prefix .. quote .. choice .. quote .. ","
           break
         end
       end

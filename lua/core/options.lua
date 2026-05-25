@@ -65,16 +65,20 @@ opt.lazyredraw  = false
 opt.mouse = settings.mouse_support == true and "a" or ""
 
 -- ── Neovide (GUI) ────────────────────────────────────────────────────────
-if vim.g.neovide then
-  vim.g.neovide_padding_top    = 10
-  vim.g.neovide_padding_bottom = 10
-  vim.g.neovide_padding_right  = 15
-  vim.g.neovide_padding_left   = 15
-  vim.g.neovide_transparency   = settings.neovide_transparency or 0.9
-  vim.g.neovide_window_blurred = true
-  vim.g.neovide_floating_blur_amount_x = 2.0
-  vim.g.neovide_floating_blur_amount_y = 2.0
-  vim.g.neovide_hide_mouse_when_typing = true
-  vim.g.neovide_cursor_animation_length = 0.05
-  vim.g.neovide_cursor_trail_size = 0.4
-end
+vim.api.nvim_create_autocmd("UIEnter", {
+  callback = function()
+    if vim.g.neovide then
+      vim.g.neovide_padding_top    = 10
+      vim.g.neovide_padding_bottom = 10
+      vim.g.neovide_padding_right  = 15
+      vim.g.neovide_padding_left   = 15
+      vim.g.neovide_transparency   = settings.neovide_transparency or 0.9
+      vim.g.neovide_window_blurred = true
+      vim.g.neovide_floating_blur_amount_x = 2.0
+      vim.g.neovide_floating_blur_amount_y = 2.0
+      vim.g.neovide_hide_mouse_when_typing = true
+      vim.g.neovide_cursor_animation_length = 0.05
+      vim.g.neovide_cursor_trail_size = 0.4
+    end
+  end,
+})

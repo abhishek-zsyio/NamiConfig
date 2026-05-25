@@ -109,12 +109,12 @@ return {
   { id = "gruvbox", plugin = "ellisonleao/gruvbox.nvim", icon = "󰟆 ", ghostty = "Gruvbox Dark", setup = function(t) vim.o.background="dark"; require("gruvbox").setup({transparent_mode=t, contrast="hard"}) end },
 
   -- Others
-  { id = "nord", plugin = "shaunsingh/nord.nvim", icon = "󰇉 ", ghostty = "Nord", setup = function(t) vim.o.background="dark"; if t then vim.g.nord_disable_background=true end end },
+  { id = "nord", plugin = "shaunsingh/nord.nvim", icon = "󰇉 ", ghostty = "Nord", setup = function(t) vim.o.background="dark"; vim.g.nord_disable_background = t and true or false end },
   { id = "dracula", plugin = "Mofiqul/dracula.nvim", icon = "󰎆 ", ghostty = "Dracula", setup = function(t) vim.o.background="dark"; require("dracula").setup({transparent_bg=t}) end },
-  { id = "sonokai", plugin = "sainnhe/sonokai", icon = "󰔎 ", ghostty = "Sonokai", setup = function(t) vim.o.background="dark"; if t then vim.g.sonokai_transparent_background=1 end end },
+  { id = "sonokai", plugin = "sainnhe/sonokai", icon = "󰔎 ", ghostty = "Sonokai", setup = function(t) vim.o.background="dark"; vim.g.sonokai_transparent_background = t and 1 or 0 end },
   { id = "oxocarbon", plugin = "nyoom-engineering/oxocarbon.nvim", icon = "󰏗 ", ghostty = "Oxocarbon", setup = function(t) vim.o.background="dark" end },
   { id = "monokai", plugin = "tanvirtin/monokai.nvim", icon = "󰏘 ", ghostty = "Monokai Classic", setup = function(t) vim.o.background="dark" end },
-  { id = "everforest", plugin = "sainnhe/everforest", icon = "󰔎 ", ghostty = "Everforest Dark Hard", setup = function(t) vim.o.background="dark"; vim.g.everforest_background="hard"; vim.g.everforest_better_performance=1; if t then vim.g.everforest_transparent_background=1 end end },
-  { id = "gruvbox-material", plugin = "sainnhe/gruvbox-material", icon = "󰟆 ", ghostty = "Gruvbox Material Dark", setup = function(t) vim.o.background="dark"; if t then vim.g.gruvbox_material_transparent_background=1 end end },
+  { id = "everforest", plugin = "sainnhe/everforest", icon = "󰔎 ", ghostty = "Everforest Dark Hard", setup = function(t) vim.o.background="dark"; vim.g.everforest_background="hard"; vim.g.everforest_better_performance=1; vim.g.everforest_transparent_background = t and 1 or 0 end },
+  { id = "gruvbox-material", plugin = "sainnhe/gruvbox-material", icon = "󰟆 ", ghostty = "Gruvbox Material Dark", setup = function(t) vim.o.background="dark"; vim.g.gruvbox_material_transparent_background = t and 1 or 0 end },
   { id = "poimandres", plugin = "olivercederborg/poimandres.nvim", icon = "󰖔 ", ghostty = "Poimandres", setup = function(t) vim.o.background="dark"; require('poimandres').setup{disable_background=t, disable_float_background=t} end },
 }

@@ -13,8 +13,9 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "rose-pine-main",
+  theme = "kanagawa-dragon",
   background = "dark",
+  transparent = false,
   hide_empty_tabline = true,
   show_indent_guides = true,
   smooth_scroll = true,
