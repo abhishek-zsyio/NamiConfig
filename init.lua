@@ -57,6 +57,7 @@ end
 require("lazy").setup(spec, {
   defaults = { lazy = true },
   install  = { colorscheme = { "catppuccin" } },
+  rocks = { enabled = false },
   ui = {
     icons = {
       ft        = "",

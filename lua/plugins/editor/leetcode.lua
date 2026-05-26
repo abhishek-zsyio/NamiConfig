@@ -112,41 +112,13 @@ return {
                 local job = function(cmd, cb)
                   vim.system(cmd, { cwd = leetcode_dir }, cb)
                 end
-
-                -- Ensure Git is initialized
-                if vim.fn.isdirectory(leetcode_dir .. "/.git") == 0 then
-                  job({ "git", "init" }, function() end)
-                  vim.notify("Git initialized in LeetCode directory. You may need to add a remote (git remote add origin ...).", vim.log.levels.INFO)
-                end
-
-                job({ "git", "add", difficulty .. "/" .. filename }, function(obj1)
-                  if obj1.code == 0 then
-                    local commit_msg = "sync: solved " .. filename .. " [" .. difficulty:upper() .. "]"
-                    job({ "git", "commit", "-m", commit_msg }, function(obj2)
-                      job({ "git", "push", "origin", "main" }, function(obj3)
-                        vim.schedule(function()
-                          if obj3.code == 0 then
-                            if obj2.code == 0 then
-                              vim.notify(("LeetCode %s solution pushed to GitHub!"):format(difficulty:upper()), vim.log.levels.INFO, { title = "Git Sync" })
-                            end
-                          else
-                            if not obj3.stderr:match("No configured push destination") then
-                               vim.notify("Failed to push LeetCode solution to GitHub:\n" .. (obj3.stderr or ""), vim.log.levels.WARN, { title = "Git Sync" })
-                            end
-                          end
-                        end)
-                      end)
-                    end)
-                  end
-                end)
               end
             end)
           end
-          
           return res
-        end
-      end}
-      
+          end
+        end,
+      }
       require("leetcode").setup(opts)
     end,
   },

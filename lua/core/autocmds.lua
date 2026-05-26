@@ -46,7 +46,10 @@ autocmd("FileType", {
 -- ── Strip trailing whitespace on save ────────────────────────────────────
 autocmd("BufWritePre", {
   group = augroup("StripTrailingWS", { clear = true }),
-  callback = function()
+  callback = function(event)
+    if not vim.bo[event.buf].modifiable then
+      return
+    end
     local save = vim.fn.winsaveview()
     vim.cmd([[keeppatterns %s/\s\+$//e]])
     vim.fn.winrestview(save)
