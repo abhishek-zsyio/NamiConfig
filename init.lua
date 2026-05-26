@@ -1,4 +1,28 @@
 if vim.loader then vim.loader.enable() end
+
+-- ── Environment Path Patch (fixes Node.js/Mason path issues in GUI/IDE) ─────
+local function patch_path()
+  -- 1. Prepend Mason bin path
+  local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+  if vim.fn.isdirectory(mason_bin) == 1 and not vim.env.PATH:find(mason_bin, 1, true) then
+    vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+  end
+
+  -- 2. If node is not executable, check typical version manager paths (like NVM)
+  if vim.fn.executable("node") == 0 then
+    local home = vim.env.HOME
+    local nvm_dir = home .. "/.nvm/versions/node"
+    if vim.fn.isdirectory(nvm_dir) == 1 then
+      local versions = vim.fn.glob(nvm_dir .. "/*/bin", true, true)
+      if #versions > 0 then
+        table.sort(versions)
+        local latest_node_bin = versions[#versions]
+        vim.env.PATH = latest_node_bin .. ":" .. vim.env.PATH
+      end
+    end
+  end
+end
+patch_path()
 -- Suppress deprecation warnings (lspconfig v2 → v3 transition)
 vim.deprecate = function() end
 

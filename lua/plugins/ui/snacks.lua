@@ -77,6 +77,7 @@ return {
         },
       },
       lazygit = { enabled = true },
+      gitbrowse = { enabled = true },
       rename = { enabled = true },
       input = { enabled = true },
       quickfile = { enabled = true },
@@ -134,6 +135,8 @@ return {
             marks = { layout = l, win = w },
             git_status = { layout = l, win = w },
             git_log = { layout = l, win = w },
+            git_diff = { layout = l, win = w },
+            git_branches = { layout = l, win = w },
             diagnostics = { layout = l, win = w },
           }
         end)()
@@ -202,6 +205,9 @@ return {
       { "<leader>gf", function() Snacks.lazygit.log_file() end, desc = "Lazygit Current File" },
       { "<leader>gt", function() Snacks.picker.git_status() end, desc = "Git Status" },
       { "<leader>gc", function() Snacks.picker.git_log() end, desc = "Git Commits" },
+      { "<leader>gd", function() Snacks.picker.git_diff() end, desc = "Git Diffs" },
+      { "<leader>gb", function() Snacks.picker.git_branches() end, desc = "Git Branches" },
+      { "<leader>gB", function() Snacks.gitbrowse() end, mode = { "n", "x" }, desc = "Git Browse (GitHub/GitLab)" },
 
       -- Diagnostics
       { "<leader>ds", function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
