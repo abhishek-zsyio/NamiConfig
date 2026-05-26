@@ -15,7 +15,7 @@ return {
         formatters_by_ft = registry.formatters_by_ft(),
 
         format_on_save = settings.format_on_save and {
-          timeout_ms   = 500,
+          timeout_ms   = 2000,
           lsp_format   = "fallback",
         } or nil,
 

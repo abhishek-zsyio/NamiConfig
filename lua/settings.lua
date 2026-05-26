@@ -22,7 +22,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "catppuccin-mocha",
+  theme = "rose-pine-main",
   background = "dark",
   transparent = false,
   hide_empty_tabline = true,

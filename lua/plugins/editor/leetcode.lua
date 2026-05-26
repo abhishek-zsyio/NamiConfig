@@ -31,15 +31,16 @@ return {
       },
     },
     config = function(_, opts)
-      require("leetcode").setup(opts)
-      
-      -- Defer the loading and monkey-patching of the interpreter until setup has fully completed
-      vim.schedule(function()
-        local interpreter = require("leetcode.api.interpreter")
-        local original_handle_item = interpreter.handle_item
-        
-        interpreter.handle_item = function(self, item)
-          local res = original_handle_item(self, item)
+      opts.hooks = {
+        enter = function()
+          local interpreter = require("leetcode.api.interpreter")
+          if interpreter._patched_for_notifications then return end
+          interpreter._patched_for_notifications = true
+          
+          local original_handle_item = interpreter.handle_item
+          
+          interpreter.handle_item = function(self, item)
+            local res = original_handle_item(self, item)
           
           if res and res.status_msg then
             -- Robust fallback detection
@@ -74,12 +75,79 @@ return {
             
             vim.schedule(function()
               vim.notify(msg, level, { title = is_submit and "LeetCode Submit" or "LeetCode Test" })
+              
+              if is_submit and is_success then
+                local leetcode_dir = vim.fn.expand("~/.local/share/nvim/leetcode")
+                
+                -- Determine difficulty
+                local difficulty = "other"
+                local ok_utils, utils = pcall(require, "leetcode.utils")
+                if ok_utils then
+                  local ok_q, q = pcall(utils.curr_question)
+                  if ok_q and q and q.q and q.q.difficulty then
+                    difficulty = q.q.difficulty:lower()
+                  end
+                end
+
+                local filepath = vim.api.nvim_buf_get_name(0)
+                local filename = vim.fn.fnamemodify(filepath, ":t")
+                local diff_dir = leetcode_dir .. "/" .. difficulty
+                local target_path = diff_dir .. "/" .. filename
+
+                vim.fn.mkdir(diff_dir, "p")
+
+                -- Copy the file instead of moving/deleting it
+                local infile = io.open(filepath, "r")
+                if infile then
+                  local content = infile:read("*a")
+                  infile:close()
+                  local outfile = io.open(target_path, "w")
+                  if outfile then
+                    outfile:write(content)
+                    outfile:close()
+                  end
+                end
+
+                -- Git Sync Routine
+                local job = function(cmd, cb)
+                  vim.system(cmd, { cwd = leetcode_dir }, cb)
+                end
+
+                -- Ensure Git is initialized
+                if vim.fn.isdirectory(leetcode_dir .. "/.git") == 0 then
+                  job({ "git", "init" }, function() end)
+                  vim.notify("Git initialized in LeetCode directory. You may need to add a remote (git remote add origin ...).", vim.log.levels.INFO)
+                end
+
+                job({ "git", "add", difficulty .. "/" .. filename }, function(obj1)
+                  if obj1.code == 0 then
+                    local commit_msg = "sync: solved " .. filename .. " [" .. difficulty:upper() .. "]"
+                    job({ "git", "commit", "-m", commit_msg }, function(obj2)
+                      job({ "git", "push", "origin", "main" }, function(obj3)
+                        vim.schedule(function()
+                          if obj3.code == 0 then
+                            if obj2.code == 0 then
+                              vim.notify(("LeetCode %s solution pushed to GitHub!"):format(difficulty:upper()), vim.log.levels.INFO, { title = "Git Sync" })
+                            end
+                          else
+                            if not obj3.stderr:match("No configured push destination") then
+                               vim.notify("Failed to push LeetCode solution to GitHub:\n" .. (obj3.stderr or ""), vim.log.levels.WARN, { title = "Git Sync" })
+                            end
+                          end
+                        end)
+                      end)
+                    end)
+                  end
+                end)
+              end
             end)
           end
           
           return res
         end
-      end)
+      end}
+      
+      require("leetcode").setup(opts)
     end,
   },
 }
