@@ -1,0 +1,87 @@
+local settings = require("settings")
+
+return {
+  zen = { enabled = true },
+  dim = { enabled = true },
+  explorer = { enabled = true },
+  indent = { 
+    enabled = true,
+    indent = {
+      char = "│",
+      hl = "SnacksIndent",
+    },
+    scope = {
+      enabled = true,
+      char = "┃",
+      underline = false,
+      only_current = false,
+      hl = "SnacksIndentScope",
+    },
+    chunk = {
+      enabled = true,
+      char = {
+        corner_top = "┌",
+        corner_bottom = "└",
+        horizontal = "─",
+        vertical = "│",
+        arrow = "►",
+      },
+      hl = "SnacksIndentChunk",
+    },
+    animate = {
+      enabled = true,
+      style = "out",
+      easing = "linear",
+      duration = {
+        step = 20,
+        total = 500,
+      },
+    },
+  },
+  bufdelete = { enabled = true },
+  scroll = { enabled = true },
+  scratch = { enabled = true },
+  notifier = { 
+    enabled = true,
+    timeout = 3000,
+    width = { min = 40, max = 0.4 },
+    height = { min = 1, max = 0.6 },
+    margin = { top = 1, right = 1, bottom = 0 },
+    padding = true,
+    sort = { "level", "added" },
+    level = vim.log.levels.TRACE,
+    icons = {
+      error = " ",
+      warn = " ",
+      info = " ",
+      debug = " ",
+      trace = " ",
+    },
+    style = "compact",
+    top_down = true,
+  },
+  words = { enabled = true },
+  terminal = { 
+    enabled = true,
+    win = {
+      wo = {
+        winbar = "",
+        statuscolumn = "  ",
+      },
+    },
+  },
+  lazygit = { enabled = true },
+  gitbrowse = { enabled = true },
+  rename = { enabled = true },
+  input = { enabled = true },
+  quickfile = { enabled = true },
+  image = { 
+    enabled = true,
+    force = true,
+    formats = {
+      "png", "jpg", "jpeg", "gif", "bmp", "webp", "tiff", "heic", "avif",
+      "mp4", "mov", "avi", "mkv", "webm", "pdf", "icns", "svg"
+    },
+    convert = { notify = true }, -- Show errors if imagemagick fails
+  },
+}
