@@ -73,11 +73,7 @@ return {
         { filter = { event = "notify",   find = "mason%-lspconfig" },      opts = { skip = true } },
         -- Silence nvim-tree deprecation warnings
         { filter = { event = "notify",   find = "NvimTree" },              opts = { skip = true } },
-        -- Send long messages to split instead of popup
-        {
-          filter = { event = "msg_show", min_height = 5 },
-          view   = "split",
-        },
+        -- Note: long messages handled by presets.long_message_to_split below
       },
 
       presets = {

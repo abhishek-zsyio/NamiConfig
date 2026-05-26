@@ -32,4 +32,5 @@ return {
   { import = "plugins.linting.lint" },
   -- Lang
   { import = "plugins.lang.django" },
+  { import = "plugins.lang.lazydev" },
 }

@@ -112,7 +112,7 @@ return {
         unocss      = {},
         sqls        = {},
         texlab      = {},
-        gopls       = {},
+        -- NOTE: gopls is managed by lang_registry (go entry) — do not duplicate here
         docker_compose_language_service = {},
         emmet_language_server = {
           filetypes = {

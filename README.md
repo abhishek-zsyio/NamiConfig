@@ -185,6 +185,25 @@ return {
 
 ## 🚀 Installation
 
+### One-Command Setup (recommended)
+
+```bash
+# 1. Clone the config
+git clone git@github.com:abhishek-zsyio/NamiConfig.git ~/.config/nvim
+
+# 2. Run the setup script — installs all dependencies + bootstraps plugins
+bash ~/.config/nvim/setup.sh
+```
+
+The setup script handles everything:
+- Installs **Homebrew** (if not present)
+- Installs **Neovim**, **ripgrep**, **fd**, **lazygit**, **Node.js**, **Deno**, **ImageMagick**, **silicon**, and more
+- Checks for **Python 3**, **Go**, **Rust** (warns if missing)
+- Installs **JetBrainsMono Nerd Font**
+- Runs a **headless plugin sync** via lazy.nvim
+
+### Manual Installation
+
 ```bash
 # Backup existing config
 mv ~/.config/nvim ~/.config/nvim.bak
@@ -214,13 +233,25 @@ See the [wiki](./wiki.md) for the complete documentation including:
 
 ## 🔧 Requirements
 
-- **Neovim** 0.10+
-- **Git**
-- **Node.js** (for TypeScript, Prettier, ESLint)
-- **Python 3** (for Python LSP + DAP)
-- A **Nerd Font** (e.g., JetBrainsMono Nerd Font)
-- `make` (for fzf-native compilation)
-- `ripgrep` (for Telescope live grep)
+| Tool | Required | Purpose |
+|------|----------|---------|
+| **Neovim 0.10+** | ✅ Required | Core editor |
+| **Git** | ✅ Required | Plugin manager + git features |
+| **Node.js / npm** | ✅ Required | ts_ls, prettier, eslint_d, leetcode.nvim |
+| **ripgrep** (`rg`) | ✅ Required | Snacks live grep |
+| **fd** | ✅ Required | Snacks file finder |
+| **lazygit** | ✅ Required | Snacks lazygit TUI |
+| **Python 3 + pip** | ✅ Required | pyright LSP, black, ruff, debugpy |
+| **Deno** | ✅ Required | peek.nvim markdown preview (build step) |
+| **ImageMagick** | ✅ Required | Snacks image rendering |
+| **A Nerd Font** | ✅ Required | Icons throughout the UI |
+| **silicon** (via cargo) | ⚡ Optional | Code screenshot (`:Silicon`) |
+| **Ghostty** | ⚡ Optional | Theme sync (`<leader>th`) |
+| **Go** | ⚡ Optional | `plugins.extras.lang.go` |
+| **Rust / cargo** | ⚡ Optional | `plugins.extras.lang.rust` + silicon |
+| `make` / `clang` | ✅ Required | Treesitter parser compilation |
+
+> **Tip:** Run `bash ~/.config/nvim/setup.sh` and all required tools are installed automatically.
 
 ---
 

@@ -2,7 +2,16 @@
 -- 🚀  User Configuration Settings
 -- ==============================================================================
 
----@alias Theme "catppuccin" | "onedark" | "tokyonight" | "gruvbox" | "rose-pine" | "nord" | "dracula" | "kanagawa" | "nightfox" | "cyberdream" | "sonokai" | "material" | "oxocarbon" | "monokai"
+---@alias Theme
+---| "catppuccin-mocha" | "catppuccin-latte" | "catppuccin-frappe" | "catppuccin-macchiato"
+---| "tokyonight-day" | "tokyonight-night" | "tokyonight-storm" | "tokyonight-moon"
+---| "rose-pine-dawn" | "rose-pine-main" | "rose-pine-moon"
+---| "kanagawa-lotus" | "kanagawa-wave" | "kanagawa-dragon"
+---| "github_light" | "github_dark" | "github_dark_dimmed"
+---| "dayfox" | "nightfox" | "duskfox" | "nordfox" | "terafox" | "carbonfox"
+---| "onedark-light" | "onedark-dark" | "onedark-darker" | "onedark-cool" | "onedark-deep" | "onedark-warm" | "onedark-warmer"
+---| "gruvbox" | "nord" | "dracula" | "sonokai" | "oxocarbon" | "monokai"
+---| "everforest" | "gruvbox-material" | "poimandres"
 
 ---@alias Extra
 ---| "plugins.extras.lang.go"
@@ -13,7 +22,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "rose-pine-main",
+  theme = "catppuccin-mocha",
   background = "dark",
   transparent = false,
   hide_empty_tabline = true,

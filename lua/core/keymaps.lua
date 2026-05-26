@@ -70,6 +70,38 @@ map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Prev buffer" })
 map("n", "<leader>th", function()
   local registry = require("core.theme_registry")
   local original_theme = vim.g.colors_name
+  
+  -- Find the original Ghostty theme to revert if cancelled
+  local original_ghostty_theme = nil
+  for _, t in ipairs(registry) do
+    if t.id == original_theme or t.colorscheme == original_theme then
+      original_ghostty_theme = t.ghostty
+      break
+    end
+  end
+
+  local function sync_ghostty(ghostty_theme)
+    if not ghostty_theme then return end
+    local ghostty_path = vim.fn.expand("~/.config/ghostty/config")
+    if vim.fn.filereadable(ghostty_path) == 1 then
+      local g_lines = vim.fn.readfile(ghostty_path)
+      for i, line in ipairs(g_lines) do
+        if line:match('^theme%s*=') then
+          g_lines[i] = 'theme = ' .. ghostty_theme
+          break
+        end
+      end
+      local file = io.open(ghostty_path, "w")
+      if file then
+        file:write(table.concat(g_lines, "\n") .. "\n")
+        file:close()
+      end
+      if vim.fn.has("mac") == 1 then
+        os.execute([[osascript -e 'tell application "System Events" to keystroke "," using {command down, shift down}']])
+      end
+    end
+  end
+
   local items = {}
   for _, t in ipairs(registry) do
     table.insert(items, {
@@ -152,6 +184,7 @@ map("n", "<leader>th", function()
         end
         local cs = item.value.colorscheme or item.value.id
         pcall(vim.cmd.colorscheme, cs)
+        sync_ghostty(item.value.ghostty)
       end
     end,
     on_close = function(picker)
@@ -169,6 +202,9 @@ map("n", "<leader>th", function()
           orig_item.setup(ok2 and s2.transparent)
         end
         pcall(vim.cmd.colorscheme, original_theme)
+        if original_ghostty_theme then
+          sync_ghostty(original_ghostty_theme)
+        end
       end
     end,
     confirm = function(picker, item)
@@ -189,25 +225,6 @@ map("n", "<leader>th", function()
       end
       vim.fn.writefile(lines, settings_path)
       
-      local ghostty_path = vim.fn.expand("~/.config/ghostty/config")
-      if vim.fn.filereadable(ghostty_path) == 1 then
-        local g_lines = vim.fn.readfile(ghostty_path)
-        for i, line in ipairs(g_lines) do
-          if line:match('^theme%s*=') then
-            g_lines[i] = 'theme = ' .. item.value.ghostty
-            break
-          end
-        end
-        local file = io.open(ghostty_path, "w")
-        if file then
-          file:write(table.concat(g_lines, "\n") .. "\n")
-          file:close()
-        end
-        if vim.fn.has("mac") == 1 then
-          os.execute([[osascript -e 'tell application "System Events" to keystroke "," using {command down, shift down}']])
-        end
-      end
-
       vim.notify("Theme synced to " .. choice .. " (Neovim + Ghostty)!", vim.log.levels.INFO)
     end,
   })
@@ -217,13 +234,6 @@ end, { desc = "Select & Save Theme (Sync Ghostty)" })
 map("n", "<leader>n", "<cmd>set nu!<CR>",   { desc = "Toggle line number" })
 map("n", "<leader>rn","<cmd>set rnu!<CR>",  { desc = "Toggle relative number" })
 map("n", "<leader>tc", "<cmd>TSContextToggle<CR>", { desc = "Toggle Treesitter Context" })
-
--- ── Comments ─────────────────────────────────────────────────────────────
--- Comment.nvim registers gcc/gc itself — these are the extra ones
-map("n", "<leader>/", "gcc",         { desc = "Toggle comment", remap = true })
-map("v", "<leader>/", "gc",          { desc = "Toggle comment", remap = true })
-
-
 
 
 

@@ -3,7 +3,7 @@ return {
   -- Core icon sets
   { "nvim-lua/plenary.nvim", lazy = true },
   { "nvim-tree/nvim-web-devicons", lazy = true },
-  { "echasnovski/mini.icons", version = false },
+  { "echasnovski/mini.icons", version = false, lazy = false },
 
 
   -- Inline color highlighting
@@ -118,6 +118,7 @@ return {
         { "<leader>gd", desc = "Diffview toggle" },
         { "<leader>gt", desc = "Git status" },
         { "<leader>gc", desc = "Git commits" },
+        { "<leader>gT", desc = "Go: Test (Go files only)" },
 
         -- Code / LSP
         { "<leader>c",  group = " Code / LSP" },

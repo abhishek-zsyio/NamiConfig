@@ -59,7 +59,7 @@ opt.splitright = settings.split_right ~= false
 -- ── Performance ──────────────────────────────────────────────────────────
 opt.updatetime  = 250
 opt.timeoutlen  = 300
-opt.lazyredraw  = false
+-- Note: lazyredraw was removed in Neovim 0.10+, do not set it
 
 -- ── Mouse ────────────────────────────────────────────────────────────────
 opt.mouse = settings.mouse_support == true and "a" or ""

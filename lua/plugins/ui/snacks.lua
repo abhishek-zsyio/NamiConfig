@@ -25,8 +25,9 @@ return {
       { "<leader>x", function() Snacks.bufdelete() end, desc = "Delete Buffer" },
 
       -- Explorer
-      { "<leader>e", function() 
-          local explorer = Snacks.picker.get({ source = "explorer" })[1]
+      { "<leader>e", function()
+          local explorers = Snacks.picker.get({ source = "explorer" }) or {}
+          local explorer = explorers[1]
           if explorer then
             explorer:focus()
           else

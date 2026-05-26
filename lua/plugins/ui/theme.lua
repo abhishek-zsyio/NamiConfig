@@ -24,7 +24,7 @@ for repo, data in pairs(unique_plugins) do
     config = function()
       local ok2, s2 = pcall(require, "settings")
       local current_theme = s2 and s2.theme or "catppuccin"
-      local transparent = (ok2 and s2.background == "transparent")
+      local transparent = (ok2 and s2.transparent == true)
       
       -- Find the active theme object for this repository
       local target_theme = nil
@@ -49,7 +49,7 @@ end
 table.insert(plugins, {
     "theme-overrides",
     name = "theme-overrides",
-    dir = "", -- dummy plugin
+    -- virtual = true is sufficient; no dir needed
     virtual = true,
     lazy = false,
     priority = 1001, -- run after themes

@@ -31,7 +31,7 @@ return {
       -- Go-specific keymaps
       local map = vim.keymap.set
       map("n", "<leader>gr", "<cmd>GoRun<CR>",       { ft = "go", desc = "Go: Run" })
-      map("n", "<leader>gt", "<cmd>GoTest<CR>",      { ft = "go", desc = "Go: Test" })
+      map("n", "<leader>gT", "<cmd>GoTest<CR>",      { ft = "go", desc = "Go: Test" })
       map("n", "<leader>gi", "<cmd>GoImport<CR>",    { ft = "go", desc = "Go: Import" })
       map("n", "<leader>gfs", "<cmd>GoFillStruct<CR>", { ft = "go", desc = "Go: Fill Struct" })
     end,

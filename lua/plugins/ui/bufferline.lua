@@ -6,7 +6,7 @@ return {
     lazy         = false,
     dependencies = {
       "nvim-tree/nvim-web-devicons",
-      "catppuccin/nvim",
+      -- catppuccin/nvim not needed here; theme system loads it independently
     },
     config = function()
       local ok, settings = pcall(require, "settings")
