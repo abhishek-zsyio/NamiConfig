@@ -133,24 +133,7 @@ return {
         callback = generate_peek_theme,
       })
       
-      -- Ensure our premium CSS is injected into peek's webview
-      local peek_css = vim.fn.stdpath("data") .. "/lazy/peek.nvim/public/style.css"
-      local my_css = vim.fn.stdpath("config") .. "/markdown-preview.css"
-      
-      if vim.fn.filereadable(peek_css) == 1 then
-        local content = vim.fn.readfile(peek_css)
-        local injected = false
-        for _, line in ipairs(content) do
-          if line:match("MODERN DESIGN SYSTEM") then
-            injected = true
-            break
-          end
-        end
-        if not injected then
-          vim.fn.system(string.format("cat %s >> %s", my_css, peek_css))
-          vim.fn.system(string.format("echo '\nhtml, body.peek-body { background-color: var(--nvim-bg, #0a0a0f) !important; background: var(--nvim-bg, #0a0a0f) !important; color: var(--nvim-fg, #d4d4d4) !important; }' >> %s", peek_css))
-        end
-      end
+      -- No longer needed, we link it directly in index.html!
       
       -- Remove the ugly hardcoded "Peek preview" window title for a clean, frameless look
       local index_html = vim.fn.stdpath("data") .. "/lazy/peek.nvim/public/index.html"

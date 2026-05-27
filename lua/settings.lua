@@ -29,7 +29,7 @@
 return {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	---@type Theme
-	theme = "rose-pine-main",
+	theme = "cyberdream-dark",
 	background = "dark",
 	transparent = false,
 	hide_empty_tabline = true,
