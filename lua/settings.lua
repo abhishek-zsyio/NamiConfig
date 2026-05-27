@@ -18,6 +18,7 @@
 ---| "gruvbox" | "nord" | "dracula" | "sonokai" | "oxocarbon" | "monokai"
 ---| "everforest" | "gruvbox-material" | "poimandres"
 ---| "nightfly" | "moonfly" | "ayu-dark" | "ayu-mirage" | "cyberdream-dark" | "material-darker" | "material-oceanic"
+---| "night-owl" | "solarized-osaka" | "mellifluous" | "bamboo"
 
 ---@alias Extra
 ---| "plugins.extras.lang.go"
@@ -28,7 +29,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "ayu-dark",
+  theme = "rose-pine-main",
   background = "dark",
   transparent = false,
   hide_empty_tabline = true,
@@ -40,7 +41,7 @@ return {
   neovide_transparency = 0.9,-- Transparency level for Neovide (0.0 to 1.0)
 
   -- ── Menus & Pickers (UI) ───────────────────────────────────────────────────
-  picker_layout = "default", -- Options: "telescope", "ivy", "dropdown", "default", "vertical", "horizontal", "vscode"
+  picker_layout = "horizontal", -- Options: "telescope", "ivy", "dropdown", "default", "vertical", "horizontal", "vscode"
   picker_width = 0.85,
   picker_height = 0.8,
   menu_border = "shadow",     -- Options: "rounded", "single", "double", "solid", "shadow", "none"

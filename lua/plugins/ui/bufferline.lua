@@ -69,6 +69,30 @@ return {
           },
         },
       })
+
+      -- Ensure Bufferline respects transparent backgrounds across all themes
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        pattern = "*",
+        callback = function()
+          -- Defer slightly to ensure Bufferline has already reacted and generated its highlights
+          vim.defer_fn(function()
+            local function clear_bg(group)
+              local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+              if ok and hl then
+                hl.bg = nil
+                vim.api.nvim_set_hl(0, group, hl)
+              end
+            end
+            
+            -- Clear backgrounds of filler and unselected components so they perfectly blend
+            clear_bg("BufferLineFill")
+            clear_bg("BufferLineBackground")
+            clear_bg("TabLineFill")
+            clear_bg("BufferLineSeparator")
+            clear_bg("BufferLineOffsetSeparator")
+          end, 50)
+        end,
+      })
     end,
   },
 }

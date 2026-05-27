@@ -135,4 +135,10 @@ return {
   -- Nightfly & Moonfly
   { id = "nightfly", plugin = "bluz71/vim-nightfly-colors", icon = "󰖔 ", ghostty = "Moonfly", setup = function(t) vim.o.background="dark"; vim.g.nightflyTransparent=t and 1 or 0 end },
   { id = "moonfly", plugin = "bluz71/vim-moonfly-colors", icon = "󰖔 ", ghostty = "Moonfly", setup = function(t) vim.o.background="dark"; vim.g.moonflyTransparent=t and 1 or 0 end },
+
+  -- Community Favorites
+  { id = "solarized-osaka", plugin = "craftzdog/solarized-osaka.nvim", icon = "󰏘 ", ghostty = "Solarized Osaka Night", setup = function(t) vim.o.background="dark"; require("solarized-osaka").setup({transparent=t}) end },
+  { id = "night-owl", plugin = "oxfist/night-owl.nvim", icon = "󰏘 ", ghostty = "Night Owl", setup = function(t) vim.o.background="dark"; require("night-owl").setup({transparent=t}) end },
+  { id = "mellifluous", plugin = "ramojus/mellifluous.nvim", icon = "󰏘 ", ghostty = "Mellifluous", setup = function(t) vim.o.background="dark"; require("mellifluous").setup({transparent_background={enabled=t}}) end },
+  { id = "bamboo", plugin = "ribru17/bamboo.nvim", icon = "󰏘 ", ghostty = "Everforest Dark Hard", setup = function(t) vim.o.background="dark"; require("bamboo").setup({transparent=t}) end },
 }

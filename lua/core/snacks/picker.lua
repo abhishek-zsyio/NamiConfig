@@ -14,7 +14,10 @@ return {
       keys = {
         ["<Esc>"] = "close", -- Standard ESC to close
       },
+      border = settings.menu_border or "rounded",
     },
+    list = { border = settings.menu_border or "rounded" },
+    preview = { border = settings.menu_border or "rounded" },
   },
   layout = l,
   sources = {

@@ -110,22 +110,26 @@ map("n", "<leader>th", function()
     ["material-lighter"] = true
   }
 
-  local items = {}
+  local dark_themes_list = {}
+  local light_themes_list = {}
+
   for _, t in ipairs(registry) do
-    table.insert(items, {
-      text = t.id,
-      value = t,
-    })
+    if light_themes[t.id] then
+      table.insert(light_themes_list, { text = t.id, value = t })
+    else
+      table.insert(dark_themes_list, { text = t.id, value = t })
+    end
   end
 
-  table.sort(items, function(a, b)
-    local a_is_light = light_themes[a.text] and 1 or 0
-    local b_is_light = light_themes[b.text] and 1 or 0
-    if a_is_light ~= b_is_light then
-      return a_is_light < b_is_light -- Dark themes first (0), Light themes second (1)
-    end
-    return a.text < b.text
-  end)
+  table.sort(dark_themes_list, function(a, b) return a.text < b.text end)
+  table.sort(light_themes_list, function(a, b) return a.text < b.text end)
+
+  local items = {}
+  table.insert(items, { text = "────── DARK THEMES ──────", value = "separator" })
+  for _, item in ipairs(dark_themes_list) do table.insert(items, item) end
+
+  table.insert(items, { text = "────── LIGHT THEMES ──────", value = "separator" })
+  for _, item in ipairs(light_themes_list) do table.insert(items, item) end
 
   Snacks.picker.pick({
     source = "themes",
@@ -142,6 +146,12 @@ map("n", "<leader>th", function()
     },
     prompt = "Select Theme (Syncs to Ghostty)",
     format = function(item)
+      if item.value == "separator" then
+        return {
+          { "  ", "SnacksPickerIcon" },
+          { item.text, "DiagnosticWarn" },
+        }
+      end
       local t = item.value
       return {
         { (t.icon or "󰏘 ") .. " ", "SnacksPickerIcon" },
@@ -193,7 +203,7 @@ map("n", "<leader>th", function()
       vim.bo[buf].filetype = "javascriptreact"
     end,
     on_change = function(picker, item)
-      if item then
+      if item and item.value ~= "separator" then
         if item.value.setup then
           local ok2, s2 = pcall(require, "settings")
           local transparent = (ok2 and s2.transparent)
@@ -225,9 +235,9 @@ map("n", "<leader>th", function()
       end
     end,
     confirm = function(picker, item)
+      if not item or item.value == "separator" then return end
       picker.confirmed = true
       picker:close()
-      if not item then return end
       local choice = item.value.id
       
       local settings_path = vim.fn.stdpath("config") .. "/lua/settings.lua"
