@@ -33,4 +33,7 @@ return {
   -- Lang
   { import = "plugins.lang.django" },
   { import = "plugins.lang.lazydev" },
+
+  -- Http
+  { import = "plugins.editor.kulala" },
 }

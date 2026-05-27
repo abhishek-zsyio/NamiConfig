@@ -103,6 +103,13 @@ map("n", "<leader>th", function()
     end
   end
 
+  local light_themes = {
+    ["catppuccin-latte"] = true, ["tokyonight-day"] = true, ["rose-pine-dawn"] = true,
+    ["kanagawa-lotus"] = true, ["github_light"] = true, ["dayfox"] = true,
+    ["onedark-light"] = true, ["ayu-light"] = true, ["cyberdream-light"] = true,
+    ["material-lighter"] = true
+  }
+
   local items = {}
   for _, t in ipairs(registry) do
     table.insert(items, {
@@ -110,6 +117,15 @@ map("n", "<leader>th", function()
       value = t,
     })
   end
+
+  table.sort(items, function(a, b)
+    local a_is_light = light_themes[a.text] and 1 or 0
+    local b_is_light = light_themes[b.text] and 1 or 0
+    if a_is_light ~= b_is_light then
+      return a_is_light < b_is_light -- Dark themes first (0), Light themes second (1)
+    end
+    return a.text < b.text
+  end)
 
   Snacks.picker.pick({
     source = "themes",

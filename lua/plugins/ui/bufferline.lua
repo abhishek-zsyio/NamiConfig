@@ -38,7 +38,7 @@ return {
           show_buffer_close_icons = false,
           show_close_icon   = true,
           show_tab_indicators = false,
-          separator_style   = "none",
+          separator_style   = "thin",
           always_show_bufferline = settings.hide_empty_tabline == false,
           custom_filter = function(buf_number)
             if vim.api.nvim_buf_get_name(buf_number) == "" then return false end

@@ -3,15 +3,21 @@
 -- ==============================================================================
 
 ---@alias Theme
----| "catppuccin-mocha" | "catppuccin-latte" | "catppuccin-frappe" | "catppuccin-macchiato"
----| "tokyonight-day" | "tokyonight-night" | "tokyonight-storm" | "tokyonight-moon"
----| "rose-pine-dawn" | "rose-pine-main" | "rose-pine-moon"
----| "kanagawa-lotus" | "kanagawa-wave" | "kanagawa-dragon"
----| "github_light" | "github_dark" | "github_dark_dimmed"
----| "dayfox" | "nightfox" | "duskfox" | "nordfox" | "terafox" | "carbonfox"
----| "onedark-light" | "onedark-dark" | "onedark-darker" | "onedark-cool" | "onedark-deep" | "onedark-warm" | "onedark-warmer"
+--- Light Themes:
+---| "catppuccin-latte" | "tokyonight-day" | "rose-pine-dawn" | "kanagawa-lotus"
+---| "github_light" | "dayfox" | "onedark-light" 
+---| "ayu-light" | "cyberdream-light" | "material-lighter"
+--- Dark Themes:
+---| "catppuccin-mocha" | "catppuccin-frappe" | "catppuccin-macchiato"
+---| "tokyonight-night" | "tokyonight-storm" | "tokyonight-moon"
+---| "rose-pine-main" | "rose-pine-moon"
+---| "kanagawa-wave" | "kanagawa-dragon"
+---| "github_dark" | "github_dark_dimmed"
+---| "nightfox" | "duskfox" | "nordfox" | "terafox" | "carbonfox"
+---| "onedark-dark" | "onedark-darker" | "onedark-cool" | "onedark-deep" | "onedark-warm" | "onedark-warmer"
 ---| "gruvbox" | "nord" | "dracula" | "sonokai" | "oxocarbon" | "monokai"
 ---| "everforest" | "gruvbox-material" | "poimandres"
+---| "nightfly" | "moonfly" | "ayu-dark" | "ayu-mirage" | "cyberdream-dark" | "material-darker" | "material-oceanic"
 
 ---@alias Extra
 ---| "plugins.extras.lang.go"
@@ -22,7 +28,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "rose-pine-moon",
+  theme = "ayu-dark",
   background = "dark",
   transparent = false,
   hide_empty_tabline = true,
@@ -34,10 +40,10 @@ return {
   neovide_transparency = 0.9,-- Transparency level for Neovide (0.0 to 1.0)
 
   -- ── Menus & Pickers (UI) ───────────────────────────────────────────────────
-  picker_layout = "dropdown", -- Options: "telescope", "ivy", "dropdown", "default", "vertical", "horizontal", "vscode"
+  picker_layout = "default", -- Options: "telescope", "ivy", "dropdown", "default", "vertical", "horizontal", "vscode"
   picker_width = 0.85,
   picker_height = 0.8,
-  menu_border = "none",     -- Options: "rounded", "single", "double", "solid", "shadow", "none"
+  menu_border = "shadow",     -- Options: "rounded", "single", "double", "solid", "shadow", "none"
 
   -- ── Editor Behavior ────────────────────────────────────────────────────────
   highlight_current_line = true,
@@ -45,7 +51,7 @@ return {
   relative_line_numbers = true,
   format_on_save = true,
   tab_size = 2,
-  mouse_support = true,
+  mouse_support = false,
   wrap_lines = true,
   scrolloff = 8,
   auto_save = false,

@@ -117,4 +117,22 @@ return {
   { id = "everforest", plugin = "sainnhe/everforest", icon = "󰔎 ", ghostty = "Everforest Dark Hard", setup = function(t) vim.o.background="dark"; vim.g.everforest_background="hard"; vim.g.everforest_better_performance=1; vim.g.everforest_transparent_background = t and 1 or 0 end },
   { id = "gruvbox-material", plugin = "sainnhe/gruvbox-material", icon = "󰟆 ", ghostty = "Gruvbox Material Dark", setup = function(t) vim.o.background="dark"; vim.g.gruvbox_material_transparent_background = t and 1 or 0 end },
   { id = "poimandres", plugin = "olivercederborg/poimandres.nvim", icon = "󰖔 ", ghostty = "Poimandres", setup = function(t) vim.o.background="dark"; require('poimandres').setup{disable_background=t, disable_float_background=t} end },
+
+  -- Ayu
+  { id = "ayu-light", colorscheme = "ayu-light", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu Light", setup = function(t) vim.o.background="light"; require("ayu").setup({mirage=false}) end },
+  { id = "ayu-dark", colorscheme = "ayu-dark", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu", setup = function(t) vim.o.background="dark"; require("ayu").setup({mirage=false}) end },
+  { id = "ayu-mirage", colorscheme = "ayu-mirage", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu Mirage", setup = function(t) vim.o.background="dark"; require("ayu").setup({mirage=true}) end },
+
+  -- Cyberdream
+  { id = "cyberdream-light", colorscheme = "cyberdream", plugin = "scottmckendry/cyberdream.nvim", icon = "󰏗 ", ghostty = "One Half Light", setup = function(t) vim.o.background="light"; require("cyberdream").setup({transparent=t, theme={variant="light"}}) end },
+  { id = "cyberdream-dark", colorscheme = "cyberdream", plugin = "scottmckendry/cyberdream.nvim", icon = "󰏗 ", ghostty = "Matte Black", setup = function(t) vim.o.background="dark"; require("cyberdream").setup({transparent=t, theme={variant="default"}}) end },
+
+  -- Material
+  { id = "material-lighter", colorscheme = "material", plugin = "marko-cerovac/material.nvim", icon = "󰏘 ", ghostty = "Material", setup = function(t) vim.o.background="light"; vim.g.material_style="lighter"; require("material").setup({disable={background=t}}) end },
+  { id = "material-darker", colorscheme = "material", plugin = "marko-cerovac/material.nvim", icon = "󰏘 ", ghostty = "Material Darker", setup = function(t) vim.o.background="dark"; vim.g.material_style="darker"; require("material").setup({disable={background=t}}) end },
+  { id = "material-oceanic", colorscheme = "material", plugin = "marko-cerovac/material.nvim", icon = "󰏘 ", ghostty = "Material Ocean", setup = function(t) vim.o.background="dark"; vim.g.material_style="oceanic"; require("material").setup({disable={background=t}}) end },
+
+  -- Nightfly & Moonfly
+  { id = "nightfly", plugin = "bluz71/vim-nightfly-colors", icon = "󰖔 ", ghostty = "Moonfly", setup = function(t) vim.o.background="dark"; vim.g.nightflyTransparent=t and 1 or 0 end },
+  { id = "moonfly", plugin = "bluz71/vim-moonfly-colors", icon = "󰖔 ", ghostty = "Moonfly", setup = function(t) vim.o.background="dark"; vim.g.moonflyTransparent=t and 1 or 0 end },
 }

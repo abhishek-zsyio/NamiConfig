@@ -1,11 +1,5 @@
 local settings = require("settings")
 
-local b = settings.menu_border or "rounded"
-local w = {
-  input = { border = b },
-  list = { border = b },
-  preview = { border = b }
-}
 local l = {
   preset = settings.picker_layout or "telescope",
   width = settings.picker_width or 0.85,
@@ -20,28 +14,26 @@ return {
       keys = {
         ["<Esc>"] = "close", -- Standard ESC to close
       },
-      border = b,
     },
-    list = { border = b },
-    preview = { border = b },
   },
   layout = l,
   sources = {
     explorer = {
       layout = { preset = "sidebar", width = 40, hidden = { "input" } },
-      win = { list = { keys = { ["<C-n>"] = "close" } } }
+      win = { list = { keys = { ["<C-n>"] = "close" } } },
+      hidden = true,
     },
-    files = { layout = l, win = w },
-    grep = { layout = l, win = w },
-    buffers = { layout = l, win = w },
-    help = { layout = l, win = w },
-    recent = { layout = l, win = w },
-    lines = { layout = l, win = w },
-    marks = { layout = l, win = w },
-    git_status = { layout = l, win = w },
-    git_log = { layout = l, win = w },
-    git_diff = { layout = l, win = w },
-    git_branches = { layout = l, win = w },
-    diagnostics = { layout = l, win = w },
+    files = { layout = l, hidden = true },
+    grep = { layout = l, hidden = true },
+    buffers = { layout = l },
+    help = { layout = l },
+    recent = { layout = l },
+    lines = { layout = l },
+    marks = { layout = l },
+    git_status = { layout = l },
+    git_log = { layout = l },
+    git_diff = { layout = l },
+    git_branches = { layout = l },
+    diagnostics = { layout = l },
   }
 }
