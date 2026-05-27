@@ -125,10 +125,11 @@ map("n", "<leader>th", function()
   table.sort(light_themes_list, function(a, b) return a.text < b.text end)
 
   local items = {}
-  table.insert(items, { text = "────── DARK THEMES ──────", value = "separator" })
+  table.insert(items, { text = "   DARK THEMES", value = "separator" })
   for _, item in ipairs(dark_themes_list) do table.insert(items, item) end
 
-  table.insert(items, { text = "────── LIGHT THEMES ──────", value = "separator" })
+  table.insert(items, { text = "", value = "spacer" })
+  table.insert(items, { text = "   LIGHT THEMES", value = "separator" })
   for _, item in ipairs(light_themes_list) do table.insert(items, item) end
 
   Snacks.picker.pick({
@@ -146,15 +147,17 @@ map("n", "<leader>th", function()
     },
     prompt = "Select Theme (Syncs to Ghostty)",
     format = function(item)
+      if item.value == "spacer" then
+        return {}
+      end
       if item.value == "separator" then
         return {
-          { "  ", "SnacksPickerIcon" },
-          { item.text, "DiagnosticWarn" },
+          { item.text, "Title" },
         }
       end
       local t = item.value
       return {
-        { (t.icon or "󰏘 ") .. " ", "SnacksPickerIcon" },
+        { "  " .. (t.icon or "󰏘 ") .. " ", "SnacksPickerIcon" },
         { t.id, "SnacksPickerText" },
       }
     end,

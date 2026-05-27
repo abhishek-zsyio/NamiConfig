@@ -79,4 +79,42 @@ autocmd("FileType", {
   end,
 })
 
+-- ── Hot Reload Settings ──────────────────────────────────────────────────────
+autocmd({ "BufWritePost", "FileChangedShellPost" }, {
+  group = augroup("HotReloadSettings", { clear = true }),
+  pattern = "*/lua/settings.lua",
+  callback = function()
+    -- Clear cached settings
+    package.loaded["settings"] = nil
+    
+    local ok, settings = pcall(require, "settings")
+    if not ok then
+      vim.notify("Error reloading settings: " .. tostring(settings), vim.log.levels.ERROR)
+      return
+    end
 
+    -- Reload colorscheme
+    if settings.theme then
+      pcall(vim.cmd, "colorscheme " .. settings.theme)
+    end
+    if settings.background then vim.o.background = settings.background end
+
+    -- Live update common vim options
+    if settings.show_line_numbers ~= nil then vim.wo.number = settings.show_line_numbers end
+    if settings.relative_line_numbers ~= nil then vim.wo.relativenumber = settings.relative_line_numbers end
+    if settings.wrap_lines ~= nil then vim.wo.wrap = settings.wrap_lines end
+    if settings.color_column then vim.wo.colorcolumn = settings.color_column end
+
+    -- Hot reload Bufferline so changes to `tab_divider_style` apply instantly
+    if package.loaded["bufferline"] then
+      pcall(function()
+        local bl_spec = require("plugins.ui.bufferline")
+        if type(bl_spec) == "table" and bl_spec[1] and type(bl_spec[1].config) == "function" then
+          bl_spec[1].config()
+        end
+      end)
+    end
+
+    vim.notify("Settings Hot-Reloaded! 🚀", vim.log.levels.INFO, { title = "Config" })
+  end,
+})

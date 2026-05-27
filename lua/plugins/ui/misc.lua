@@ -65,24 +65,53 @@ return {
     },
   },
 
-  -- Markdown preview
+  -- Markdown preview (Peek)
   {
-    "iamcco/markdown-preview.nvim",
-    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-    ft = { "markdown" },
-    build = function()
-      vim.fn["mkdp#util#install"]()
-    end,
-    init = function()
-      vim.g.mkdp_filetypes = { "markdown" }
-      -- Match markdown preview theme to Neovim's current background (dark/light)
-      vim.g.mkdp_theme = vim.o.background
+    "toppair/peek.nvim",
+    event = { "VeryLazy" },
+    build = "deno task --quiet build:fast",
+    config = function()
+      require("peek").setup({
+        app = "webview",
+        theme = vim.o.background == "light" and "light" or "dark",
+      })
+      
+      -- Ensure our premium CSS is injected into peek's webview
+      local peek_css = vim.fn.stdpath("data") .. "/lazy/peek.nvim/public/style.css"
+      local my_css = vim.fn.stdpath("config") .. "/markdown-preview.css"
+      
+      if vim.fn.filereadable(peek_css) == 1 then
+        local content = vim.fn.readfile(peek_css)
+        local injected = false
+        for _, line in ipairs(content) do
+          if line:match("MODERN DESIGN SYSTEM") then
+            injected = true
+            break
+          end
+        end
+        if not injected then
+          vim.fn.system(string.format("cat %s >> %s", my_css, peek_css))
+          vim.fn.system(string.format("echo '\nhtml, body.peek-body { background-color: #0a0a0f !important; background: #0a0a0f !important; }' >> %s", peek_css))
+        end
+      end
+      
+      -- Remove the ugly hardcoded "Peek preview" window title for a clean, frameless look
+      local index_html = vim.fn.stdpath("data") .. "/lazy/peek.nvim/public/index.html"
+      if vim.fn.filereadable(index_html) == 1 then
+        vim.fn.system("sed -i '' \"s/<title>Peek preview<\\/title>/<title> <\\/title>/\" " .. index_html)
+      end
     end,
     keys = {
       {
         "<leader>op",
-        ft = "markdown",
-        "<cmd>MarkdownPreviewToggle<cr>",
+        function()
+          local peek = require("peek")
+          if peek.is_open() then
+            peek.close()
+          else
+            peek.open()
+          end
+        end,
         desc = "Toggle Markdown Preview",
       },
     },

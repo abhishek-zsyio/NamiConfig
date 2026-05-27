@@ -38,7 +38,12 @@ return {
           show_buffer_close_icons = false,
           show_close_icon   = true,
           show_tab_indicators = false,
-          separator_style   = "thin",
+          separator_style   = (function()
+            local s = settings.tab_divider_style or "thin"
+            if s == "none" then return { "", "" } end
+            if s == "dotted" then return { "·", "·" } end
+            return s
+          end)(),
           always_show_bufferline = settings.hide_empty_tabline == false,
           custom_filter = function(buf_number)
             if vim.api.nvim_buf_get_name(buf_number) == "" then return false end
@@ -84,12 +89,12 @@ return {
               end
             end
             
-            -- Clear backgrounds of filler and unselected components so they perfectly blend
-            clear_bg("BufferLineFill")
-            clear_bg("BufferLineBackground")
+            -- Clear backgrounds of all BufferLine components to make it completely transparent
+            local hls = vim.fn.getcompletion("BufferLine", "highlight")
+            for _, hl_name in ipairs(hls) do
+              clear_bg(hl_name)
+            end
             clear_bg("TabLineFill")
-            clear_bg("BufferLineSeparator")
-            clear_bg("BufferLineOffsetSeparator")
           end, 50)
         end,
       })
