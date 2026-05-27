@@ -60,6 +60,7 @@ map("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Move to below window" })
 map("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Move to above window" })
 map("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Move to right window" })
 map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+map("t", "<C-x>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- ── Buffer Navigation ────────────────────────────────────────────────────
 map("n", "<Tab>",   "<cmd>bnext<CR>",     { desc = "Next buffer" })

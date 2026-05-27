@@ -67,19 +67,25 @@ return {
 
   -- Markdown preview
   {
-    "toppair/peek.nvim",
-    build = "deno task --quiet build:fast",
-    keys  = {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = function()
+      vim.fn["mkdp#util#install"]()
+    end,
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown" }
+      -- Match markdown preview theme to Neovim's current background (dark/light)
+      vim.g.mkdp_theme = vim.o.background
+    end,
+    keys = {
       {
         "<leader>op",
-        function()
-          local peek = require("peek")
-          if peek.is_open() then peek.close() else peek.open() end
-        end,
+        ft = "markdown",
+        "<cmd>MarkdownPreviewToggle<cr>",
         desc = "Toggle Markdown Preview",
       },
     },
-    opts = { theme = "dark" },
   },
 
 

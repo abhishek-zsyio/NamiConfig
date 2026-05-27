@@ -22,7 +22,7 @@
 return {
   -- ── UI & Aesthetics ────────────────────────────────────────────────────────
   ---@type Theme
-  theme = "dayfox",
+  theme = "rose-pine-moon",
   background = "dark",
   transparent = false,
   hide_empty_tabline = true,
