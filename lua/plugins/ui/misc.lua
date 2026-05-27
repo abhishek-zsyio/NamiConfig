@@ -76,6 +76,63 @@ return {
         theme = vim.o.background == "light" and "light" or "dark",
       })
       
+      -- Theme sync generator
+      local function generate_peek_theme()
+        local function get_hex(hlgroup, attr)
+            local hl = vim.api.nvim_get_hl(0, { name = hlgroup, link = false })
+            local color = hl[attr]
+            if color then
+                return string.format("#%06x", color)
+            end
+            return nil
+        end
+        
+        local bg = get_hex("Normal", "bg") or "#0a0a0f"
+        local fg = get_hex("Normal", "fg") or "#d4d4d4"
+        local title = get_hex("Title", "fg") or fg
+        local link = get_hex("String", "fg") or "#82aaff"
+        local code_bg = get_hex("CursorLine", "bg") or "#1a1a24"
+        local code_fg = get_hex("String", "fg") or fg
+        local border = get_hex("FloatBorder", "fg") or "#333333"
+        local accent = get_hex("Keyword", "fg") or "#c678dd"
+        
+        local css = string.format([[
+:root {
+  --nvim-bg: %s;
+  --nvim-fg: %s;
+  --nvim-title: %s;
+  --nvim-link: %s;
+  --nvim-code-bg: %s;
+  --nvim-code-fg: %s;
+  --nvim-border: %s;
+  --nvim-accent: %s;
+}
+]], bg, fg, title, link, code_bg, code_fg, border, accent)
+
+        local file = io.open(vim.fn.stdpath("config") .. "/peek-theme-vars.css", "w")
+        if file then
+          file:write(css)
+          file:close()
+        end
+        
+        -- Tell peek to reload theme if running
+        pcall(function()
+          local peek_app = require("peek.app")
+          if peek_app.update_theme then
+            peek_app.update_theme()
+          end
+        end)
+      end
+      
+      -- Generate immediately
+      generate_peek_theme()
+      
+      -- Generate on ColorScheme change
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("PeekThemeSync", { clear = true }),
+        callback = generate_peek_theme,
+      })
+      
       -- Ensure our premium CSS is injected into peek's webview
       local peek_css = vim.fn.stdpath("data") .. "/lazy/peek.nvim/public/style.css"
       local my_css = vim.fn.stdpath("config") .. "/markdown-preview.css"
@@ -91,7 +148,7 @@ return {
         end
         if not injected then
           vim.fn.system(string.format("cat %s >> %s", my_css, peek_css))
-          vim.fn.system(string.format("echo '\nhtml, body.peek-body { background-color: #0a0a0f !important; background: #0a0a0f !important; }' >> %s", peek_css))
+          vim.fn.system(string.format("echo '\nhtml, body.peek-body { background-color: var(--nvim-bg, #0a0a0f) !important; background: var(--nvim-bg, #0a0a0f) !important; color: var(--nvim-fg, #d4d4d4) !important; }' >> %s", peek_css))
         end
       end
       

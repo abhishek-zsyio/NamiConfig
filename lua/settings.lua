@@ -29,7 +29,7 @@
 return {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	---@type Theme
-	theme = "tokyonight-storm",
+	theme = "rose-pine-main",
 	background = "dark",
 	transparent = false,
 	hide_empty_tabline = true,
