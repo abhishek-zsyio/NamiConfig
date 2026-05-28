@@ -387,6 +387,70 @@ map("n", "<leader>ls", "<cmd>Leet submit<CR>", { desc = "LeetCode Submit Solutio
 map("n", "<leader>ld", "<cmd>Leet desc<CR>", { desc = "LeetCode Show Description" })
 map("n", "<leader>li", "<cmd>Leet info<CR>", { desc = "LeetCode Question Info" })
 
+-- ── Code Runner ───────────────────────────────────────────────────────────
+map("n", "<leader>rr", function()
+  local ft = vim.bo.filetype
+  local file = vim.fn.expand("%:p")
+
+  if file == "" then
+    vim.notify("No file to run!", vim.log.levels.WARN)
+    return
+  end
+
+  -- Save buffer first
+  vim.cmd("silent! write")
+
+  local cmd
+
+  if ft == "python" then
+    -- Use venv python if active, else python3/python
+    local py = (vim.env.VIRTUAL_ENV and vim.env.VIRTUAL_ENV .. "/bin/python")
+      or vim.fn.exepath("python3")
+      or vim.fn.exepath("python")
+      or "python3"
+    cmd = py .. " " .. vim.fn.shellescape(file)
+
+  elseif ft == "javascript" or ft == "javascriptreact" then
+    cmd = "node " .. vim.fn.shellescape(file)
+
+  elseif ft == "typescript" or ft == "typescriptreact" then
+    -- Prefer tsx (bun), ts-node, or npx ts-node
+    if vim.fn.executable("tsx") == 1 then
+      cmd = "tsx " .. vim.fn.shellescape(file)
+    elseif vim.fn.executable("ts-node") == 1 then
+      cmd = "ts-node " .. vim.fn.shellescape(file)
+    else
+      cmd = "npx --yes ts-node " .. vim.fn.shellescape(file)
+    end
+
+  else
+    vim.notify("No runner configured for filetype: " .. ft, vim.log.levels.WARN)
+    return
+  end
+
+  -- Wrap in a shell that prints a finish banner and waits for keypress
+  local full_cmd = string.format(
+    [[bash -c 'clear; %s; echo ""; echo "─── Process exited ($?) ─── Press any key to close ───"; read -n1']],
+    cmd
+  )
+
+  local fname = vim.fn.expand("%:t")
+  local term = Snacks.terminal(full_cmd, {
+    win = {
+      position = "bottom",
+      height = 0.3,
+      border = require("settings").menu_border or "rounded",
+      title = " ▶ " .. fname .. " ",
+      title_pos = "center",
+    },
+    bo = { filetype = "snacks_terminal" },
+  })
+  -- Rename the buffer so the statusline shows a clean name instead of the raw command
+  if term and term.buf and vim.api.nvim_buf_is_valid(term.buf) then
+    pcall(vim.api.nvim_buf_set_name, term.buf, "runner: " .. fname)
+  end
+end, { desc = "Run current file (Node / Python)" })
+
 -- ── Hard Mode: Disable Arrow Keys ─────────────────────────────────────────
 local disabled = [[<cmd>echohl Error | echo "KEY DISABLED" | echohl None<CR>]]
 map("i", "<Up>",    "<C-o>" .. disabled, { noremap = true })
