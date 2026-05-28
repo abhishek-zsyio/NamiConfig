@@ -33,13 +33,15 @@ return {
         },
         completion = { completeopt = "menu,menuone" },
         window = {
-          completion = cmp.config.window.bordered({
-            border = require("settings").menu_border or "rounded",
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
-          }),
+          completion = {
+            border = "none",
+            winhighlight = "Normal:CmpPmenu,FloatBorder:CmpPmenuBorder,CursorLine:CmpPmenuSel,Search:None",
+            side_padding = 1,
+            col_offset = -3,
+          },
           documentation = cmp.config.window.bordered({
             border = require("settings").menu_border or "rounded",
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
+            winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:CmpPmenuSel,Search:None",
           }),
         },
         mapping = cmp.mapping.preset.insert({

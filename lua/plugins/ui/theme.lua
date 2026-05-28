@@ -108,9 +108,51 @@ table.insert(plugins, {
             make_diag_bg("DiagnosticInfo")
             make_diag_bg("DiagnosticHint")
             
-            -- Sleek Pmenu (Autocomplete)
+            -- Sleek Pmenu & Borderless nvim-cmp overrides
+            local function cmp_hl(name, val)
+              set_hl(0, name, val)
+            end
+            
+            local cmp_bg = alt_bg
+            local fallback_fg = bg or "#1e1e2e"
+            
+            cmp_hl("CmpPmenu", { bg = cmp_bg })
+            cmp_hl("CmpPmenuBorder", { bg = cmp_bg, fg = cmp_bg })
+            cmp_hl("CmpPmenuSel", { bg = accent, fg = fallback_fg, bold = true })
+            
+            cmp_hl("CmpItemAbbr", { fg = fg })
+            cmp_hl("CmpItemAbbrDeprecated", { fg = get_hl("Comment").fg or "#5c6370", strikethrough = true })
+            cmp_hl("CmpItemAbbrMatch", { fg = accent, bold = true })
+            cmp_hl("CmpItemAbbrMatchFuzzy", { fg = accent, bold = true })
+            cmp_hl("CmpItemMenu", { fg = get_hl("Comment").fg or "#5c6370", italic = true })
+            
+            -- Color-code autocomplete item kinds dynamically
+            local colors_map = {
+              Function = get_hl("Function").fg or "#89b4fa",
+              Method = get_hl("Function").fg or "#89b4fa",
+              Variable = get_hl("Identifier").fg or "#cdd6f4",
+              Constant = get_hl("Constant").fg or "#f9e2af",
+              Keyword = get_hl("Keyword").fg or "#cba6f7",
+              Snippet = get_hl("Special").fg or "#f5c2e7",
+              Class = get_hl("Type").fg or "#f9e2af",
+              Interface = get_hl("Type").fg or "#f9e2af",
+              Module = get_hl("PreProc").fg or "#a6e3a1",
+              Property = get_hl("Identifier").fg or "#f38ba8",
+              Field = get_hl("Identifier").fg or "#f38ba8",
+              Enum = get_hl("Type").fg or "#f9e2af",
+              EnumMember = get_hl("Constant").fg or "#f9e2af",
+              Struct = get_hl("Type").fg or "#f9e2af",
+              Event = get_hl("Special").fg or "#f5c2e7",
+              Operator = get_hl("Operator").fg or "#89dceb",
+              TypeParameter = get_hl("Type").fg or "#89dceb",
+            }
+            
+            for kind, k_color in pairs(colors_map) do
+              cmp_hl("CmpItemKind" .. kind, { fg = k_color })
+            end
+
             set_hl(0, "Pmenu", { bg = alt_bg, fg = fg })
-            set_hl(0, "PmenuSel", { bg = accent, fg = bg, bold = true })
+            set_hl(0, "PmenuSel", { bg = accent, fg = fallback_fg, bold = true })
 
             -- Subtle split separators that don't compete with content
             local border_fg = get_hl("FloatBorder").fg or get_hl("Comment").fg

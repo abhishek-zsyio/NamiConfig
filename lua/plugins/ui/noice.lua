@@ -7,6 +7,11 @@ return {
       "MunifTanjim/nui.nvim",
       -- Snacks notifier is used instead of nvim-notify
     },
+    keys = {
+      { "<leader>nh", "<cmd>Noice history<cr>", desc = "Noice message history" },
+      { "<leader>nd", "<cmd>Noice dismiss<cr>", desc = "Dismiss Noice messages" },
+      { "<leader>nl", "<cmd>Noice last<cr>", desc = "Show last message" },
+    },
     opts = {
       cmdline = {
         enabled = true,

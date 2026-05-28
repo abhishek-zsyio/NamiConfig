@@ -36,7 +36,7 @@ return {
     cmd  = "Silicon",
     config = function()
       require("silicon").setup({
-        font          = "JetBrainsMono NFM=15;Noto Color Emoji=15",
+        font          = "JetBrainsMono NFM=15;Apple Color Emoji=15",
         theme         = "gruvbox-dark",
         to_clipboard  = true,
         background    = "#8D6479",
@@ -171,7 +171,10 @@ return {
         -- Top-level navigation / editor
         { "<leader>e",  group = "󰙅 Explorer" },
         { "<leader>x",  group = " Close Buffer" },
-        { "<leader>n",  group = "󰎦 Numbers" },
+        { "<leader>n",  group = "󰎦 Numbers / Notifications" },
+        { "<leader>nh", desc = "Noice message history" },
+        { "<leader>nd", desc = "Dismiss Noice messages" },
+        { "<leader>nl", desc = "Show last message" },
 
         -- Find / Files / Telescope
         { "<leader>f",  group = "󰍉 Find" },

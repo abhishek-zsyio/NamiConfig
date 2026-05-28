@@ -65,6 +65,8 @@ return {
 	terminal = {
 		enabled = true,
 		win = {
+			border = s.menu_border or "rounded",
+			winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
 			wo = {
 				winbar = "",
 				statuscolumn = "  ",

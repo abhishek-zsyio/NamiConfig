@@ -69,11 +69,11 @@ return {
 
         highlights = {
           fill = {
-            bg = { attribute = "bg", highlight = "Normal" },
+            bg = { attribute = "bg", highlight = "TabLine" },
           },
           background = {
             fg = { attribute = "fg", highlight = "TabLine" },
-            bg = { attribute = "bg", highlight = "Normal" },
+            bg = { attribute = "bg", highlight = "TabLine" },
           },
 
           buffer_selected = {
