@@ -272,6 +272,7 @@ map("v", "<leader>sc", ":Silicon<CR>",                   { desc = "Screenshot co
 
 -- ── Python Venv ───────────────────────────────────────────────────────────
 map("n", "<leader>vs", function()
+  local s = require("settings")
   local paths = {}
   local cwd = vim.fn.getcwd()
   
@@ -332,14 +333,14 @@ map("n", "<leader>vs", function()
     items = items,
     prompt = "Select Python Virtual Environment",
     layout = {
-      preset = require("settings").picker_layout or "select",
-      width = require("settings").picker_width or 0.5,
-      height = require("settings").picker_height or 0.8,
+      preset = s.picker_layout or "select",
+      width = s.picker_width or 0.5,
+      height = s.picker_height or 0.8,
     },
     win = {
-      input = { border = require("settings").menu_border or "rounded" },
-      list = { border = require("settings").menu_border or "rounded" },
-      preview = { border = require("settings").menu_border or "rounded" },
+      input = { border = s.menu_border or "rounded" },
+      list = { border = s.menu_border or "rounded" },
+      preview = { border = s.menu_border or "rounded" },
     },
     format = function(item)
       local icon = item.value == "deactivate" and "󰅙  " or "  "
@@ -356,7 +357,7 @@ map("n", "<leader>vs", function()
       if item.value == "deactivate" then
         vim.env.VIRTUAL_ENV = nil
         local default_py = vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
-        for _, client in ipairs(vim.lsp.get_active_clients({ name = "pyright" })) do
+        for _, client in ipairs(vim.lsp.get_clients({ name = "pyright" })) do
           client.config.settings.python.pythonPath = default_py
           client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
         end
@@ -370,7 +371,7 @@ map("n", "<leader>vs", function()
       vim.env.VIRTUAL_ENV = py_path:gsub("/bin/python$", "")
       
       -- Update LSP clients
-      for _, client in ipairs(vim.lsp.get_active_clients({ name = "pyright" })) do
+      for _, client in ipairs(vim.lsp.get_clients({ name = "pyright" })) do
         client.config.settings.python.pythonPath = py_path
         client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
       end
@@ -380,12 +381,6 @@ map("n", "<leader>vs", function()
   })
 end, { desc = "Select Python venv" })
 
--- ── LeetCode Native Integration ─────────────────────────────────────────────
-map("n", "<leader>lc", "<cmd>Leet<CR>", { desc = "Open LeetCode Dashboard" })
-map("n", "<leader>lr", "<cmd>Leet run<CR>", { desc = "LeetCode Run Test" })
-map("n", "<leader>ls", "<cmd>Leet submit<CR>", { desc = "LeetCode Submit Solution" })
-map("n", "<leader>ld", "<cmd>Leet desc<CR>", { desc = "LeetCode Show Description" })
-map("n", "<leader>li", "<cmd>Leet info<CR>", { desc = "LeetCode Question Info" })
 
 -- ── Code Runner ───────────────────────────────────────────────────────────
 map("n", "<leader>rr", function()

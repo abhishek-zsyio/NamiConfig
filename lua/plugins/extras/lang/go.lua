@@ -28,12 +28,17 @@ return {
         dap_debug  = true,
       })
 
-      -- Go-specific keymaps
-      local map = vim.keymap.set
-      map("n", "<leader>gr", "<cmd>GoRun<CR>",       { ft = "go", desc = "Go: Run" })
-      map("n", "<leader>gT", "<cmd>GoTest<CR>",      { ft = "go", desc = "Go: Test" })
-      map("n", "<leader>gi", "<cmd>GoImport<CR>",    { ft = "go", desc = "Go: Import" })
-      map("n", "<leader>gfs", "<cmd>GoFillStruct<CR>", { ft = "go", desc = "Go: Fill Struct" })
+      -- Go-specific keymaps (properly buffer-local)
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "go",
+        callback = function(args)
+          local opts = { buffer = args.buf }
+          vim.keymap.set("n", "<leader>gr", "<cmd>GoRun<CR>",       vim.tbl_extend("force", opts, { desc = "Go: Run" }))
+          vim.keymap.set("n", "<leader>gT", "<cmd>GoTest<CR>",      vim.tbl_extend("force", opts, { desc = "Go: Test" }))
+          vim.keymap.set("n", "<leader>gi", "<cmd>GoImport<CR>",    vim.tbl_extend("force", opts, { desc = "Go: Import" }))
+          vim.keymap.set("n", "<leader>gfs", "<cmd>GoFillStruct<CR>", vim.tbl_extend("force", opts, { desc = "Go: Fill Struct" }))
+        end,
+      })
     end,
   },
 

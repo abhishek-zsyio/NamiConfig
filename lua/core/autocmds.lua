@@ -104,8 +104,11 @@ autocmd({ "BufWritePost", "FileChangedShellPost" }, {
     if settings.relative_line_numbers ~= nil then vim.wo.relativenumber = settings.relative_line_numbers end
     if settings.wrap_lines ~= nil then vim.wo.wrap = settings.wrap_lines end
     if settings.color_column then vim.wo.colorcolumn = settings.color_column end
+    if settings.show_tab_buffer ~= nil then
+      vim.o.showtabline = settings.show_tab_buffer and 2 or 0
+    end
 
-    -- Hot reload Bufferline so changes to `tab_divider_style` apply instantly
+    -- Hot reload Bufferline so changes to style or layout apply instantly
     if package.loaded["bufferline"] then
       pcall(function()
         local bl_spec = require("plugins.ui.bufferline")

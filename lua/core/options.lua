@@ -13,6 +13,7 @@ opt.cursorlineopt  = "both" -- highlight both the number and the lines"
 opt.signcolumn     = "yes"
 opt.termguicolors  = true
 opt.showmode       = false      -- lualine shows the mode
+opt.showtabline    = (settings.show_tab_buffer ~= false) and 2 or 0 -- 2 to show tab buffer bar, 0 to completely hide it
 opt.cmdheight      = settings.cmdheight or 0 -- 0 provides a modern clean UI
 opt.pumheight      = 10         -- max items in popup menu
 opt.scrolloff      = settings.scrolloff or 8
@@ -42,10 +43,8 @@ opt.smartindent = true
 opt.ignorecase = settings.ignore_case_search ~= false
 opt.smartcase  = true
 opt.hlsearch   = true
-opt.incsearch  = true
 
 -- ── Files & Encoding ─────────────────────────────────────────────────────
-opt.encoding    = "utf-8"
 opt.fileencoding = "utf-8"
 opt.undofile    = true
 opt.swapfile    = false

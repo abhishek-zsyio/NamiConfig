@@ -133,8 +133,6 @@ return {
         callback = generate_peek_theme,
       })
       
-      -- No longer needed, we link it directly in index.html!
-      
       -- Remove the ugly hardcoded "Peek preview" window title for a clean, frameless look
       local index_html = vim.fn.stdpath("data") .. "/lazy/peek.nvim/public/index.html"
       if vim.fn.filereadable(index_html) == 1 then

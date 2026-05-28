@@ -6,7 +6,7 @@ return {
     lazy         = false,
     dependencies = {
       "nvim-tree/nvim-web-devicons",
-      -- catppuccin/nvim not needed here; theme system loads it independently
+      -- theme registry loads theme configurations independently
     },
     config = function()
       local ok, settings = pcall(require, "settings")
@@ -14,7 +14,7 @@ return {
 
       require("bufferline").setup({
         options = {
-          mode            = "buffers",
+          mode            = settings.tab_buffer_style or "buffers",
           numbers         = "none",
           close_command   = function(n) Snacks.bufdelete(n) end,
           right_mouse_command = function(n) Snacks.bufdelete(n) end,
@@ -28,18 +28,21 @@ return {
           max_prefix_length = 15,
           truncate_names    = true,
           tab_size          = 18,
-          diagnostics       = "nvim_lsp",
+          diagnostics       = settings.tab_buffer_diagnostics or "nvim_lsp",
           diagnostics_indicator = function(count, level)
             local icons = { error = " ", warning = " ", info = " " }
             return (icons[level] or "") .. count
           end,
-          color_icons       = true,
-          show_buffer_icons = true,
-          show_buffer_close_icons = false,
-          show_close_icon   = true,
+          color_icons       = settings.tab_buffer_show_icons ~= false,
+          show_buffer_icons = settings.tab_buffer_show_icons ~= false,
+          show_buffer_close_icons = settings.tab_buffer_show_close == true,
+          show_close_icon   = settings.tab_buffer_show_close == true,
           show_tab_indicators = false,
           separator_style   = (function()
-            local s = settings.tab_divider_style or "thin"
+            if settings.tab_buffer_transparent_dividers == true then
+              return { "", "" }
+            end
+            local s = settings.tab_divider_style or "slope"
             if s == "none" then return { "", "" } end
             if s == "dotted" then return { "·", "·" } end
             return s
@@ -75,17 +78,53 @@ return {
         },
       })
 
-      -- Sync Bufferline background with the StatusLine background color
+      -- Sync Bufferline background and separators with the StatusLine background color
       local function sync_bufferline_bg()
         -- Defer slightly to ensure highlights have settled after colorscheme change
         vim.defer_fn(function()
-          local ok, sl_hl = pcall(vim.api.nvim_get_hl, 0, { name = "StatusLine", link = false })
-          local bg = (ok and sl_hl and sl_hl.bg) or nil
+          -- 1. Try to get TabLineFill background (actual tab bar background)
+          local ok_tl, tl_hl = pcall(vim.api.nvim_get_hl, 0, { name = "TabLineFill", link = false })
+          local bg = (ok_tl and tl_hl and tl_hl.bg) or nil
 
-          local function set_bg(group)
+          -- 2. Fall back to StatusLine background
+          if not bg then
+            local ok_sl, sl_hl = pcall(vim.api.nvim_get_hl, 0, { name = "StatusLine", link = false })
+            bg = (ok_sl and sl_hl and sl_hl.bg) or nil
+          end
+
+          -- 3. Fall back to Normal background
+          if not bg then
+            local ok_nor, nor_hl = pcall(vim.api.nvim_get_hl, 0, { name = "Normal", link = false })
+            bg = (ok_nor and nor_hl and nor_hl.bg) or nil
+          end
+
+          -- 4. Absolute fallback
+          if not bg then
+            bg = 2040629 -- Hex #1f2335 in decimal
+          end
+
+          -- Get the actual background color of the active tab
+          local ok_sel, sel_hl = pcall(vim.api.nvim_get_hl, 0, { name = "BufferLineBufferSelected", link = false })
+          local active_bg = (ok_sel and sel_hl and sel_hl.bg) or nil
+          
+          if not active_bg then
+            local ok_nor, nor_hl = pcall(vim.api.nvim_get_hl, 0, { name = "Normal", link = false })
+            active_bg = (ok_nor and nor_hl and nor_hl.bg) or nil
+          end
+
+          if not active_bg then
+            active_bg = bg
+          end
+
+          local function update_hl(group, new_fg, new_bg)
             local ok2, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
             if ok2 and hl then
-              hl.bg = bg
+              if new_fg ~= nil then
+                hl.fg = new_fg
+              end
+              if new_bg ~= nil then
+                hl.bg = new_bg
+              end
               vim.api.nvim_set_hl(0, group, hl)
             end
           end
@@ -93,9 +132,28 @@ return {
           -- Apply to all BufferLine highlight groups and the tab fill
           local hls = vim.fn.getcompletion("BufferLine", "highlight")
           for _, hl_name in ipairs(hls) do
-            set_bg(hl_name)
+            if hl_name:find("Separator") then
+              if settings.tab_buffer_transparent_dividers ~= false then
+                -- Make all separators (active/inactive/selected) completely transparent and invisible
+                update_hl(hl_name, bg or "NONE", bg or "NONE")
+              else
+                -- Traditional dividers: active separator gets active color, others blend or default
+                if hl_name:find("SeparatorSelected$") or hl_name == "BufferLineSeparatorSelected" then
+                  update_hl(hl_name, active_bg, bg or "NONE")
+                else
+                  update_hl(hl_name, nil, bg or "NONE")
+                end
+              end
+            elseif hl_name:find("Selected") then
+              -- Keep selected highlights untouched
+            else
+              -- Inactive background elements match StatusLine bg
+              update_hl(hl_name, nil, bg or "NONE")
+            end
           end
-          set_bg("TabLineFill")
+          
+          -- Sync main TabLineFill
+          update_hl("TabLineFill", nil, bg)
         end, 50)
       end
 

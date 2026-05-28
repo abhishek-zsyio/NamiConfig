@@ -3,14 +3,14 @@ local plugins = {}
 
 -- 1. Dynamically load all themes from the registry
 local unique_plugins = {}
+local ok, settings = pcall(require, "settings")
+local current = ok and settings.theme or "catppuccin"
 for _, theme in ipairs(registry) do
   local repo = theme.plugin
   if not unique_plugins[repo] then
     unique_plugins[repo] = { is_active = false }
   end
   
-  local ok, settings = pcall(require, "settings")
-  local current = ok and settings.theme or "catppuccin"
   if current == theme.id then
     unique_plugins[repo].is_active = true
   end
@@ -60,13 +60,12 @@ table.insert(plugins, {
         pattern = "*",
         callback = function()
           -- 1. Apply transparency to main editor if requested
-          if ok and settings.background == "transparent" then
+          if ok and settings.transparent == true then
             local hl_groups = {
               "Normal", "NormalNC", "Comment", "Constant", "Special", "Identifier",
               "Statement", "PreProc", "Type", "Underlined", "Todo", "String", "Function",
               "Conditional", "Repeat", "Operator", "Structure", "LineNr", "NonText",
               "SignColumn", "CursorLineNr", "EndOfBuffer", 
-              "NvimTreeNormal", "NvimTreeNormalNC",
             }
             for _, name in ipairs(hl_groups) do
               vim.cmd(string.format("hi %s ctermbg=NONE guibg=NONE", name))
@@ -80,10 +79,10 @@ table.insert(plugins, {
             vim.cmd(string.format("hi %s guibg=NONE ctermbg=NONE", name))
           end
 
-          -- 3. Universal Telescope Theme (borderless style)
+          -- 3. Universal Highlight Adjustments
           local function get_hl(name)
-            local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
-            return ok and hl or {}
+            local ok_hl, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+            return ok_hl and hl or {}
           end
           local bg = get_hl("Normal").bg
           local fg = get_hl("Normal").fg
@@ -92,22 +91,7 @@ table.insert(plugins, {
 
           if bg and fg and alt_bg then
             local set_hl = vim.api.nvim_set_hl
-            
-            -- Telescope Borderless
-            set_hl(0, "TelescopeNormal", { bg = bg, fg = fg })
-            set_hl(0, "TelescopeBorder", { bg = bg, fg = bg })
-            set_hl(0, "TelescopePromptNormal", { bg = alt_bg, fg = fg })
-            set_hl(0, "TelescopePromptBorder", { bg = alt_bg, fg = alt_bg })
-            set_hl(0, "TelescopePromptTitle", { bg = accent, fg = bg, bold = true })
-            set_hl(0, "TelescopePromptPrefix", { bg = alt_bg, fg = accent })
-            set_hl(0, "TelescopeResultsNormal", { bg = bg, fg = fg })
-            set_hl(0, "TelescopeResultsBorder", { bg = bg, fg = bg })
-            set_hl(0, "TelescopeResultsTitle", { bg = bg, fg = bg })
-            set_hl(0, "TelescopePreviewNormal", { bg = alt_bg, fg = fg })
-            set_hl(0, "TelescopePreviewBorder", { bg = alt_bg, fg = alt_bg })
-            set_hl(0, "TelescopePreviewTitle", { bg = alt_bg, fg = alt_bg })
 
-            -- Premium Global Highlight Adjustments
             -- Make line numbers subtle but the active line number pop out
             set_hl(0, "LineNr", { fg = get_hl("Comment").fg or "#5c6370", italic = true })
             set_hl(0, "CursorLineNr", { fg = accent, bold = true })
@@ -116,8 +100,6 @@ table.insert(plugins, {
             local function make_diag_bg(diag_name)
               local diag_fg = get_hl(diag_name).fg
               if diag_fg then
-                -- In Neovim 0.9+, blend colors using nvim_set_hl, 
-                -- or just fallback to the original fg with no bg for transparency
                 set_hl(0, diag_name .. "VirtualText", { fg = diag_fg, bg = "NONE", italic = true })
               end
             end

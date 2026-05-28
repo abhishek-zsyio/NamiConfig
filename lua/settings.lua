@@ -29,14 +29,20 @@
 return {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	---@type Theme
-	theme = "everforest",
+	theme = "rose-pine-main",
 	background = "dark",
-	transparent = false,
-	hide_empty_tabline = true,
+	transparent = true,
+	show_tab_buffer = true, -- Enable/disable the tab buffer bar completely
+	tab_buffer_style = "buffers", -- Options: "buffers", "tabs"
+	tab_buffer_show_icons = true, -- Toggle file-type icons in tabs
+	tab_buffer_show_close = false, -- Toggle close button inside tabs
+	tab_buffer_diagnostics = "nvim_lsp", -- Options: "nvim_lsp", "none"
+	tab_divider_style = "slope", -- Options: "slant", "slope", "thick", "thin", "none", "dotted"
+	tab_buffer_transparent_dividers = true, -- Make vertical divider lines completely transparent
+	hide_empty_tabline = true, -- Hide buffer bar when only 1 file is open
 	show_indent_guides = true,
 	smooth_scroll = true,
 	dim_inactive = false,
-	tab_divider_style = "slope", -- Options: "slant", "slope", "thick", "thin", "none", "dotted"
 	line_height = 2, -- Additional spacing between lines (GUI only, e.g., Neovide)
 	cmdheight = 0, -- 0 for modern hidden cmdline, 1 for classic
 	neovide_transparency = 0.9, -- Transparency level for Neovide (0.0 to 1.0)

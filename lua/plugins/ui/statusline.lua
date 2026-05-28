@@ -95,7 +95,7 @@ return {
             {
               "branch",
               icon    = "⎇",
-              padding = { left = 1, right = 0 },
+              padding = { left = 1, right = 1 },
               fmt     = function(name)
                 return #name > 20 and name:sub(1, 18) .. "…" or name
               end,
@@ -116,9 +116,9 @@ return {
             },
             {
               "filename",
-              path    = 1,
+              path    = 0,
               symbols = { modified = " ●", readonly = " ", unnamed = "[No Name]" },
-              padding = { left = 1, right = 1 },
+              padding = { left = 2, right = 2 },
             },
           },
 
@@ -203,7 +203,7 @@ return {
         inactive_sections = {
           lualine_a = {},
           lualine_b = {},
-          lualine_c = { { "filename", path = 1 } },
+          lualine_c = { { "filename", path = 0 } },
           lualine_x = { "location" },
           lualine_y = {},
           lualine_z = {},

@@ -112,16 +112,61 @@ return {
   { id = "nord", plugin = "shaunsingh/nord.nvim", icon = "󰇉 ", ghostty = "Nord", setup = function(t) vim.o.background="dark"; vim.g.nord_disable_background = t and true or false end },
   { id = "dracula", plugin = "Mofiqul/dracula.nvim", icon = "󰎆 ", ghostty = "Dracula", setup = function(t) vim.o.background="dark"; require("dracula").setup({transparent_bg=t}) end },
   { id = "sonokai", plugin = "sainnhe/sonokai", icon = "󰔎 ", ghostty = "Sonokai", setup = function(t) vim.o.background="dark"; vim.g.sonokai_transparent_background = t and 1 or 0 end },
-  { id = "oxocarbon", plugin = "nyoom-engineering/oxocarbon.nvim", icon = "󰏗 ", ghostty = "Oxocarbon", setup = function(t) vim.o.background="dark" end },
-  { id = "monokai", plugin = "tanvirtin/monokai.nvim", icon = "󰏘 ", ghostty = "Monokai Classic", setup = function(t) vim.o.background="dark" end },
+  { id = "oxocarbon", plugin = "nyoom-engineering/oxocarbon.nvim", icon = "󰏗 ", ghostty = "Oxocarbon", setup = function(t)
+    vim.o.background = "dark"
+    if t then
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        pattern = "oxocarbon",
+        callback = function()
+          vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+          vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
+          vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+        end,
+      })
+    end
+  end },
+  { id = "monokai", plugin = "tanvirtin/monokai.nvim", icon = "󰏘 ", ghostty = "Monokai Classic", setup = function(t)
+    vim.o.background = "dark"
+    require("monokai").setup({ transparent_background = t })
+  end },
   { id = "everforest", plugin = "sainnhe/everforest", icon = "󰔎 ", ghostty = "Everforest Dark Hard", setup = function(t) vim.o.background="dark"; vim.g.everforest_background="hard"; vim.g.everforest_better_performance=1; vim.g.everforest_transparent_background = t and 1 or 0 end },
   { id = "gruvbox-material", plugin = "sainnhe/gruvbox-material", icon = "󰟆 ", ghostty = "Gruvbox Material Dark", setup = function(t) vim.o.background="dark"; vim.g.gruvbox_material_transparent_background = t and 1 or 0 end },
   { id = "poimandres", plugin = "olivercederborg/poimandres.nvim", icon = "󰖔 ", ghostty = "Poimandres", setup = function(t) vim.o.background="dark"; require('poimandres').setup{disable_background=t, disable_float_background=t} end },
 
   -- Ayu
-  { id = "ayu-light", colorscheme = "ayu-light", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu Light", setup = function(t) vim.o.background="light"; require("ayu").setup({mirage=false}) end },
-  { id = "ayu-dark", colorscheme = "ayu-dark", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu", setup = function(t) vim.o.background="dark"; require("ayu").setup({mirage=false}) end },
-  { id = "ayu-mirage", colorscheme = "ayu-mirage", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu Mirage", setup = function(t) vim.o.background="dark"; require("ayu").setup({mirage=true}) end },
+  { id = "ayu-light", colorscheme = "ayu-light", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu Light", setup = function(t)
+    vim.o.background = "light"
+    require("ayu").setup({
+      mirage = false,
+      overrides = t and {
+        Normal = { bg = "None" },
+        NormalNC = { bg = "None" },
+        SignColumn = { bg = "None" },
+      } or {}
+    })
+  end },
+  { id = "ayu-dark", colorscheme = "ayu-dark", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu", setup = function(t)
+    vim.o.background = "dark"
+    require("ayu").setup({
+      mirage = false,
+      overrides = t and {
+        Normal = { bg = "None" },
+        NormalNC = { bg = "None" },
+        SignColumn = { bg = "None" },
+      } or {}
+    })
+  end },
+  { id = "ayu-mirage", colorscheme = "ayu-mirage", plugin = "Shatur/neovim-ayu", icon = "󰏘 ", ghostty = "Ayu Mirage", setup = function(t)
+    vim.o.background = "dark"
+    require("ayu").setup({
+      mirage = true,
+      overrides = t and {
+        Normal = { bg = "None" },
+        NormalNC = { bg = "None" },
+        SignColumn = { bg = "None" },
+      } or {}
+    })
+  end },
 
   -- Cyberdream
   { id = "cyberdream-light", colorscheme = "cyberdream", plugin = "scottmckendry/cyberdream.nvim", icon = "󰏗 ", ghostty = "One Half Light", setup = function(t) vim.o.background="light"; require("cyberdream").setup({transparent=t, theme={variant="light"}}) end },
@@ -133,7 +178,7 @@ return {
   { id = "material-oceanic", colorscheme = "material", plugin = "marko-cerovac/material.nvim", icon = "󰏘 ", ghostty = "Material Ocean", setup = function(t) vim.o.background="dark"; vim.g.material_style="oceanic"; require("material").setup({disable={background=t}}) end },
 
   -- Nightfly & Moonfly
-  { id = "nightfly", plugin = "bluz71/vim-nightfly-colors", icon = "󰖔 ", ghostty = "Moonfly", setup = function(t) vim.o.background="dark"; vim.g.nightflyTransparent=t and 1 or 0 end },
+  { id = "nightfly", plugin = "bluz71/vim-nightfly-colors", icon = "󰖔 ", ghostty = "Nightfly", setup = function(t) vim.o.background="dark"; vim.g.nightflyTransparent=t and 1 or 0 end },
   { id = "moonfly", plugin = "bluz71/vim-moonfly-colors", icon = "󰖔 ", ghostty = "Moonfly", setup = function(t) vim.o.background="dark"; vim.g.moonflyTransparent=t and 1 or 0 end },
 
   -- Community Favorites

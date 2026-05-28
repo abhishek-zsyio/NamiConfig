@@ -19,6 +19,17 @@ return {
       vim.g.rustaceanvim = {
         server = {
           capabilities = capabilities,
+          on_attach = function(client, bufnr)
+            local map = function(mode, lhs, rhs, opts)
+              opts = opts or {}
+              opts.buffer = bufnr
+              vim.keymap.set(mode, lhs, rhs, opts)
+            end
+            map("n", "<leader>rR", function() vim.cmd("RustLsp runnables") end,   { desc = "Rust: Runnables" })
+            map("n", "<leader>rt", function() vim.cmd("RustLsp testables") end,   { desc = "Rust: Testables" })
+            map("n", "<leader>re", function() vim.cmd("RustLsp expandMacro") end, { desc = "Rust: Expand Macro" })
+            map("n", "<leader>rc", function() vim.cmd("RustLsp openCargo") end,   { desc = "Rust: Open Cargo.toml" })
+          end,
           settings     = {
             ["rust-analyzer"] = {
               cargo    = { allFeatures = true },
@@ -33,13 +44,6 @@ return {
           float_win_config = { border = "rounded" },
         },
       }
-
-      -- Rust-specific keymaps
-      local map = vim.keymap.set
-      map("n", "<leader>rr", function() vim.cmd("RustLsp runnables") end,   { ft = "rust", desc = "Rust: Runnables" })
-      map("n", "<leader>rt", function() vim.cmd("RustLsp testables") end,   { ft = "rust", desc = "Rust: Testables" })
-      map("n", "<leader>re", function() vim.cmd("RustLsp expandMacro") end, { ft = "rust", desc = "Rust: Expand Macro" })
-      map("n", "<leader>rc", function() vim.cmd("RustLsp openCargo") end,   { ft = "rust", desc = "Rust: Open Cargo.toml" })
     end,
   },
 

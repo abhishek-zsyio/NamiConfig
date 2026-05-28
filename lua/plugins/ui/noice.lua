@@ -71,8 +71,6 @@ return {
         { filter = { event = "notify",   find = "lualine" },               opts = { skip = true } },
         -- Silence mason-lspconfig warnings about server names
         { filter = { event = "notify",   find = "mason%-lspconfig" },      opts = { skip = true } },
-        -- Silence nvim-tree deprecation warnings
-        { filter = { event = "notify",   find = "NvimTree" },              opts = { skip = true } },
         -- Note: long messages handled by presets.long_message_to_split below
       },
 
@@ -84,9 +82,5 @@ return {
         lsp_doc_border        = true,
       },
     },
-
-    config = function(_, opts)
-      require("noice").setup(opts)
-    end,
   },
 }

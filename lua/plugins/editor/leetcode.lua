@@ -3,7 +3,6 @@ return {
   {
     "kawre/leetcode.nvim",
     dependencies = {
-      "nvim-telescope/telescope.nvim",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
       "nvim-tree/nvim-web-devicons",
@@ -108,10 +107,6 @@ return {
                   end
                 end
 
-                -- Git Sync Routine
-                local job = function(cmd, cb)
-                  vim.system(cmd, { cwd = leetcode_dir }, cb)
-                end
               end
             end)
           end
