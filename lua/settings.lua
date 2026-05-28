@@ -29,7 +29,7 @@
 return {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	---@type Theme
-	theme = "cyberdream-dark",
+	theme = "everforest",
 	background = "dark",
 	transparent = false,
 	hide_empty_tabline = true,
@@ -69,7 +69,7 @@ return {
 
 	-- ── File Explorer ──────────────────────────────────────────────────────────
 	show_hidden_files = true,
-	file_explorer_position = "right",
+	file_explorer_position = "left",
 
 	-- ── Linting ────────────────────────────────────────────────────────────────
 	enable_linting = true,

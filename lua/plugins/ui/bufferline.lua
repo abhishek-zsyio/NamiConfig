@@ -75,29 +75,36 @@ return {
         },
       })
 
-      -- Ensure Bufferline respects transparent backgrounds across all themes
+      -- Sync Bufferline background with the StatusLine background color
+      local function sync_bufferline_bg()
+        -- Defer slightly to ensure highlights have settled after colorscheme change
+        vim.defer_fn(function()
+          local ok, sl_hl = pcall(vim.api.nvim_get_hl, 0, { name = "StatusLine", link = false })
+          local bg = (ok and sl_hl and sl_hl.bg) or nil
+
+          local function set_bg(group)
+            local ok2, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+            if ok2 and hl then
+              hl.bg = bg
+              vim.api.nvim_set_hl(0, group, hl)
+            end
+          end
+
+          -- Apply to all BufferLine highlight groups and the tab fill
+          local hls = vim.fn.getcompletion("BufferLine", "highlight")
+          for _, hl_name in ipairs(hls) do
+            set_bg(hl_name)
+          end
+          set_bg("TabLineFill")
+        end, 50)
+      end
+
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = "*",
-        callback = function()
-          -- Defer slightly to ensure Bufferline has already reacted and generated its highlights
-          vim.defer_fn(function()
-            local function clear_bg(group)
-              local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
-              if ok and hl then
-                hl.bg = nil
-                vim.api.nvim_set_hl(0, group, hl)
-              end
-            end
-            
-            -- Clear backgrounds of all BufferLine components to make it completely transparent
-            local hls = vim.fn.getcompletion("BufferLine", "highlight")
-            for _, hl_name in ipairs(hls) do
-              clear_bg(hl_name)
-            end
-            clear_bg("TabLineFill")
-          end, 50)
-        end,
+        callback = sync_bufferline_bg,
       })
+      -- Also apply immediately on first load
+      sync_bufferline_bg()
     end,
   },
 }

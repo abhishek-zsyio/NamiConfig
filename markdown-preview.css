@@ -1,1577 +1,433 @@
+/* ── peek.nvim · markdown-preview.css ───────────────────
+   Minimal dark theme. Clean. No clutter.
+   ─────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500&display=swap');
+
+/* ── Variables ─────────────────────────────────────────── */
+:root {
+  --bg:      var(--nvim-bg,       #0b0e14);
+  --bg-1:    var(--nvim-code-bg,  #11151c);
+  --bg-2:    #151a23;
+  --fg:      var(--nvim-fg,       #bfbdb6);
+  --fg-dim:  #636a72;
+  --accent:  var(--nvim-accent,   #ff8f40);
+  --link:    var(--nvim-link,     #aad94c);
+  --title:   var(--nvim-title,    #ff8f40);
+  --border:  var(--nvim-border,   #2a2f38);
+
+  /* Syntax — Aura Dark */
+  --syn-keyword:  #a277ff;
+  --syn-string:   #aad94c;
+  --syn-number:   #f29668;
+  --syn-comment:  #5c6370;
+  --syn-fn:       #61afef;
+  --syn-type:     #e5c07b;
+  --syn-operator: #61afef;
+  --syn-tag:      #ef5350;
+  --syn-attr:     #56b6c2;
+  --syn-punct:    #636a72;
+}
+
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body.peek-body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* ── Titlebar ───────────────────────────────────────────── */
+#titlebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 26px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  user-select: none;
+}
+
+.titlebar-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: grab;
+}
+.titlebar-content:active { cursor: grabbing; }
+
+/* ── Scroll container ───────────────────────────────────── */
+#scroll-container {
+  position: absolute;
+  top: 26px; bottom: 0; left: 0; right: 0;
+  overflow-y: auto;
+  padding: 32px 24px;
+}
+
+/* ── Zoom label ─────────────────────────────────────────── */
+#peek-zoom-label {
+  position: fixed;
+  top: 32px; right: 24px;
+  padding: 4px 10px;
+  opacity: 0;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  z-index: 999;
+}
+
+/* ── Loader ─────────────────────────────────────────────── */
+@keyframes pulse {
+  from { scale: 0; }
+  to   { scale: 1; }
+}
+.peek-loader {
+  position: absolute;
+  display: flex;
+  width: 36px;
+  top: 50%; left: 50%;
+  translate: -50% -50%;
+  justify-content: space-between;
+}
+.peek-loader::before,
+.peek-loader::after {
+  content: '';
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: .5s linear infinite alternate pulse;
+}
+.peek-loader::after { animation-direction: alternate-reverse; }
+
+/* ── Mermaid ────────────────────────────────────────────── */
+.peek-mermaid-container {
+  margin: 0 0 1.2em;
+  padding: 16px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  overflow: auto;
+}
+.peek-mermaid-container:has(svg) { height: auto !important; }
+div[data-graph='mermaid']:has(> .peek-loader) {
+  position: relative;
+  height: 100%;
+  min-height: 50px;
+}
+
 /* ═══════════════════════════════════════════════════════
-   MODERN DESIGN SYSTEM  ·  v2.0
-   Neovim · Terminal · Monospace-first
+   MARKDOWN BODY
    ═══════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap');
-
-/* ── Tokens ─────────────────────────────────────────── */
-:root {
-  /* Surface layers — TokyoNight-inspired */
-  --bg:    var(--nvim-bg,      #1a1b26);
-  --bg-01: var(--nvim-code-bg, #1f2335);
-  --bg-02: var(--nvim-code-bg, #24283b);
-  --bg-03: #292e42;
-  --bg-04: #2f3549;
-
-  /* Glass — flat, no blur in terminal land */
-  --glass:        rgba(255, 255, 255, 0.03);
-  --glass-hover:  rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.07);
-
-  /* Typography */
-  --text:       var(--nvim-fg, #c0caf5);
-  --text-muted: var(--nvim-fg, #9aa5ce);
-  --text-faint: var(--nvim-fg, #565f89);
-  --heading:    var(--nvim-title, #c0caf5);
-
-  /* Brand accent — Tokyo blue */
-  --accent:      var(--nvim-accent, #7aa2f7);
-  --accent-2:    var(--nvim-link,   #bb9af7);
-  --accent-glow: rgba(122, 162, 247, 0.12);
-  --accent-soft: rgba(122, 162, 247, 0.08);
-
-  /* Semantic */
-  --success: #9ece6a;
-  --warning: #e0af68;
-  --danger:  #f7768e;
-  --info:    #7dcfff;
-
-  /* Borders — sharp, single-pixel, terminal weight */
-  --border:     var(--nvim-border, rgba(86,  95, 137, 0.4));
-  --border-mid: var(--nvim-border, rgba(86,  95, 137, 0.65));
-
-  /* Fonts — mono everywhere, body as fallback */
-  --font-display: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
-  --font-body:    'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
-  --font-code:    'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
-
-  /* Radius — zero, always. nvim has no curves. */
-  --r-sm: 0px;
-  --r-md: 0px;
-  --r-lg: 0px;
-  --r-xl: 0px;
-
-  /* Shadows — mostly flat; depth via border only */
-  --shadow-sm:     0 1px 0 rgba(0, 0, 0, .6);
-  --shadow-md:     0 2px 0 rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255,255,255,.03);
-  --shadow-lg:     0 4px 0 rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255,255,255,.04);
-  --shadow-accent: 0 0 0 1px var(--accent);
-
-  /* Transitions — snappy like a mode switch */
-  --ease:   linear;
-  --t-fast: 60ms;
-  --t-mid:  100ms;
-  --t-slow: 160ms;
-
-  /* Syntax tokens — TokyoNight exact */
-  --tok-comment:  #565f89;
-  --tok-keyword:  #bb9af7;
-  --tok-string:   #9ece6a;
-  --tok-number:   #ff9e64;
-  --tok-fn:       #7aa2f7;
-  --tok-operator: #89ddff;
-  --tok-type:     #e0af68;
-  --tok-tag:      #f7768e;
-  --tok-attr:     #73daca;
-  --tok-punct:    #9aa5ce;
-  --tok-bool:     #ff9e64;
+.markdown-body {
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--fg);
+  background: transparent;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 8px 64px;
+  -webkit-font-smoothing: antialiased;
+  tab-size: 2;
 }
 
-/* Light theme — no-nonsense light terminal */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg:    #e9e9f4;
-    --bg-01: #e1e1ef;
-    --bg-02: #d8d8ea;
-    --bg-03: #cecee0;
-    --bg-04: #c4c4d6;
-
-    --glass:        rgba(0, 0, 0, 0.04);
-    --glass-hover:  rgba(0, 0, 0, 0.07);
-    --glass-border: rgba(0, 0, 0, 0.09);
-
-    --text:       #3b4261;
-    --text-muted: #6b7499;
-    --text-faint: #9699b0;
-    --heading:    #1f2335;
-
-    --accent:      #2959c0;
-    --accent-2:    #7c53c0;
-    --accent-glow: rgba(41, 89, 192, 0.14);
-    --accent-soft: rgba(41, 89, 192, 0.08);
-
-    --border:     rgba(59, 66, 97, 0.20);
-    --border-mid: rgba(59, 66, 97, 0.35);
-
-    --shadow-sm:     0 1px 0 rgba(0, 0, 0, .1);
-    --shadow-md:     0 2px 0 rgba(0, 0, 0, .12);
-    --shadow-lg:     0 4px 0 rgba(0, 0, 0, .14);
-    --shadow-accent: 0 0 0 1px var(--accent);
-
-    --tok-comment:  #9699b0;
-    --tok-keyword:  #7c53c0;
-    --tok-string:   #3d6b31;
-    --tok-number:   #965027;
-    --tok-fn:       #2959c0;
-    --tok-operator: #0369a1;
-    --tok-type:     #8c6a1a;
-    --tok-tag:      #a3214a;
-    --tok-attr:     #1a7a6a;
-    --tok-punct:    #4a5078;
-    --tok-bool:     #965027;
-  }
-}
-
-/* ── Reset & base ────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body.peek-body {
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: var(--bg);
-  color: var(--text);
-}
-
-/* ── Titlebar — Neovim statusline style ─────────────── */
-#titlebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 28px;
-  background-color: var(--bg-02);
-  border-bottom: 1px solid var(--border-mid);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  user-select: none;
-  color: var(--text-muted);
-  font-family: var(--font-code);
-  font-size: 12px;
-  letter-spacing: 0.01em;
-}
-
-/* Statusline pill — mimics ▊ NORMAL / INSERT ▊ */
-.titlebar-content {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px 3px 8px;
-  background-color: var(--accent);
-  color: var(--bg);
-  border: none;
-  cursor: grab;
+/* ── Headings ───────────────────────────────────────────── */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  font-family: 'Geist', sans-serif;
   font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--fg);
+  margin: 1.8em 0 0.6em;
 }
 
-.titlebar-content:active {
-  cursor: grabbing;
-  filter: brightness(0.9);
+.markdown-body h1:first-child,
+.markdown-body h2:first-child,
+.markdown-body h3:first-child {
+  margin-top: 0;
 }
 
-.nvim-logo {
-  color: inherit;
-  opacity: 0.9;
+.markdown-body h1 {
+  font-size: 1.7em;
+  color: var(--title);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4em;
+  margin-bottom: 0.8em;
 }
 
-/* ── Scroll container ───────────────────────────────── */
-#scroll-container {
-  position: absolute;
-  top: 28px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow-y: auto;
-  padding: 24px 28px;
-  /* terminal-style line numbers gutter feel */
-  background-image:
-    linear-gradient(
-      to right,
-      var(--bg-02) 0px,
-      var(--bg-02) 40px,
-      var(--border) 40px,
-      var(--border) 41px,
-      transparent 41px
-    );
-  background-attachment: local;
+.markdown-body h2 {
+  font-size: 1.3em;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.25em;
 }
 
-/* ── Document body ──────────────────────────────────── */
-.markdown-body.markdown-body {
-  & {
-    font-family: var(--font-body);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.65;
-    color: var(--text);
-    background: transparent;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 12px 20px 48px 56px; /* 56px left = clears the gutter */
-    -webkit-font-smoothing: subpixel-antialiased; /* sharper, like a terminal */
-    -moz-osx-font-smoothing: auto;
-    tab-size: 4;
-  }
-
-  /* ── Subtle cursor-blink on load instead of float-up ── */
-  @keyframes nvimEntry {
-    0%   { opacity: 0; }
-    40%  { opacity: 0; }
-    41%  { opacity: 1; }
-    100% { opacity: 1; }
-  }
-
-  & > * {
-    animation: nvimEntry calc(var(--t-slow) * 1) linear both;
-  }
-
-  & > *:nth-child(1)  { animation-delay:  0ms; }
-  & > *:nth-child(2)  { animation-delay: 30ms; }
-  & > *:nth-child(3)  { animation-delay: 60ms; }
-  & > *:nth-child(4)  { animation-delay: 90ms; }
-  & > *:nth-child(5)  { animation-delay: 120ms; }
-
-  /* ── Headings — mono, functional, like a fold marker ── */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-body);
-    color: var(--heading);
-    font-weight: 500;
-    line-height: 1.3;
-    letter-spacing: 0em;
-    margin: 2em 0 0.6em;
-  }
-
-  h1:first-child,
-  h2:first-child,
-  h3:first-child {
-    margin-top: 0;
-  }
-
-  /* h1 — mimics ══ Title ══ fold header */
-  h1 {
-    font-family: var(--font-display);
-    font-size: 1.35em;
-    font-weight: 500;
-    letter-spacing: 0;
-    line-height: 1.3;
-    color: var(--accent);
-    /* no gradient — just the accent color, sharp */
-    -webkit-text-fill-color: unset;
-    background: none;
-    padding: 0;
-    padding-bottom: 0.5em;
-    margin-bottom: 0.4em;
-    /* fold-style separator */
-    border-bottom: 1px solid var(--border-mid);
-    position: relative;
-  }
-
-  h1::before {
-    content: '# ';
-    color: var(--text-faint);
-    font-size: 1em;
-  }
-
-  h2 {
-    font-size: 1.15em;
-    color: var(--accent-2);
-    position: relative;
-    padding-bottom: 0;
-    border-bottom: none;
-    margin-top: 2.2em;
-  }
-
-  h2::before {
-    content: '## ';
-    color: var(--text-faint);
-    font-size: 1em;
-  }
-
-  h2::after {
-    display: none; /* remove gradient underline */
-  }
-
-  h3 {
-    font-size: 1.05em;
-    color: var(--info);
-  }
-
-  h3::before {
-    content: '### ';
-    color: var(--text-faint);
-    font-size: 1em;
-  }
-
-  h4 {
-    font-size: 0.95em;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  h4::before {
-    content: '#### ';
-    color: var(--text-faint);
-  }
-
-  h5, h6 {
-    font-size: 0.85em;
-    font-weight: 400;
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--text-muted);
-  }
-
-  /* ── Links ──────────────────────────────────────────── */
-  a {
-    color: var(--accent);
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
-    text-underline-offset: 3px;
-    border-bottom: none;
-    transition: color var(--t-fast) var(--ease),
-                text-decoration-color var(--t-fast) var(--ease);
-  }
-
-  a:hover {
-    color: var(--heading);
-    text-decoration-color: var(--accent);
-  }
-
-  /* ── Prose ──────────────────────────────────────────── */
-  p {
-    margin: 0 0 0.9em;
-  }
-
-  ul, ol {
-    margin: 0 0 0.9em;
-    padding-left: 1.4em;
-  }
-
-  li {
-    margin-bottom: 0.25em;
-  }
-
-  /* Custom marker — Lua-style bullet */
-  ul li::marker {
-    content: '─ ';
-    color: var(--text-faint);
-  }
-
-  ol li::marker {
-    color: var(--text-faint);
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* ── Blockquote — like a :echo / message area ───────── */
-  blockquote {
-    margin: 1.2em 0;
-    padding: 0.7em 1em;
-    background: var(--bg-01);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent-2);
-    border-radius: 0;
-    color: var(--text-muted);
-    font-style: normal;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* Remove the giant decorative quote mark */
-  blockquote::before {
-    display: none;
-  }
-
-  /* Add a ":" prefix like neovim command output */
-  blockquote::after {
-    content: ':';
-    position: absolute;
-    top: 0.65em;
-    left: -1px;
-    font-size: 0.85em;
-    color: var(--accent-2);
-    font-weight: 500;
-  }
-
-  blockquote > :first-child { margin-top: 0; }
-  blockquote > :last-child  { margin-bottom: 0; }
-
-  /* ── Inline code ────────────────────────────────────── */
-  code, pre, kbd {
-    font-family: var(--font-code);
-  }
-
-  :not(pre) > code {
-    font-size: 0.88em;
-    padding: 0.12em 0.38em;
-    background: var(--bg-02);
-    border: 1px solid var(--border-mid);
-    border-radius: 0;
-    color: var(--tok-string);
-    font-weight: 400;
-    transition: background var(--t-fast);
-  }
-
-  :not(pre) > code:hover {
-    background: var(--bg-03);
-  }
-
-  /* ── Code block — the star of the show ─────────────── */
-  pre {
-    position: relative;
-    margin: 0 0 1.2em;
-    padding: 0;
-    overflow-x: auto;
-    font-size: 0.88em;
-    line-height: 1.6;
-    background: var(--bg-01);
-    border: 1px solid var(--border-mid);
-    border-radius: 0;
-    tab-size: 4;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-mid) transparent;
-    box-shadow: none;
-    transition: border-color var(--t-fast) var(--ease);
-  }
-
-  /* Filetype bar — mimics nvim buffer topline */
-  pre::before {
-    content: attr(data-lang, '');
-    display: block;
-    width: 100%;
-    padding: 3px 10px;
-    background: var(--bg-02);
-    border-bottom: 1px solid var(--border-mid);
-    color: var(--text-muted);
-    font-size: 0.8em;
-    font-family: var(--font-code);
-    letter-spacing: 0.03em;
-    opacity: 1;
-    pointer-events: none;
-  }
-
-  pre:hover {
-    border-color: var(--accent);
-    box-shadow: none;
-  }
-
-  /* Remove gradient overlay on hover */
-  pre::after {
-    display: none;
-  }
-
-  pre > code {
-    display: block;
-    padding: 0.9em 1.1em;
-    background: transparent;
-    border: 0;
-    font-size: inherit;
-    border-radius: 0;
-    color: var(--text);
-    font-weight: 400;
-  }
-
-  /* Line numbers */
-  pre.line-numbers {
-    padding-left: 3em;
-    counter-reset: line;
-  }
-
-  pre.line-numbers code {
-    counter-increment: line;
-  }
-
-  /* ── Syntax token colors ── TokyoNight precise ───── */
-  .token.comment,
-  .token.prolog,
-  .token.doctype,
-  .token.cdata {
-    color: var(--tok-comment);
-    font-style: italic;
-  }
-
-  .token.keyword,
-  .token.important {
-    color: var(--tok-keyword);
-    font-weight: 400;
-  }
-
-  .token.string,
-  .token.char,
-  .token.attr-value {
-    color: var(--tok-string);
-  }
-
-  .token.number,
-  .token.constant,
-  .token.boolean {
-    color: var(--tok-number);
-  }
-
-  .token.function {
-    color: var(--tok-fn);
-  }
-
-  .token.class-name,
-  .token.maybe-class-name {
-    color: var(--tok-type);
-  }
-
-  .token.tag     { color: var(--tok-tag); }
-  .token.attr-name { color: var(--tok-attr); }
-
-  .token.operator,
-  .token.entity,
-  .token.url {
-    color: var(--tok-operator);
-  }
-
-  .token.punctuation { color: var(--tok-punct); }
-  .token.inserted    { color: var(--tok-string); }
-  .token.deleted     { color: var(--tok-tag); }
-  .token.variable    { color: var(--text); }
-
-  /* ── KBD — looks like mode indicator ───────────────── */
-  kbd {
-    display: inline-flex;
-    align-items: center;
-    gap: 1px;
-    font-size: 0.8em;
-    padding: 0.15em 0.45em;
-    border: 1px solid var(--border-mid);
-    border-bottom-width: 1px;
-    border-radius: 0;
-    background: var(--bg-03);
-    color: var(--accent);
-    box-shadow: none;
-    font-weight: 500;
-    font-family: var(--font-code);
-    letter-spacing: 0.04em;
-  }
-
-  /* ── Tables — grid-like, no frills ─────────────────── */
-  .table-wrap {
-    overflow-x: auto;
-    margin-bottom: 1.2em;
-    border-radius: 0;
-    border: 1px solid var(--border-mid);
-    box-shadow: none;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88em;
-  }
-
-  thead {
-    background: var(--bg-02);
-    border-bottom: 1px solid var(--border-mid);
-  }
-
-  th, td {
-    padding: 0.45em 0.9em;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-
-  th {
-    font-weight: 500;
-    font-size: 0.85em;
-    letter-spacing: 0.03em;
-    text-transform: none;
-    color: var(--accent);
-    font-family: var(--font-code);
-  }
-
-  tbody tr:last-child td { border-bottom: 0; }
-
-  tbody tr {
-    transition: background var(--t-fast) var(--ease);
-  }
-
-  tbody tr:hover {
-    background: var(--bg-02);
-  }
-
-  td:first-child,
-  th:first-child { padding-left: 0.9em; }
-
-  td:last-child,
-  th:last-child  { padding-right: 0.9em; }
-
-  /* ── Images ─────────────────────────────────────────── */
-  img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 0;
-    border: 1px solid var(--border-mid);
-    display: block;
-    margin: 1.2em 0;
-    box-shadow: none;
-    transition: border-color var(--t-fast) var(--ease);
-  }
-
-  img:hover {
-    border-color: var(--accent);
-    box-shadow: none;
-    transform: none;
-  }
-
-  /* ── Figure / Caption ───────────────────────────────── */
-  figure { margin: 1.4em 0; }
-
-  figcaption {
-    font-size: 0.78em;
-    color: var(--tok-comment);
-    text-align: left;
-    margin-top: 0.3em;
-    font-style: italic;
-    font-family: var(--font-code);
-  }
-
-  /* ── HR — like a fold separator line ────────────────── */
-  hr {
-    border: 0;
-    height: 1px;
-    background: var(--border-mid);
-    margin: 2em 0;
-  }
-
-  /* ── Callout / Note card — diagnostic style ─────────── */
-  .note, .warning, .tip, .danger {
-    padding: 0.6em 1em;
-    border-radius: 0;
-    border: 0;
-    border-left: 3px solid;
-    margin: 1.2em 0;
-    font-size: 0.875em;
-    display: flex;
-    gap: 0.6em;
-    background: var(--bg-01);
-  }
-
-  .note    { border-left-color: var(--info);    }
-  .warning { border-left-color: var(--warning); }
-  .tip     { border-left-color: var(--success); }
-  .danger  { border-left-color: var(--danger);  }
-
-  .note p, .warning p, .tip p, .danger p {
-    color: var(--text-muted);
-    margin: 0;
-  }
-
-  /* ── Badges / Tags — mode-pill style ───────────────── */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.15em 0.55em;
-    font-size: 0.73em;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    border-radius: 0;
-    text-transform: uppercase;
-    border: 1px solid;
-    font-family: var(--font-code);
-  }
-
-  .badge-default  { background: var(--bg-03); border-color: var(--border-mid); color: var(--text-muted); }
-  .badge-accent   { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-  .badge-success  { background: transparent; border-color: var(--success); color: var(--success); }
-  .badge-warning  { background: transparent; border-color: var(--warning); color: var(--warning); }
-  .badge-danger   { background: transparent; border-color: var(--danger);  color: var(--danger); }
-
-  /* ── Details / Summary — fold/unfold ───────────────── */
-  details {
-    background: var(--bg-01);
-    border: 1px solid var(--border);
-    border-radius: 0;
-    margin-bottom: 0.8em;
-    overflow: hidden;
-    transition: border-color var(--t-fast) var(--ease);
-  }
-
-  details[open] {
-    border-color: var(--border-mid);
-    box-shadow: none;
-  }
-
-  summary {
-    padding: 0.55em 0.9em;
-    cursor: pointer;
-    font-weight: 400;
-    color: var(--heading);
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 0.4em;
-    user-select: none;
-    font-family: var(--font-code);
-    font-size: 0.9em;
-    transition: background var(--t-fast) var(--ease);
-  }
-
-  summary::-webkit-details-marker { display: none; }
-
-  /* Fold marker: ▶ / ▼  */
-  summary::before {
-    content: '▶';
-    font-size: 0.65em;
-    color: var(--text-faint);
-    transition: transform var(--t-fast) var(--ease);
-    display: inline-block;
-    font-weight: 400;
-  }
-
-  details[open] > summary::before {
-    transform: rotate(90deg);
-    color: var(--accent);
-  }
-
-  summary:hover { background: var(--bg-02); }
-
-  details > *:not(summary) {
-    padding: 0 0.9em 0.8em;
-    font-size: 0.9em;
-  }
-
-  /* ── Scrollbar — minimal ────────────────────────────── */
-  ::-webkit-scrollbar       { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb {
-    background: var(--border-mid);
-    border-radius: 0;
-  }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
-
-  /* ── Selection ──────────────────────────────────────── */
-  ::selection {
-    background: color-mix(in srgb, var(--accent) 30%, transparent);
-    color: var(--heading);
-  }
-
-  /* ── Focus ──────────────────────────────────────────── */
-  :focus-visible {
-    outline: 1px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 0;
-  }
-
-  /* ── Utility helpers ─────────────────────────────────── */
-  .text-muted   { color: var(--text-muted); }
-  .text-accent  { color: var(--accent); }
-  .text-small   { font-size: 0.85em; }
-  .mono         { font-family: var(--font-code); }
-  .serif        { font-family: var(--font-display); }
-
-  /* ── Responsive ─────────────────────────────────────── */
-  @media (max-width: 600px) {
-    & {
-      font-size: 13px;
-      padding: 10px 12px 32px 12px;
-    }
-
-    pre { font-size: 0.82em; }
-  }
-}/* ═══════════════════════════════════════════════════════
-   MODERN DESIGN SYSTEM  ·  v2.0
-   Neovim · Terminal · Monospace-first
-   ═══════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap');
-
-/* ── Tokens ─────────────────────────────────────────── */
-:root {
-  /* Surface layers — TokyoNight-inspired */
-  --bg:    var(--nvim-bg,      #1a1b26);
-  --bg-01: var(--nvim-code-bg, #1f2335);
-  --bg-02: var(--nvim-code-bg, #24283b);
-  --bg-03: #292e42;
-  --bg-04: #2f3549;
-
-  /* Glass — flat, no blur in terminal land */
-  --glass:        rgba(255, 255, 255, 0.03);
-  --glass-hover:  rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.07);
-
-  /* Typography */
-  --text:       var(--nvim-fg, #c0caf5);
-  --text-muted: var(--nvim-fg, #9aa5ce);
-  --text-faint: var(--nvim-fg, #565f89);
-  --heading:    var(--nvim-title, #c0caf5);
-
-  /* Brand accent — Tokyo blue */
-  --accent:      var(--nvim-accent, #7aa2f7);
-  --accent-2:    var(--nvim-link,   #bb9af7);
-  --accent-glow: rgba(122, 162, 247, 0.12);
-  --accent-soft: rgba(122, 162, 247, 0.08);
-
-  /* Semantic */
-  --success: #9ece6a;
-  --warning: #e0af68;
-  --danger:  #f7768e;
-  --info:    #7dcfff;
-
-  /* Borders — sharp, single-pixel, terminal weight */
-  --border:     var(--nvim-border, rgba(86,  95, 137, 0.4));
-  --border-mid: var(--nvim-border, rgba(86,  95, 137, 0.65));
-
-  /* Fonts — mono everywhere, body as fallback */
-  --font-display: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
-  --font-body:    'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
-  --font-code:    'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
-
-  /* Radius — zero, always. nvim has no curves. */
-  --r-sm: 0px;
-  --r-md: 0px;
-  --r-lg: 0px;
-  --r-xl: 0px;
-
-  /* Shadows — mostly flat; depth via border only */
-  --shadow-sm:     0 1px 0 rgba(0, 0, 0, .6);
-  --shadow-md:     0 2px 0 rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255,255,255,.03);
-  --shadow-lg:     0 4px 0 rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255,255,255,.04);
-  --shadow-accent: 0 0 0 1px var(--accent);
-
-  /* Transitions — snappy like a mode switch */
-  --ease:   linear;
-  --t-fast: 60ms;
-  --t-mid:  100ms;
-  --t-slow: 160ms;
-
-  /* Syntax tokens — TokyoNight exact */
-  --tok-comment:  #565f89;
-  --tok-keyword:  #bb9af7;
-  --tok-string:   #9ece6a;
-  --tok-number:   #ff9e64;
-  --tok-fn:       #7aa2f7;
-  --tok-operator: #89ddff;
-  --tok-type:     #e0af68;
-  --tok-tag:      #f7768e;
-  --tok-attr:     #73daca;
-  --tok-punct:    #9aa5ce;
-  --tok-bool:     #ff9e64;
+.markdown-body h3 { font-size: 1.1em; color: var(--link); }
+.markdown-body h4 { font-size: 1em;   color: var(--fg); }
+.markdown-body h5,
+.markdown-body h6 { font-size: 0.9em; color: var(--fg-dim); }
+
+/* ── Paragraphs ─────────────────────────────────────────── */
+.markdown-body p  { margin: 0 0 1em; }
+
+/* ── Links ──────────────────────────────────────────────── */
+.markdown-body a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 80ms;
+}
+.markdown-body a:hover { border-bottom-color: var(--link); }
+
+/* ── Lists ──────────────────────────────────────────────── */
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 1em;
+  padding-left: 1.6em;
+}
+.markdown-body li { margin-bottom: 0.2em; }
+
+/* ── Blockquote ─────────────────────────────────────────── */
+.markdown-body blockquote {
+  margin: 1em 0;
+  padding: 0.6em 1em;
+  background: var(--bg-1);
+  border-left: 3px solid var(--accent);
+  color: var(--fg-dim);
+}
+.markdown-body blockquote > :first-child { margin-top: 0; }
+.markdown-body blockquote > :last-child  { margin-bottom: 0; }
+
+/* ── Inline code ────────────────────────────────────────── */
+.markdown-body :not(pre) > code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.875em;
+  padding: 0.15em 0.4em;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  color: var(--link);
+  border-radius: 3px;
 }
 
-/* Light theme — no-nonsense light terminal */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg:    #e9e9f4;
-    --bg-01: #e1e1ef;
-    --bg-02: #d8d8ea;
-    --bg-03: #cecee0;
-    --bg-04: #c4c4d6;
-
-    --glass:        rgba(0, 0, 0, 0.04);
-    --glass-hover:  rgba(0, 0, 0, 0.07);
-    --glass-border: rgba(0, 0, 0, 0.09);
-
-    --text:       #3b4261;
-    --text-muted: #6b7499;
-    --text-faint: #9699b0;
-    --heading:    #1f2335;
-
-    --accent:      #2959c0;
-    --accent-2:    #7c53c0;
-    --accent-glow: rgba(41, 89, 192, 0.14);
-    --accent-soft: rgba(41, 89, 192, 0.08);
-
-    --border:     rgba(59, 66, 97, 0.20);
-    --border-mid: rgba(59, 66, 97, 0.35);
-
-    --shadow-sm:     0 1px 0 rgba(0, 0, 0, .1);
-    --shadow-md:     0 2px 0 rgba(0, 0, 0, .12);
-    --shadow-lg:     0 4px 0 rgba(0, 0, 0, .14);
-    --shadow-accent: 0 0 0 1px var(--accent);
-
-    --tok-comment:  #9699b0;
-    --tok-keyword:  #7c53c0;
-    --tok-string:   #3d6b31;
-    --tok-number:   #965027;
-    --tok-fn:       #2959c0;
-    --tok-operator: #0369a1;
-    --tok-type:     #8c6a1a;
-    --tok-tag:      #a3214a;
-    --tok-attr:     #1a7a6a;
-    --tok-punct:    #4a5078;
-    --tok-bool:     #965027;
-  }
-}
-
-/* ── Reset & base ────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body.peek-body {
-  height: 100vh;
-  margin: 0;
+/* ── Code block ─────────────────────────────────────────── */
+.markdown-body pre {
+  /* Reset any position:absolute from style.css::before */
+  position: relative;
+  margin: 0 0 1.2em;
+  /* no padding-top so language bar sits flush */
   padding: 0;
-  overflow: hidden;
-  background-color: var(--bg);
-  color: var(--text);
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.875em;
+  line-height: 1.6;
+  tab-size: 2;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
-/* ── Titlebar — Neovim statusline style ─────────────── */
-#titlebar {
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Language bar — overrides style.css pre::before completely */
+.markdown-body pre::before {
+  /* MUST reset position from style.css which sets position:absolute inset:0 */
+  position: static;
+  content: attr(data-lang);
+  display: block;
   width: 100%;
-  height: 28px;
-  background-color: var(--bg-02);
-  border-bottom: 1px solid var(--border-mid);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  user-select: none;
-  color: var(--text-muted);
-  font-family: var(--font-code);
-  font-size: 12px;
-  letter-spacing: 0.01em;
+  padding: 4px 12px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-dim);
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.8em;
+  letter-spacing: 0.04em;
+  /* cancel any style.css gradient/opacity/inset */
+  background-image: none;
+  inset: unset;
+  opacity: 1;
 }
 
-/* Statusline pill — mimics ▊ NORMAL / INSERT ▊ */
-.titlebar-content {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px 3px 8px;
-  background-color: var(--accent);
-  color: var(--bg);
+/* Hide bar when no language */
+.markdown-body pre:not([data-lang]) ::before,
+.markdown-body pre[data-lang='']::before {
+  display: none;
+}
+
+/* Disable the gradient overlay from style.css */
+.markdown-body pre:hover::before { opacity: 1; }
+.markdown-body pre::after        { display: none; }
+
+/* Code content */
+.markdown-body pre > code {
+  display: block;
+  padding: 0.85em 1em;
+  background: transparent;
   border: none;
-  cursor: grab;
+  font-family: 'Geist Mono', monospace;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--fg);
+  border-radius: 0;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* ── Highlight.js token colors ──────────────────────────── */
+.markdown-body .hljs-keyword,
+.markdown-body .hljs-selector-tag,
+.markdown-body .hljs-tag          { color: var(--syn-keyword); }
+
+.markdown-body .hljs-title,
+.markdown-body .hljs-title.function_ { color: var(--syn-fn); }
+
+.markdown-body .hljs-string,
+.markdown-body .hljs-attr-value   { color: var(--syn-string); }
+
+.markdown-body .hljs-number,
+.markdown-body .hljs-literal,
+.markdown-body .hljs-boolean      { color: var(--syn-number); }
+
+.markdown-body .hljs-comment,
+.markdown-body .hljs-quote        { color: var(--syn-comment); font-style: italic; }
+
+.markdown-body .hljs-type,
+.markdown-body .hljs-class,
+.markdown-body .hljs-title.class_ { color: var(--syn-type); }
+
+.markdown-body .hljs-built_in     { color: var(--syn-fn); }
+
+.markdown-body .hljs-attr,
+.markdown-body .hljs-attribute,
+.markdown-body .hljs-selector-attr { color: var(--syn-attr); }
+
+.markdown-body .hljs-operator,
+.markdown-body .hljs-punctuation  { color: var(--syn-punct); }
+
+.markdown-body .hljs-variable,
+.markdown-body .hljs-template-variable { color: var(--fg); }
+
+.markdown-body .hljs-meta,
+.markdown-body .hljs-meta .hljs-keyword { color: var(--syn-keyword); }
+
+.markdown-body .hljs-section      { color: var(--accent); font-weight: 500; }
+.markdown-body .hljs-addition     { color: var(--syn-string); }
+.markdown-body .hljs-deletion     { color: var(--syn-tag); }
+.markdown-body .hljs-emphasis     { font-style: italic; }
+.markdown-body .hljs-strong       { font-weight: 700; }
+
+/* Also support Prism token classes */
+.markdown-body .token.keyword     { color: var(--syn-keyword); }
+.markdown-body .token.string      { color: var(--syn-string); }
+.markdown-body .token.number      { color: var(--syn-number); }
+.markdown-body .token.comment     { color: var(--syn-comment); font-style: italic; }
+.markdown-body .token.function    { color: var(--syn-fn); }
+.markdown-body .token.class-name  { color: var(--syn-type); }
+.markdown-body .token.operator    { color: var(--syn-operator); }
+.markdown-body .token.punctuation { color: var(--syn-punct); }
+.markdown-body .token.tag         { color: var(--syn-tag); }
+.markdown-body .token.attr-name   { color: var(--syn-attr); }
+.markdown-body .token.boolean     { color: var(--syn-number); }
+
+/* ── KBD ────────────────────────────────────────────────── */
+.markdown-body kbd {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.8em;
+  padding: 0.15em 0.45em;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-2);
+  color: var(--accent);
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  margin-bottom: 1em;
+  border: 1px solid var(--border);
+}
+.markdown-body th,
+.markdown-body td {
+  padding: 0.5em 0.9em;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.markdown-body th {
+  background: var(--bg-2);
+  color: var(--accent);
   font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.85em;
+}
+.markdown-body tr:last-child td { border-bottom: none; }
+.markdown-body tbody tr:hover { background: var(--bg-1); }
+
+/* ── Images ─────────────────────────────────────────────── */
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
 }
 
-.titlebar-content:active {
-  cursor: grabbing;
-  filter: brightness(0.9);
+/* ── HR ─────────────────────────────────────────────────── */
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
 }
 
-.nvim-logo {
-  color: inherit;
-  opacity: 0.9;
+/* ── Details / Summary ──────────────────────────────────── */
+.markdown-body details {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin-bottom: 0.8em;
+  overflow: hidden;
+}
+.markdown-body summary {
+  padding: 0.5em 0.9em;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+  user-select: none;
+}
+.markdown-body summary::-webkit-details-marker { display: none; }
+.markdown-body details > *:not(summary) { padding: 0 0.9em 0.7em; }
+
+/* ── Selection ──────────────────────────────────────────── */
+::selection {
+  background: rgba(255, 143, 64, 0.2);
+  color: var(--fg);
 }
 
-/* ── Scroll container ───────────────────────────────── */
-#scroll-container {
-  position: absolute;
-  top: 28px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow-y: auto;
-  padding: 24px 28px;
-  /* terminal-style line numbers gutter feel */
-  background-image:
-    linear-gradient(
-      to right,
-      var(--bg-02) 0px,
-      var(--bg-02) 40px,
-      var(--border) 40px,
-      var(--border) 41px,
-      transparent 41px
-    );
-  background-attachment: local;
-}
-
-/* ── Document body ──────────────────────────────────── */
-.markdown-body.markdown-body {
-  & {
-    font-family: var(--font-body);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.65;
-    color: var(--text);
-    background: transparent;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 12px 20px 48px 56px; /* 56px left = clears the gutter */
-    -webkit-font-smoothing: subpixel-antialiased; /* sharper, like a terminal */
-    -moz-osx-font-smoothing: auto;
-    tab-size: 4;
-  }
-
-  /* ── Subtle cursor-blink on load instead of float-up ── */
-  @keyframes nvimEntry {
-    0%   { opacity: 0; }
-    40%  { opacity: 0; }
-    41%  { opacity: 1; }
-    100% { opacity: 1; }
-  }
-
-  & > * {
-    animation: nvimEntry calc(var(--t-slow) * 1) linear both;
-  }
-
-  & > *:nth-child(1)  { animation-delay:  0ms; }
-  & > *:nth-child(2)  { animation-delay: 30ms; }
-  & > *:nth-child(3)  { animation-delay: 60ms; }
-  & > *:nth-child(4)  { animation-delay: 90ms; }
-  & > *:nth-child(5)  { animation-delay: 120ms; }
-
-  /* ── Headings — mono, functional, like a fold marker ── */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-body);
-    color: var(--heading);
-    font-weight: 500;
-    line-height: 1.3;
-    letter-spacing: 0em;
-    margin: 2em 0 0.6em;
-  }
-
-  h1:first-child,
-  h2:first-child,
-  h3:first-child {
-    margin-top: 0;
-  }
-
-  /* h1 — mimics ══ Title ══ fold header */
-  h1 {
-    font-family: var(--font-display);
-    font-size: 1.35em;
-    font-weight: 500;
-    letter-spacing: 0;
-    line-height: 1.3;
-    color: var(--accent);
-    /* no gradient — just the accent color, sharp */
-    -webkit-text-fill-color: unset;
-    background: none;
-    padding: 0;
-    padding-bottom: 0.5em;
-    margin-bottom: 0.4em;
-    /* fold-style separator */
-    border-bottom: 1px solid var(--border-mid);
-    position: relative;
-  }
-
-  h1::before {
-    content: '# ';
-    color: var(--text-faint);
-    font-size: 1em;
-  }
-
-  h2 {
-    font-size: 1.15em;
-    color: var(--accent-2);
-    position: relative;
-    padding-bottom: 0;
-    border-bottom: none;
-    margin-top: 2.2em;
-  }
-
-  h2::before {
-    content: '## ';
-    color: var(--text-faint);
-    font-size: 1em;
-  }
-
-  h2::after {
-    display: none; /* remove gradient underline */
-  }
-
-  h3 {
-    font-size: 1.05em;
-    color: var(--info);
-  }
-
-  h3::before {
-    content: '### ';
-    color: var(--text-faint);
-    font-size: 1em;
-  }
-
-  h4 {
-    font-size: 0.95em;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  h4::before {
-    content: '#### ';
-    color: var(--text-faint);
-  }
-
-  h5, h6 {
-    font-size: 0.85em;
-    font-weight: 400;
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--text-muted);
-  }
-
-  /* ── Links ──────────────────────────────────────────── */
-  a {
-    color: var(--accent);
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
-    text-underline-offset: 3px;
-    border-bottom: none;
-    transition: color var(--t-fast) var(--ease),
-                text-decoration-color var(--t-fast) var(--ease);
-  }
-
-  a:hover {
-    color: var(--heading);
-    text-decoration-color: var(--accent);
-  }
-
-  /* ── Prose ──────────────────────────────────────────── */
-  p {
-    margin: 0 0 0.9em;
-  }
-
-  ul, ol {
-    margin: 0 0 0.9em;
-    padding-left: 1.4em;
-  }
-
-  li {
-    margin-bottom: 0.25em;
-  }
-
-  /* Custom marker — Lua-style bullet */
-  ul li::marker {
-    content: '─ ';
-    color: var(--text-faint);
-  }
-
-  ol li::marker {
-    color: var(--text-faint);
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* ── Blockquote — like a :echo / message area ───────── */
-  blockquote {
-    margin: 1.2em 0;
-    padding: 0.7em 1em;
-    background: var(--bg-01);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent-2);
-    border-radius: 0;
-    color: var(--text-muted);
-    font-style: normal;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* Remove the giant decorative quote mark */
-  blockquote::before {
-    display: none;
-  }
-
-  /* Add a ":" prefix like neovim command output */
-  blockquote::after {
-    content: ':';
-    position: absolute;
-    top: 0.65em;
-    left: -1px;
-    font-size: 0.85em;
-    color: var(--accent-2);
-    font-weight: 500;
-  }
-
-  blockquote > :first-child { margin-top: 0; }
-  blockquote > :last-child  { margin-bottom: 0; }
-
-  /* ── Inline code ────────────────────────────────────── */
-  code, pre, kbd {
-    font-family: var(--font-code);
-  }
-
-  :not(pre) > code {
-    font-size: 0.88em;
-    padding: 0.12em 0.38em;
-    background: var(--bg-02);
-    border: 1px solid var(--border-mid);
-    border-radius: 0;
-    color: var(--tok-string);
-    font-weight: 400;
-    transition: background var(--t-fast);
-  }
-
-  :not(pre) > code:hover {
-    background: var(--bg-03);
-  }
-
-  /* ── Code block — the star of the show ─────────────── */
-  pre {
-    position: relative;
-    margin: 0 0 1.2em;
-    padding: 0;
-    overflow-x: auto;
-    font-size: 0.88em;
-    line-height: 1.6;
-    background: var(--bg-01);
-    border: 1px solid var(--border-mid);
-    border-radius: 0;
-    tab-size: 4;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-mid) transparent;
-    box-shadow: none;
-    transition: border-color var(--t-fast) var(--ease);
-  }
-
-  /* Filetype bar — mimics nvim buffer topline */
-  pre::before {
-    content: attr(data-lang, '');
-    display: block;
-    width: 100%;
-    padding: 3px 10px;
-    background: var(--bg-02);
-    border-bottom: 1px solid var(--border-mid);
-    color: var(--text-muted);
-    font-size: 0.8em;
-    font-family: var(--font-code);
-    letter-spacing: 0.03em;
-    opacity: 1;
-    pointer-events: none;
-  }
-
-  pre:hover {
-    border-color: var(--accent);
-    box-shadow: none;
-  }
-
-  /* Remove gradient overlay on hover */
-  pre::after {
-    display: none;
-  }
-
-  pre > code {
-    display: block;
-    padding: 0.9em 1.1em;
-    background: transparent;
-    border: 0;
-    font-size: inherit;
-    border-radius: 0;
-    color: var(--text);
-    font-weight: 400;
-  }
-
-  /* Line numbers */
-  pre.line-numbers {
-    padding-left: 3em;
-    counter-reset: line;
-  }
-
-  pre.line-numbers code {
-    counter-increment: line;
-  }
-
-  /* ── Syntax token colors ── TokyoNight precise ───── */
-  .token.comment,
-  .token.prolog,
-  .token.doctype,
-  .token.cdata {
-    color: var(--tok-comment);
-    font-style: italic;
-  }
-
-  .token.keyword,
-  .token.important {
-    color: var(--tok-keyword);
-    font-weight: 400;
-  }
-
-  .token.string,
-  .token.char,
-  .token.attr-value {
-    color: var(--tok-string);
-  }
-
-  .token.number,
-  .token.constant,
-  .token.boolean {
-    color: var(--tok-number);
-  }
-
-  .token.function {
-    color: var(--tok-fn);
-  }
-
-  .token.class-name,
-  .token.maybe-class-name {
-    color: var(--tok-type);
-  }
-
-  .token.tag     { color: var(--tok-tag); }
-  .token.attr-name { color: var(--tok-attr); }
-
-  .token.operator,
-  .token.entity,
-  .token.url {
-    color: var(--tok-operator);
-  }
-
-  .token.punctuation { color: var(--tok-punct); }
-  .token.inserted    { color: var(--tok-string); }
-  .token.deleted     { color: var(--tok-tag); }
-  .token.variable    { color: var(--text); }
-
-  /* ── KBD — looks like mode indicator ───────────────── */
-  kbd {
-    display: inline-flex;
-    align-items: center;
-    gap: 1px;
-    font-size: 0.8em;
-    padding: 0.15em 0.45em;
-    border: 1px solid var(--border-mid);
-    border-bottom-width: 1px;
-    border-radius: 0;
-    background: var(--bg-03);
-    color: var(--accent);
-    box-shadow: none;
-    font-weight: 500;
-    font-family: var(--font-code);
-    letter-spacing: 0.04em;
-  }
-
-  /* ── Tables — grid-like, no frills ─────────────────── */
-  .table-wrap {
-    overflow-x: auto;
-    margin-bottom: 1.2em;
-    border-radius: 0;
-    border: 1px solid var(--border-mid);
-    box-shadow: none;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88em;
-  }
-
-  thead {
-    background: var(--bg-02);
-    border-bottom: 1px solid var(--border-mid);
-  }
-
-  th, td {
-    padding: 0.45em 0.9em;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-
-  th {
-    font-weight: 500;
-    font-size: 0.85em;
-    letter-spacing: 0.03em;
-    text-transform: none;
-    color: var(--accent);
-    font-family: var(--font-code);
-  }
-
-  tbody tr:last-child td { border-bottom: 0; }
-
-  tbody tr {
-    transition: background var(--t-fast) var(--ease);
-  }
-
-  tbody tr:hover {
-    background: var(--bg-02);
-  }
-
-  td:first-child,
-  th:first-child { padding-left: 0.9em; }
-
-  td:last-child,
-  th:last-child  { padding-right: 0.9em; }
-
-  /* ── Images ─────────────────────────────────────────── */
-  img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 0;
-    border: 1px solid var(--border-mid);
-    display: block;
-    margin: 1.2em 0;
-    box-shadow: none;
-    transition: border-color var(--t-fast) var(--ease);
-  }
-
-  img:hover {
-    border-color: var(--accent);
-    box-shadow: none;
-    transform: none;
-  }
-
-  /* ── Figure / Caption ───────────────────────────────── */
-  figure { margin: 1.4em 0; }
-
-  figcaption {
-    font-size: 0.78em;
-    color: var(--tok-comment);
-    text-align: left;
-    margin-top: 0.3em;
-    font-style: italic;
-    font-family: var(--font-code);
-  }
-
-  /* ── HR — like a fold separator line ────────────────── */
-  hr {
-    border: 0;
-    height: 1px;
-    background: var(--border-mid);
-    margin: 2em 0;
-  }
-
-  /* ── Callout / Note card — diagnostic style ─────────── */
-  .note, .warning, .tip, .danger {
-    padding: 0.6em 1em;
-    border-radius: 0;
-    border: 0;
-    border-left: 3px solid;
-    margin: 1.2em 0;
-    font-size: 0.875em;
-    display: flex;
-    gap: 0.6em;
-    background: var(--bg-01);
-  }
-
-  .note    { border-left-color: var(--info);    }
-  .warning { border-left-color: var(--warning); }
-  .tip     { border-left-color: var(--success); }
-  .danger  { border-left-color: var(--danger);  }
-
-  .note p, .warning p, .tip p, .danger p {
-    color: var(--text-muted);
-    margin: 0;
-  }
-
-  /* ── Badges / Tags — mode-pill style ───────────────── */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.15em 0.55em;
-    font-size: 0.73em;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    border-radius: 0;
-    text-transform: uppercase;
-    border: 1px solid;
-    font-family: var(--font-code);
-  }
-
-  .badge-default  { background: var(--bg-03); border-color: var(--border-mid); color: var(--text-muted); }
-  .badge-accent   { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-  .badge-success  { background: transparent; border-color: var(--success); color: var(--success); }
-  .badge-warning  { background: transparent; border-color: var(--warning); color: var(--warning); }
-  .badge-danger   { background: transparent; border-color: var(--danger);  color: var(--danger); }
-
-  /* ── Details / Summary — fold/unfold ───────────────── */
-  details {
-    background: var(--bg-01);
-    border: 1px solid var(--border);
-    border-radius: 0;
-    margin-bottom: 0.8em;
-    overflow: hidden;
-    transition: border-color var(--t-fast) var(--ease);
-  }
-
-  details[open] {
-    border-color: var(--border-mid);
-    box-shadow: none;
-  }
-
-  summary {
-    padding: 0.55em 0.9em;
-    cursor: pointer;
-    font-weight: 400;
-    color: var(--heading);
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 0.4em;
-    user-select: none;
-    font-family: var(--font-code);
-    font-size: 0.9em;
-    transition: background var(--t-fast) var(--ease);
-  }
-
-  summary::-webkit-details-marker { display: none; }
-
-  /* Fold marker: ▶ / ▼  */
-  summary::before {
-    content: '▶';
-    font-size: 0.65em;
-    color: var(--text-faint);
-    transition: transform var(--t-fast) var(--ease);
-    display: inline-block;
-    font-weight: 400;
-  }
-
-  details[open] > summary::before {
-    transform: rotate(90deg);
-    color: var(--accent);
-  }
-
-  summary:hover { background: var(--bg-02); }
-
-  details > *:not(summary) {
-    padding: 0 0.9em 0.8em;
-    font-size: 0.9em;
-  }
-
-  /* ── Scrollbar — minimal ────────────────────────────── */
-  ::-webkit-scrollbar       { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb {
-    background: var(--border-mid);
-    border-radius: 0;
-  }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
-
-  /* ── Selection ──────────────────────────────────────── */
-  ::selection {
-    background: color-mix(in srgb, var(--accent) 30%, transparent);
-    color: var(--heading);
-  }
-
-  /* ── Focus ──────────────────────────────────────────── */
-  :focus-visible {
-    outline: 1px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 0;
-  }
-
-  /* ── Utility helpers ─────────────────────────────────── */
-  .text-muted   { color: var(--text-muted); }
-  .text-accent  { color: var(--accent); }
-  .text-small   { font-size: 0.85em; }
-  .mono         { font-family: var(--font-code); }
-  .serif        { font-family: var(--font-display); }
-
-  /* ── Responsive ─────────────────────────────────────── */
-  @media (max-width: 600px) {
-    & {
-      font-size: 13px;
-      padding: 10px 12px 32px 12px;
-    }
-
-    pre { font-size: 0.82em; }
-  }
-}
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }

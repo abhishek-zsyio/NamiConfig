@@ -79,27 +79,33 @@ return {
     config = function(_, opts)
       require("dropbar").setup(opts)
 
-      -- Fix Dropbar / Winbar theme issues across all colorschemes
+      -- Sync Dropbar / WinBar background with the StatusLine background color
+      local function sync_dropbar_bg()
+        local ok, sl_hl = pcall(vim.api.nvim_get_hl, 0, { name = "StatusLine", link = false })
+        local bg = (ok and sl_hl and sl_hl.bg) or nil
+
+        local function set_bg(group)
+          local ok2, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+          if ok2 and hl then
+            hl.bg = bg
+            vim.api.nvim_set_hl(0, group, hl)
+          end
+        end
+
+        set_bg("WinBar")
+        set_bg("WinBarNC")
+        set_bg("DropBarMenuNormalFloat")
+
+        -- Ensure the separators match the theme's subtle colors
+        vim.api.nvim_set_hl(0, "DropBarIconUIIndicator", { link = "Comment" })
+      end
+
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = "*",
-        callback = function()
-          local function clear_bg(group)
-            local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
-            if ok and hl then
-              hl.bg = nil
-              vim.api.nvim_set_hl(0, group, hl)
-            end
-          end
-          
-          -- Clear backgrounds so it perfectly blends into the editor
-          clear_bg("WinBar")
-          clear_bg("WinBarNC")
-          clear_bg("DropBarMenuNormalFloat")
-          
-          -- Ensure the separators match the theme's subtle colors
-          vim.api.nvim_set_hl(0, "DropBarIconUIIndicator", { link = "Comment" })
-        end,
+        callback = sync_dropbar_bg,
       })
+      -- Also apply immediately on first load
+      sync_dropbar_bg()
 
       -- Globally hide Dropbar on all underlying windows when Snacks Picker is open
       vim.api.nvim_create_autocmd({ "WinEnter", "FileType" }, {
