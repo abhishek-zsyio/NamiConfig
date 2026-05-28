@@ -40,7 +40,7 @@ return {
     explorer = {
       layout = { preset = "sidebar", layout = { position = settings.file_explorer_position or "left" }, width = 40, hidden = { "input" } },
       win = { list = { keys = { ["<C-n>"] = "close" } } },
-      hidden = true,
+      hidden = settings.show_hidden_files ~= false,
     },
     files = { layout = l, hidden = true },
     grep = { layout = l, hidden = true },

@@ -1,9 +1,12 @@
+local ok, settings = pcall(require, "settings")
+local s = ok and settings or {}
+
 return {
 	zen = { enabled = true },
-	dim = { enabled = true },
+	dim = { enabled = s.dim_inactive == true },
 	explorer = { enabled = true },
 	indent = {
-		enabled = true,
+		enabled = s.show_indent_guides ~= false,
 		indent = {
 			char = "│",
 			hl = "SnacksIndent",
@@ -37,7 +40,7 @@ return {
 		},
 	},
 	bufdelete = { enabled = true },
-	scroll = { enabled = true },
+	scroll = { enabled = s.smooth_scroll ~= false },
 	scratch = { enabled = true },
 	notifier = {
 		enabled = true,

@@ -8,6 +8,9 @@ return {
       "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
+      local ok_s, settings = pcall(require, "settings")
+      if not ok_s then settings = {} end
+
       -- ── Capabilities (boost with cmp-nvim-lsp) ───────────────────────────
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
@@ -33,6 +36,11 @@ return {
           return vim.tbl_extend("force", tbl, extra)
         end
 
+        -- Enable inlay hints if requested
+        if settings.enable_inlay_hints == true and vim.lsp.inlay_hint then
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        end
+
         map("n", "gD",         vim.lsp.buf.declaration,    e(bufopts, { desc = "LSP Declaration" }))
         map("n", "gd",         vim.lsp.buf.definition,     e(bufopts, { desc = "LSP Definition" }))
         map("n", "gi",         vim.lsp.buf.implementation,  e(bufopts, { desc = "LSP Implementation" }))
@@ -54,7 +62,7 @@ return {
 
       -- ── Diagnostic display ───────────────────────────────────────────────
       vim.diagnostic.config({
-        virtual_text    = { prefix = "●" },
+        virtual_text    = settings.show_inline_errors ~= false and { prefix = "●" } or false,
         signs           = true,
         underline       = true,
         update_in_insert = false,
@@ -77,8 +85,6 @@ return {
 
       local lspconfig = require("lspconfig")
       local registry  = require("core.lang_registry")
-      local ok, settings = pcall(require, "settings")
-      if not ok then settings = {} end
 
       -- ── Boot all servers from the lang registry ───────────────────────────
       for _, srv in ipairs(registry.lsp_servers()) do

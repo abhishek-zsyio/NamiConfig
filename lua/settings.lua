@@ -30,10 +30,10 @@ local M = {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	ui = {
 		---@type Theme
-		theme = "kanagawa-wave",
+		theme = "tokyonight-night",
 
 		background = "dark", -- "dark" or "light"
-		transparent = ture,
+		transparent = true,
 		dim_inactive = false,
 		show_indent_guides = true,
 		smooth_scroll = true,
