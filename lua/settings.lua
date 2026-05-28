@@ -30,7 +30,7 @@ local M = {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	ui = {
 		---@type Theme
-		theme = "tokyonight-night",
+		theme = "duskfox",
 
 		background = "dark", -- "dark" or "light"
 		transparent = true,
