@@ -84,7 +84,7 @@ return {
       end
 
       local lspconfig = require("lspconfig")
-      local registry  = require("core.lang_registry")
+      local registry  = require("nami.lang")
 
       -- ── Boot all servers from the lang registry ───────────────────────────
       for _, srv in ipairs(registry.lsp_servers()) do

@@ -1,4 +1,4 @@
-local registry = require("core.theme_registry")
+local registry = require("nami.themes.registry")
 local plugins = {}
 
 -- 1. Dynamically load all themes from the registry
@@ -28,7 +28,7 @@ for repo, data in pairs(unique_plugins) do
       
       -- Find the active theme object for this repository
       local target_theme = nil
-      for _, t in ipairs(require("core.theme_registry")) do
+      for _, t in ipairs(require("nami.themes.registry")) do
         if t.id == current_theme then
           target_theme = t
           break

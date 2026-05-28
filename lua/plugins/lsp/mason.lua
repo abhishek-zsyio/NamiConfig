@@ -22,7 +22,7 @@ return {
     lazy         = true,
     dependencies = { "williamboman/mason.nvim" },
     config       = function()
-      local registry = require("core.lang_registry")
+      local registry = require("nami.lang")
       local ok, settings = pcall(require, "settings")
       if not ok then settings = {} end
 
@@ -60,7 +60,7 @@ return {
     event = "VeryLazy",
     dependencies = { "williamboman/mason.nvim" },
     config       = function()
-      local registry = require("core.lang_registry")
+      local registry = require("nami.lang")
       local ok, settings = pcall(require, "settings")
       if not ok then settings = {} end
       

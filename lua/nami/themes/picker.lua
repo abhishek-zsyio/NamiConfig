@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- core/theme_picker.lua  (v3)
+-- nami/themes/picker.lua  (v3)
 -- Three-panel floating UI: Search, List, Preview
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -40,7 +40,7 @@ local function sync_ghostty(ghostty_theme)
 end
 
 local function save_theme(id)
-  local p = vim.fn.stdpath("config") .. "/lua/settings.lua"
+  local p = vim.fn.stdpath("config") .. "/lua/custom/settings.lua"
   local lines = vim.fn.readfile(p)
   for i, l in ipairs(lines) do
     local pre, q = l:match("^(%s*theme%s*=%s*)([\"'])")
@@ -374,7 +374,7 @@ function M.open()
   reset()
   setup_hls()
 
-  local registry = require("core.theme_registry")
+  local registry = require("nami.themes.registry")
   st.items = {}
   for _, t in ipairs(registry) do
     if t.ghostty and t.ghostty ~= "" then

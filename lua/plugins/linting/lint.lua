@@ -12,7 +12,7 @@ return {
       if settings.enable_linting == false then return end
 
       local lint     = require("lint")
-      local registry = require("core.lang_registry")
+      local registry = require("nami.lang")
 
       -- ── Prepend Mason's bin dir to PATH ────────────────────────────────────
       -- Mason installs linter binaries to a non-system path.

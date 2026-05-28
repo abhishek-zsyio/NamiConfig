@@ -69,7 +69,7 @@ map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Prev buffer" })
 
 -- ── Theme Switcher ──────────────────────────────────────────────────────────
 map("n", "<leader>th", function()
-  require("core.theme_picker").open()
+  require("nami.themes.picker").open()
 end, { desc = "Select & Save Theme" })
 
 -- ── Line Numbers ─────────────────────────────────────────────────────────

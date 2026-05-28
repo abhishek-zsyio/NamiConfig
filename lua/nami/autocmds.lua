@@ -82,11 +82,11 @@ autocmd("FileType", {
 -- ── Hot Reload Settings ──────────────────────────────────────────────────────
 autocmd({ "BufWritePost", "FileChangedShellPost" }, {
   group = augroup("HotReloadSettings", { clear = true }),
-  pattern = "*/lua/settings.lua",
+  pattern = { "*/lua/custom/settings.lua", "*/lua/custom/init.lua" },
   callback = function()
-    -- Reload and wrap settings via settings_loader
+    -- Reload user settings via the Nami config engine
     local ok, settings = pcall(function()
-      return require("core.settings_loader").load()
+      return require("nami.config").reload()
     end)
     if not ok then
       vim.notify("Error reloading settings: " .. tostring(settings), vim.log.levels.ERROR)
@@ -105,7 +105,7 @@ autocmd({ "BufWritePost", "FileChangedShellPost" }, {
     if settings.wrap_lines ~= nil then vim.wo.wrap = settings.wrap_lines end
     if settings.color_column then vim.wo.colorcolumn = settings.color_column end
 
-
-    vim.notify("Settings Hot-Reloaded! 🚀", vim.log.levels.INFO, { title = "Config" })
+    vim.notify("Settings Hot-Reloaded! 🌊", vim.log.levels.INFO, { title = "Nami" })
   end,
 })
+

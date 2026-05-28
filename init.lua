@@ -1,3 +1,9 @@
+-- =============================================================================
+-- 🌊  Nami — Neovim Framework
+-- =============================================================================
+-- Entry point. Boots the framework, merges user config, loads plugins.
+-- =============================================================================
+
 if vim.loader then
 	vim.loader.enable()
 end
@@ -25,18 +31,27 @@ local function patch_path()
 	end
 end
 patch_path()
+
 -- Suppress deprecation warnings (lspconfig v2 → v3 transition)
 vim.deprecate = function() end
 
--- Pre-load and wrap declarative settings to allow both flat and nested lookups
-require("core.settings_loader").load()
+-- ── Boot Nami Framework ─────────────────────────────────────────────────────
+-- 1. Load user overrides from lua/custom/ (if they exist)
+local nami = require("nami")
+local user_ok, user = pcall(require, "custom.init")
+if not user_ok then
+	user = {}
+end
+
+-- 2. Merge user settings over framework defaults
+nami.setup(user.settings or {})
 
 -- Leader keys must be set BEFORE lazy loads plugins
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Load core options immediately
-require("core.options")
+require("nami.options")
 
 -- ── Bootstrap lazy.nvim ─────────────────────────────────────────────────────
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -53,15 +68,19 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- ── Plugin setup ────────────────────────────────────────────────────────────
-local ok, settings = pcall(require, "settings")
-if not ok then
-	settings = {}
-end
+local settings = nami.config.current or {}
 
--- Build the spec: core plugins + any user-enabled extras
+-- Build the spec: framework plugins + user extras + custom plugins
 local spec = { { import = "plugins" } }
+
+-- Add opt-in extras from settings
 for _, extra in ipairs(settings.extras or {}) do
 	table.insert(spec, { import = extra })
+end
+
+-- Add user's custom plugins (if custom/plugins/ exists)
+if user.plugins then
+	table.insert(spec, { import = user.plugins })
 end
 
 require("lazy").setup(spec, {
@@ -113,6 +132,14 @@ require("lazy").setup(spec, {
 
 -- ── Load keymaps & autocmds after plugins ────────────────────────────────────
 vim.schedule(function()
-	require("core.keymaps")
-	require("core.autocmds")
+	-- Framework keymaps & autocmds
+	require("nami.keymaps")
+	require("nami.autocmds")
+
+	-- User's custom keymaps & autocmds (if they exist)
+	pcall(require, "custom.keymaps")
+	pcall(require, "custom.autocmds")
+
+	-- Framework commands
+	require("nami.commands")
 end)

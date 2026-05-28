@@ -1,1 +1,0 @@
-return { val = 2 }

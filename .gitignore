@@ -1,0 +1,3 @@
+# NvChad style framework ignore
+lua/custom/
+!lua/custom/.gitkeep

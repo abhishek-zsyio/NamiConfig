@@ -4,9 +4,9 @@ return {
     priority = 1000,
     lazy = false,
     opts = (function()
-      local opts = require("core.snacks.opts")
-      opts.picker = require("core.snacks.picker")
-      opts.dashboard = require("core.snacks.dashboard")
+      local opts = require("nami.snacks.opts")
+      opts.picker = require("nami.snacks.picker")
+      opts.dashboard = require("nami.snacks.dashboard")
       return opts
     end)(),
     keys = {
