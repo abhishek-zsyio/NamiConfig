@@ -428,27 +428,61 @@ map("n", "<leader>rr", function()
     return
   end
 
-  -- Wrap in a shell that prints a finish banner and waits for keypress
-  local full_cmd = string.format(
-    [[bash -c 'clear; %s; echo ""; echo "─── Process exited ($?) ─── Press any key to close ───"; read -n1']],
-    cmd
-  )
-
   local fname = vim.fn.expand("%:t")
-  local term = Snacks.terminal(full_cmd, {
+
+  -- Pass file path via env var to avoid all single-quote / shellescape issues
+  -- inside the bash -c '...' wrapper.
+  local env_vars = {
+    RUNNER_FILE = file,
+    RUNNER_NAME = fname,
+    RUNNER_CMD  = cmd,        -- e.g. "node" / "python3" / "tsx"
+  }
+
+  -- Pretty ANSI wrapper ────────────────────────────────────────────────────
+  --   • dynamic-width separator using tput cols
+  --   • header: file icon + name + timestamp
+  --   • green ✓ / red ✗ footer with exit code
+  --   • silent read -n1 so the pressed key isn't echoed
+  local script = [[
+clear
+_w=$(tput cols 2>/dev/null || echo 72)
+_sep=$(printf '%*s' "$_w" '' | tr ' ' '─')
+_ts=$(date '+%H:%M:%S')
+
+# ── header ────────────────────────────────────────────────────────────
+printf '\033[38;5;239m%s\033[0m\n' "$_sep"
+printf '  \033[1;38;5;75m▶  %s\033[0m   \033[38;5;240m%s\033[0m\n' "$RUNNER_NAME" "$_ts"
+printf '\033[38;5;239m%s\033[0m\n\n' "$_sep"
+
+# ── run ───────────────────────────────────────────────────────────────
+eval "$RUNNER_CMD \"$RUNNER_FILE\""
+_x=$?
+
+# ── footer ────────────────────────────────────────────────────────────
+printf '\n\033[38;5;239m%s\033[0m\n' "$_sep"
+if [ "$_x" -eq 0 ]; then
+  printf '  \033[1;32m✓  Done\033[0m  \033[38;5;240m(exit 0)\033[0m   \033[38;5;245m· press any key to close\033[0m\n'
+else
+  printf '  \033[1;31m✗  Exited with error\033[0m  \033[38;5;240m(exit %s)\033[0m   \033[38;5;245m· press any key to close\033[0m\n' "$_x"
+fi
+read -n1 -s
+]]
+
+  local term = Snacks.terminal("bash -c " .. vim.fn.shellescape(script), {
+    env = env_vars,
     win = {
-      position = "bottom",
-      height = 0.3,
-      border = require("settings").menu_border or "rounded",
-      title = " ▶ " .. fname .. " ",
-      title_pos = "center",
+      position    = "bottom",
+      height      = 0.35,
+      border      = require("settings").menu_border or "rounded",
+      title       = " ▶ " .. fname .. " ",
+      title_pos   = "center",
     },
     bo = { filetype = "snacks_terminal" },
   })
-  -- Rename the buffer so the statusline shows a clean name instead of the raw command
   if term and term.buf and vim.api.nvim_buf_is_valid(term.buf) then
     pcall(vim.api.nvim_buf_set_name, term.buf, "runner: " .. fname)
   end
+
 end, { desc = "Run current file (Node / Python)" })
 
 -- ── Hard Mode: Disable Arrow Keys ─────────────────────────────────────────
