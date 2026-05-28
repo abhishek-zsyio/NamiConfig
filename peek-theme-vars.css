@@ -1,10 +1,10 @@
 :root {
   --nvim-bg: #0a0a0f;
-  --nvim-fg: #e0def4;
-  --nvim-title: #9ccfd8;
-  --nvim-link: #f6c177;
-  --nvim-code-bg: #26233a;
-  --nvim-code-fg: #f6c177;
-  --nvim-border: #6e6a86;
-  --nvim-accent: #31748f;
+  --nvim-fg: #cdd6f4;
+  --nvim-title: #89b4fa;
+  --nvim-link: #a6e3a1;
+  --nvim-code-bg: #2a2b3c;
+  --nvim-code-fg: #a6e3a1;
+  --nvim-border: #45475a;
+  --nvim-accent: #cba6f7;
 }

@@ -1,8 +1,8 @@
 return {
   -- UI
   { import = "plugins.ui.theme" },
-  { import = "plugins.ui.statusline" },
   { import = "plugins.ui.bufferline" },
+  { import = "plugins.ui.statusline" },
   { import = "plugins.ui.noice" },
   { import = "plugins.ui.misc" },
   { import = "plugins.ui.dropbar" },

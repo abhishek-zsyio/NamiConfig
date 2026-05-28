@@ -1,168 +1,346 @@
--- Bufferline: polished modern tab bar
+-- bufferline.lua – layout-aware tab bar using bufferline's native highlights API
 return {
   {
     "akinsho/bufferline.nvim",
     version      = "*",
     lazy         = false,
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
-      -- theme registry loads theme configurations independently
-    },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+
     config = function()
       local ok, settings = pcall(require, "settings")
       if not ok then settings = {} end
 
-      require("bufferline").setup({
-        options = {
-          mode            = settings.tab_buffer_style or "buffers",
-          numbers         = "none",
-          close_command   = function(n) Snacks.bufdelete(n) end,
-          right_mouse_command = function(n) Snacks.bufdelete(n) end,
-          indicator       = { style = "none" },
-          buffer_close_icon = "",
-          modified_icon     = "●",
-          close_icon        = "",
-          left_trunc_marker  = "",
-          right_trunc_marker = "",
-          max_name_length   = 18,
-          max_prefix_length = 15,
-          truncate_names    = true,
-          tab_size          = 18,
-          diagnostics       = settings.tab_buffer_diagnostics or "nvim_lsp",
-          diagnostics_indicator = function(count, level)
-            local icons = { error = " ", warning = " ", info = " " }
-            return (icons[level] or "") .. count
-          end,
-          color_icons       = settings.tab_buffer_show_icons ~= false,
-          show_buffer_icons = settings.tab_buffer_show_icons ~= false,
-          show_buffer_close_icons = settings.tab_buffer_show_close == true,
-          show_close_icon   = settings.tab_buffer_show_close == true,
-          show_tab_indicators = false,
-          separator_style   = (function()
-            if settings.tab_buffer_transparent_dividers == true then
-              return { "", "" }
-            end
-            local s = settings.tab_divider_style or "slope"
-            if s == "none" then return { "", "" } end
-            if s == "dotted" then return { "·", "·" } end
-            return s
-          end)(),
-          always_show_bufferline = settings.hide_empty_tabline == false,
-          custom_filter = function(buf_number)
-            if vim.api.nvim_buf_get_name(buf_number) == "" then return false end
-            local ft = vim.bo[buf_number].filetype
-            local bt = vim.bo[buf_number].buftype
-            if ft == "toggleterm" or bt == "terminal" or ft:match("snacks") then
-              return false
-            end
-            return true
-          end,
-          hover = { enabled = true, delay = 150, reveal = { "close" } },
-          offsets = {
-            {
-              filetype   = "snacks_layout_box",
-              text       = "",
-              separator  = true,
-            },
-            {
-              filetype   = "snacks_picker_list",
-              text       = "",
-              separator  = true,
-            },
-            {
-              filetype   = "snacks_picker_input",
-              text       = "",
-              separator  = true,
-            }
-          },
-        },
-      })
+      local layout_name = (settings.ui and settings.ui.tab_buffer_layout) or "minimal"
 
-      -- Sync Bufferline background and separators with the StatusLine background color
-      local function sync_bufferline_bg()
-        -- Defer slightly to ensure highlights have settled after colorscheme change
-        vim.defer_fn(function()
-          -- 1. Try to get TabLineFill background (actual tab bar background)
-          local ok_tl, tl_hl = pcall(vim.api.nvim_get_hl, 0, { name = "TabLineFill", link = false })
-          local bg = (ok_tl and tl_hl and tl_hl.bg) or nil
-
-          -- 2. Fall back to StatusLine background
-          if not bg then
-            local ok_sl, sl_hl = pcall(vim.api.nvim_get_hl, 0, { name = "StatusLine", link = false })
-            bg = (ok_sl and sl_hl and sl_hl.bg) or nil
-          end
-
-          -- 3. Fall back to Normal background
-          if not bg then
-            local ok_nor, nor_hl = pcall(vim.api.nvim_get_hl, 0, { name = "Normal", link = false })
-            bg = (ok_nor and nor_hl and nor_hl.bg) or nil
-          end
-
-          -- 4. Absolute fallback
-          if not bg then
-            bg = 2040629 -- Hex #1f2335 in decimal
-          end
-
-          -- Get the actual background color of the active tab
-          local ok_sel, sel_hl = pcall(vim.api.nvim_get_hl, 0, { name = "BufferLineBufferSelected", link = false })
-          local active_bg = (ok_sel and sel_hl and sel_hl.bg) or nil
-          
-          if not active_bg then
-            local ok_nor, nor_hl = pcall(vim.api.nvim_get_hl, 0, { name = "Normal", link = false })
-            active_bg = (ok_nor and nor_hl and nor_hl.bg) or nil
-          end
-
-          if not active_bg then
-            active_bg = bg
-          end
-
-          local function update_hl(group, new_fg, new_bg)
-            local ok2, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
-            if ok2 and hl then
-              if new_fg ~= nil then
-                hl.fg = new_fg
-              end
-              if new_bg ~= nil then
-                hl.bg = new_bg
-              end
-              vim.api.nvim_set_hl(0, group, hl)
-            end
-          end
-
-          -- Apply to all BufferLine highlight groups and the tab fill
-          local hls = vim.fn.getcompletion("BufferLine", "highlight")
-          for _, hl_name in ipairs(hls) do
-            if hl_name:find("Separator") then
-              if settings.tab_buffer_transparent_dividers ~= false then
-                -- Make all separators (active/inactive/selected) completely transparent and invisible
-                update_hl(hl_name, bg or "NONE", bg or "NONE")
-              else
-                -- Traditional dividers: active separator gets active color, others blend or default
-                if hl_name:find("SeparatorSelected$") or hl_name == "BufferLineSeparatorSelected" then
-                  update_hl(hl_name, active_bg, bg or "NONE")
-                else
-                  update_hl(hl_name, nil, bg or "NONE")
-                end
-              end
-            elseif hl_name:find("Selected") then
-              -- Keep selected highlights untouched
-            else
-              -- Inactive background elements match StatusLine bg
-              update_hl(hl_name, nil, bg or "NONE")
-            end
-          end
-          
-          -- Sync main TabLineFill
-          update_hl("TabLineFill", nil, bg)
-        end, 50)
+      -- ── Color helpers ────────────────────────────────────────────────────
+      local function get_hl(name)
+        local s, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+        return (s and hl) or {}
       end
 
+      local function hex(n)
+        if not n then return nil end
+        return string.format("#%06x", n)
+      end
+
+      local function resolve_colors()
+        local bar_bg
+        for _, g in ipairs({ "TabLineFill", "StatusLine", "Normal" }) do
+          bar_bg = get_hl(g).bg; if bar_bg then break end
+        end
+        bar_bg = hex(bar_bg) or "#1f2335"
+
+        local active_bg
+        for _, g in ipairs({ "CursorLine", "PmenuSel", "Visual" }) do
+          active_bg = get_hl(g).bg; if active_bg then break end
+        end
+        if not active_bg then active_bg = get_hl("Normal").bg end
+        active_bg = hex(active_bg) or "#24283b"
+
+        local normal_fg   = hex(get_hl("Normal").fg)          or "#c0caf5"
+        local inactive_fg = hex(get_hl("Comment").fg)         or "#565f89"
+        local modified_fg = hex(get_hl("String").fg)          or "#9ece6a"
+        local error_fg    = hex(get_hl("DiagnosticError").fg) or "#f7768e"
+        local warn_fg     = hex(get_hl("DiagnosticWarn").fg)  or "#e0af68"
+        local info_fg     = hex(get_hl("DiagnosticInfo").fg)  or "#7aa2f7"
+
+        local accent_fg
+        for _, g in ipairs({ "Function", "Keyword", "Statement", "Directory" }) do
+          accent_fg = get_hl(g).fg; if accent_fg then break end
+        end
+        accent_fg = hex(accent_fg) or "#7aa2f7"
+
+        return {
+          bar_bg      = bar_bg,
+          active_bg   = active_bg,
+          normal_fg   = normal_fg,
+          inactive_fg = inactive_fg,
+          modified_fg = modified_fg,
+          accent_fg   = accent_fg,
+          error_fg    = error_fg,
+          warn_fg     = warn_fg,
+          info_fg     = info_fg,
+        }
+      end
+
+      -- ── Layout definitions ───────────────────────────────────────────────
+      -- Each layout returns:
+      --   options   – merged into base_options
+      --   hl_patch  – function(c, hl) that mutates the highlights table
+      local layouts = {
+
+        minimal = {
+          options = { separator_style = { "", "" }, tab_size = 22, indicator = { icon = "", style = "none" } },
+          hl_patch = function(c, hl)
+            -- plain: active tab just has a different background
+          end,
+        },
+
+        underline = {
+          options = { separator_style = { "", "" }, tab_size = 22, indicator = { icon = "", style = "none" } },
+          hl_patch = function(c, hl)
+            hl.buffer_selected = vim.tbl_extend("force", hl.buffer_selected, {
+              underline = true, sp = c.accent_fg,
+            })
+          end,
+        },
+
+        top_accent = {
+          options = { separator_style = { "", "" }, tab_size = 22, indicator = { icon = "", style = "none" } },
+          hl_patch = function(c, hl)
+            hl.buffer_selected = vim.tbl_extend("force", hl.buffer_selected, {
+              overline = true, sp = c.accent_fg,
+            })
+          end,
+        },
+
+        theme_accent = {
+          options = { separator_style = { "", "" }, tab_size = 22, indicator = { icon = "", style = "none" } },
+          hl_patch = function(c, hl)
+            hl.buffer_selected = vim.tbl_extend("force", hl.buffer_selected, {
+              underline = true, overline = false, sp = c.accent_fg,
+            })
+            hl.indicator_selected = { fg = c.accent_fg, bg = c.active_bg }
+          end,
+        },
+
+        slant = {
+          options = { separator_style = "slant", tab_size = 22, indicator = { style = "none" } },
+          hl_patch = function(c, hl)
+            hl.separator          = { fg = c.bar_bg,    bg = c.bar_bg }
+            hl.separator_selected = { fg = c.bar_bg,    bg = c.active_bg }
+            hl.separator_visible  = { fg = c.bar_bg,    bg = c.bar_bg }
+          end,
+        },
+
+        bubble = {
+          options = { separator_style = { "▎", "▎" }, tab_size = 20, indicator = { style = "none" } },
+          hl_patch = function(c, hl)
+            local bubble_bg = hex(get_hl("CursorLine").bg) or c.active_bg
+            hl.buffer_selected    = vim.tbl_extend("force", hl.buffer_selected, { bg = bubble_bg })
+            hl.separator          = { fg = c.bar_bg, bg = c.bar_bg }
+            hl.separator_selected = { fg = c.bar_bg, bg = bubble_bg }
+            -- also fix all _selected backgrounds for icons
+            hl.modified_selected  = { fg = hl.modified_fg, bg = bubble_bg }
+            hl.close_button_selected = { fg = hl.close_button_selected and hl.close_button_selected.fg or c.accent_fg, bg = bubble_bg }
+          end,
+        },
+
+        bordered = {
+          options = { separator_style = { "▎", "▎" }, tab_size = 20, indicator = { style = "none" } },
+          hl_patch = function(c, hl)
+            local border_fg = hex(get_hl("Comment").fg) or "#414868"
+            hl.separator          = { fg = border_fg, bg = c.bar_bg }
+            hl.separator_selected = { fg = border_fg, bg = c.active_bg }
+            hl.separator_visible  = { fg = border_fg, bg = c.bar_bg }
+          end,
+        },
+
+        compact = {
+          options = {
+            separator_style = { "", "" }, tab_size = 14, max_name_length = 12,
+            max_prefix_length = 8, truncate_names = true,
+            color_icons = false, show_buffer_icons = false,
+            show_buffer_close_icons = false, indicator = { icon = "", style = "none" },
+          },
+          hl_patch = function(c, hl)
+            hl.buffer_selected = vim.tbl_extend("force", hl.buffer_selected, {
+              underline = true, sp = c.accent_fg,
+            })
+          end,
+        },
+
+        centered = {
+          options = { separator_style = { "", "" }, tab_size = 32, max_name_length = 24, indicator = { icon = "", style = "none" } },
+          hl_patch = function(c, hl)
+            hl.buffer_selected = vim.tbl_extend("force", hl.buffer_selected, {
+              overline = true, sp = c.accent_fg,
+            })
+          end,
+        },
+
+        diagnostic_gutter = {
+          options = {
+            separator_style = { "", "" }, tab_size = 22,
+            indicator = { icon = "", style = "none" }, show_tab_indicators = true,
+          },
+          hl_patch = function(c, hl)
+            hl.buffer_selected = vim.tbl_extend("force", hl.buffer_selected, {
+              underline = true, sp = c.accent_fg,
+            })
+          end,
+        },
+
+        devicon_showcase = {
+          options = {
+            separator_style = { "", "" }, tab_size = 22,
+            color_icons = true, show_buffer_icons = true,
+            indicator = { icon = "", style = "none" },
+          },
+          hl_patch = function(c, hl)
+            -- Icons get color from nvim-web-devicons; just ensure bgs are right
+          end,
+        },
+      }
+
+      local selected = layouts[layout_name] or layouts.minimal
+
+      -- ── Settings ─────────────────────────────────────────────────────────
+      local ui         = settings.ui or {}
+      local show_icons = ui.tab_buffer_show_icons ~= false
+      local show_close = ui.tab_buffer_show_close == true
+      local hide_empty = ui.hide_empty_tabline == true
+
+      -- ── Build and apply ───────────────────────────────────────────────────
+      local function apply_setup()
+        local c = resolve_colors()
+
+        -- Base highlights (every variant: _selected, _visible, inactive)
+        local hl = {
+          fill                   = { bg = c.bar_bg },
+
+          background             = { fg = c.inactive_fg, bg = c.bar_bg },
+          buffer_selected        = { fg = c.accent_fg,   bg = c.active_bg, bold = true },
+          buffer_visible         = { fg = c.normal_fg,   bg = c.bar_bg },
+
+          separator              = { fg = c.bar_bg,    bg = c.bar_bg },
+          separator_selected     = { fg = c.active_bg, bg = c.active_bg },
+          separator_visible      = { fg = c.bar_bg,    bg = c.bar_bg },
+
+          tab                    = { fg = c.inactive_fg, bg = c.bar_bg },
+          tab_selected           = { fg = c.accent_fg,   bg = c.active_bg, bold = true },
+          tab_separator          = { fg = c.bar_bg,    bg = c.bar_bg },
+          tab_separator_selected = { fg = c.active_bg, bg = c.active_bg },
+          tab_close              = { fg = c.inactive_fg, bg = c.bar_bg },
+
+          close_button           = { fg = c.inactive_fg, bg = c.bar_bg },
+          close_button_selected  = { fg = c.accent_fg,   bg = c.active_bg },
+          close_button_visible   = { fg = c.normal_fg,   bg = c.bar_bg },
+
+          modified               = { fg = c.modified_fg, bg = c.bar_bg },
+          modified_selected      = { fg = c.modified_fg, bg = c.active_bg },
+          modified_visible       = { fg = c.modified_fg, bg = c.bar_bg },
+
+          duplicate              = { fg = c.inactive_fg, bg = c.bar_bg,    italic = true },
+          duplicate_selected     = { fg = c.accent_fg,   bg = c.active_bg, italic = true },
+          duplicate_visible      = { fg = c.inactive_fg, bg = c.bar_bg,    italic = true },
+
+          trunc_marker           = { fg = c.inactive_fg, bg = c.bar_bg },
+
+          indicator_selected     = { fg = c.active_bg,  bg = c.active_bg },
+          indicator_visible      = { fg = c.bar_bg,     bg = c.bar_bg },
+
+          numbers                = { fg = c.inactive_fg, bg = c.bar_bg },
+          numbers_selected       = { fg = c.accent_fg,   bg = c.active_bg, bold = true },
+          numbers_visible        = { fg = c.normal_fg,   bg = c.bar_bg },
+
+          pick                   = { fg = c.warn_fg, bg = c.bar_bg,    bold = true },
+          pick_selected          = { fg = c.warn_fg, bg = c.active_bg, bold = true },
+          pick_visible           = { fg = c.warn_fg, bg = c.bar_bg,    bold = true },
+
+          offset_separator       = { fg = c.bar_bg, bg = c.bar_bg },
+
+          -- Diagnostics
+          diagnostic             = { fg = c.inactive_fg, bg = c.bar_bg },
+          diagnostic_selected    = { fg = c.normal_fg,   bg = c.active_bg },
+          diagnostic_visible     = { fg = c.inactive_fg, bg = c.bar_bg },
+
+          error                  = { fg = c.error_fg, bg = c.bar_bg },
+          error_selected         = { fg = c.error_fg, bg = c.active_bg, bold = true },
+          error_visible          = { fg = c.error_fg, bg = c.bar_bg },
+
+          warning                = { fg = c.warn_fg, bg = c.bar_bg },
+          warning_selected       = { fg = c.warn_fg, bg = c.active_bg, bold = true },
+          warning_visible        = { fg = c.warn_fg, bg = c.bar_bg },
+
+          info                   = { fg = c.info_fg, bg = c.bar_bg },
+          info_selected          = { fg = c.info_fg, bg = c.active_bg, bold = true },
+          info_visible           = { fg = c.info_fg, bg = c.bar_bg },
+
+          hint                   = { fg = c.info_fg, bg = c.bar_bg },
+          hint_selected          = { fg = c.info_fg, bg = c.active_bg, bold = true },
+          hint_visible           = { fg = c.info_fg, bg = c.bar_bg },
+
+          error_diagnostic           = { fg = c.error_fg, bg = c.bar_bg },
+          error_diagnostic_selected  = { fg = c.error_fg, bg = c.active_bg },
+          warning_diagnostic         = { fg = c.warn_fg, bg = c.bar_bg },
+          warning_diagnostic_selected= { fg = c.warn_fg, bg = c.active_bg },
+          info_diagnostic            = { fg = c.info_fg, bg = c.bar_bg },
+          info_diagnostic_selected   = { fg = c.info_fg, bg = c.active_bg },
+          hint_diagnostic            = { fg = c.info_fg, bg = c.bar_bg },
+          hint_diagnostic_selected   = { fg = c.info_fg, bg = c.active_bg },
+        }
+
+        -- Let the layout mutate highlights
+        selected.hl_patch(c, hl)
+
+        -- Base options
+        local base_options = {
+          mode    = settings.tab_buffer_style or "buffers",
+          numbers = "none",
+
+          close_command       = function(n) Snacks.bufdelete(n) end,
+          right_mouse_command = function(n) Snacks.bufdelete(n) end,
+
+          color_icons             = show_icons,
+          show_buffer_icons       = show_icons,
+          show_buffer_close_icons = show_close,
+          show_close_icon         = show_close,
+          show_tab_indicators     = false,
+          buffer_close_icon       = "",
+          modified_icon           = "●",
+          close_icon              = "",
+          left_trunc_marker       = "",
+          right_trunc_marker      = "",
+
+          tab_size          = 22,
+          max_name_length   = 18,
+          max_prefix_length = 13,
+          truncate_names    = true,
+
+          diagnostics = "nvim_lsp",
+          diagnostics_indicator = function(count, level)
+            local icons = { error = " ", warning = " ", info = " " }
+            return (icons[level] or "") .. count
+          end,
+
+          always_show_bufferline = not hide_empty,
+
+          custom_filter = function(bufnr)
+            if vim.api.nvim_buf_get_name(bufnr) == "" then return false end
+            local ft = vim.bo[bufnr].filetype
+            local bt = vim.bo[bufnr].buftype
+            if ft == "toggleterm" or bt == "terminal" then return false end
+            if ft:find("snacks") then return false end
+            return true
+          end,
+
+          hover = { enabled = true, delay = 200, reveal = { "close" } },
+
+          offsets = {
+            { filetype = "NvimTree",           text = " Files", text_align = "left", separator = false },
+            { filetype = "neo-tree",            text = " Files", text_align = "left", separator = false },
+            { filetype = "snacks_layout_box",   text = "",       separator = false },
+            { filetype = "snacks_picker_list",  text = "",       separator = false },
+          },
+        }
+
+        local options = vim.tbl_deep_extend("force", base_options, selected.options or {})
+
+        require("bufferline").setup({ highlights = hl, options = options })
+
+        -- Keep TabLineFill in sync (Neovim draws this outside bufferline)
+        local bar_int = tonumber(c.bar_bg:sub(2), 16)
+        if bar_int then vim.api.nvim_set_hl(0, "TabLineFill", { bg = bar_int }) end
+      end
+
+      apply_setup()
+
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "*",
-        callback = sync_bufferline_bg,
+        group    = vim.api.nvim_create_augroup("BufferlineThemeSync", { clear = true }),
+        pattern  = "*",
+        callback = function() vim.defer_fn(apply_setup, 50) end,
       })
-      -- Also apply immediately on first load
-      sync_bufferline_bg()
     end,
   },
 }

@@ -26,6 +26,9 @@ patch_path()
 -- Suppress deprecation warnings (lspconfig v2 → v3 transition)
 vim.deprecate = function() end
 
+-- Pre-load and wrap declarative settings to allow both flat and nested lookups
+require("core.settings_loader").load()
+
 -- Leader keys must be set BEFORE lazy loads plugins
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "

@@ -128,67 +128,77 @@ init.lua
 
 ## settings.lua Reference
 
-`lua/settings.lua` is the **only file you need to edit** for common customizations.
+`lua/settings.lua` is the **only file you need to edit** for common customizations. It is structured into logical tables. Behind the scenes, the configuration system wraps this table with flat-compatibility translation, so both the new nested keys and flat keys continue to resolve correctly.
 
-### UI & Aesthetics
+### UI & Aesthetics (`ui`)
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `theme` | `"catppuccin"` | Active colorscheme |
-| `background` | `"solid"` | `"transparent"` or `"solid"` |
-| `hide_empty_tabline` | `true` | Hide buffer bar when only 1 file is open |
-| `show_indent_guides` | `true` | Vertical indentation guide lines |
-| `smooth_scroll` | `true` | Smooth scrolling animations |
-| `dim_inactive` | `false` | Dim unfocused windows |
+| Setting | Type/Options | Description |
+|---------|--------------|-------------|
+| `ui.theme` | `Theme` (string) | Active colorscheme |
+| `ui.background` | `"dark"` \| `"light"` | Editor color variant |
+| `ui.transparent` | `boolean` | Enable seamless backdrop transparency |
+| `ui.dim_inactive` | `boolean` | Dim unfocused split windows |
+| `ui.show_indent_guides` | `boolean` | Vertical lines indicating code indents |
+| `ui.smooth_scroll` | `boolean` | Smooth scrolling physics |
+| `ui.cmdheight` | `0` \| `1` | Command bar height (`0` for modern hidden) |
 
-**Available themes:**
-`catppuccin` · `onedark` · `tokyonight` · `gruvbox` · `rose-pine` · `nord` · `dracula` · `kanagawa` · `nightfox` · `sonokai` · `material` · `oxocarbon` · `monokai` · `everforest` · `gruvbox-material` · `poimandres` · `github_dark`
+#### Buffer Tab Bar (`ui.tab_buffer`)
 
-### Editor Behavior
+| Setting | Type/Options | Description |
+|---------|--------------|-------------|
+| `ui.tab_buffer.enable` | `boolean` | Enable the tab buffer bar |
+| `ui.tab_buffer.style` | `"buffers"` \| `"tabs"` | Render files (`buffers`) or tab pages (`tabs`) |
+| `ui.tab_buffer.show_icons` | `boolean` | Toggle file-type icons in tabs |
+| `ui.tab_buffer.show_close` | `boolean` | Toggle tab close buttons |
+| `ui.tab_buffer.diagnostics` | `"nvim_lsp"` \| `"none"` | Show LSP diagnostic indicators in tabs |
+| `ui.tab_buffer.divider_style` | `"slope"` \| `"slant"` \| `"thick"` \| `"thin"` | Shape of separators between tabs |
+| `ui.tab_buffer.transparent_dividers` | `boolean` | Completely hide divider lines |
+| `ui.tab_buffer.hide_empty` | `boolean` | Hide buffer bar if only 1 buffer is open |
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `highlight_current_line` | `true` | Cursorline highlight |
-| `show_line_numbers` | `true` | Line numbers in gutter |
-| `relative_line_numbers` | `false` | Relative line numbers (`5j`, `4k`) |
-| `format_on_save` | `false` | Auto-format on save via conform.nvim |
-| `tab_size` | `2` | Spaces per indent level |
-| `mouse_support` | `true` | Enable mouse in all modes |
-| `wrap_lines` | `true` | Wrap long lines |
-| `scrolloff` | `8` | Lines kept visible above/below cursor |
-| `auto_save` | `false` | Auto-save on focus loss |
-| `blink_cursor` | `true` | Blinking cursor |
-| `color_column` | `"80"` | Vertical ruler (`""` to disable) |
-| `split_below` | `true` | Horizontal splits open below |
-| `split_right` | `true` | Vertical splits open to the right |
-| `ignore_case_search` | `true` | Case-insensitive search (capital = case-sensitive) |
+#### Picker & Overlays (`ui.picker`)
 
-### Code Intelligence
+| Setting | Type/Options | Description |
+|---------|--------------|-------------|
+| `ui.picker.layout` | `"ivy"` \| `"telescope"` \| `"dropdown"` \| `"vertical"` | Finder overlay layout shape |
+| `ui.picker.width` | `number` (0.0 to 1.0) | Modal layout width percentage |
+| `ui.picker.height` | `number` (0.0 to 1.0) | Modal layout height percentage |
+| `ui.picker.border` | `"rounded"` \| `"single"` \| `"double"` \| `"shadow"` | Border styling style |
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `enable_inlay_hints` | `true` | Inline type/parameter hints from LSP |
-| `show_inline_errors` | `true` | Inline diagnostics at end of line |
+### Editor Behavior (`editor`)
 
-### File Explorer
+| Setting | Type/Options | Description |
+|---------|--------------|-------------|
+| `editor.highlight_current_line` | `boolean` | Highlight line under active cursor |
+| `editor.show_line_numbers` | `boolean` | Display standard line numbers |
+| `editor.relative_line_numbers` | `boolean` | Enable relative numbering (`5j`, `4k`) |
+| `editor.format_on_save` | `boolean` | Auto-format files on write via conform.nvim |
+| `editor.tab_size` | `number` (default `2`) | Indent spacing size in spaces |
+| `editor.mouse_support` | `boolean` | Enable mouse interactions in splits |
+| `editor.wrap_lines` | `boolean` | Wrap long lines to viewport |
+| `editor.scrolloff` | `number` (default `8`) | Margins kept visible above/below cursor |
+| `editor.auto_save` | `boolean` | Save files on focus loss |
+| `editor.blink_cursor` | `boolean` | Blinking cursor speed animation |
+| `editor.color_column` | `string` (e.g. `"80"`) | Draw a vertical guide ruler |
+| `editor.split_below` | `boolean` | Open horizontal splits below active |
+| `editor.split_right` | `boolean` | Open vertical splits to the right |
+| `editor.ignore_case_search` | `boolean` | Case-insensitive searching |
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `show_hidden_files` | `true` | Show dotfiles in nvim-tree |
+### Code Intelligence (`lsp`)
 
-### Linting
+| Setting | Type/Options | Description |
+|---------|--------------|-------------|
+| `lsp.enable_inlay_hints` | `boolean` | Inline type hints from LSP |
+| `lsp.show_inline_errors` | `boolean` | Diagnostics errors at end of line |
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `enable_linting` | `true` | Enable async linting via nvim-lint |
+### File Explorer (`explorer`)
 
-### Project-Local Config
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `enable_project_config` | `true` | Load `.neoconf.json` from project roots |
+| Setting | Type/Options | Description |
+|---------|--------------|-------------|
+| `explorer.show_hidden` | `boolean` | Show dotfiles in file tree |
+| `explorer.position` | `"left"` \| `"right"` | Panel location |
 
 ### Extras
+
 
 ```lua
 extras = {

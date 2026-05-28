@@ -70,24 +70,58 @@ This automatically drives: **Mason install** → **lspconfig setup** → **confo
 
 ## ⚙️ Configuration
 
-Everything you need is in **`lua/settings.lua`**. No Lua knowledge required.
+Everything you need is in **`lua/settings.lua`**. No Lua knowledge required. The configuration is organized into logical, nested tables:
 
 ```lua
 return {
-  theme                = "catppuccin",  -- 14 themes available
-  background           = "solid",       -- "solid" or "transparent"
-  format_on_save       = false,         -- auto-format on :w
-  tab_size             = 2,
-  enable_linting       = true,          -- async linting
-  enable_project_config = true,         -- .neoconf.json support
-  show_hidden_files    = true,
+  -- ── UI & Aesthetics ────────────────────────────────────────────────────────
+  ui = {
+    theme = "rose-pine-main",      -- Sleek themes (catppuccin, rose-pine, etc.)
+    background = "dark",           -- "dark" or "light"
+    transparent = true,            -- Toggle editor background transparency
+    dim_inactive = false,          -- Dim unfocused windows
+    show_indent_guides = true,     -- Vertical indent lines
+    smooth_scroll = true,          -- Smooth scroll animations
+    cmdheight = 0,                 -- 0 for clean modern hidden command line
 
-  -- Opt-in to extra language/feature packs:
+    -- Buffer Tab Bar (akinsho/bufferline.nvim)
+    tab_buffer = {
+      enable = true,
+      style = "buffers",           -- "buffers" or "tabs"
+      show_icons = true,
+      show_close = false,
+      diagnostics = "nvim_lsp",
+      divider_style = "slope",     -- slope, slant, thick, thin, none, dotted
+      transparent_dividers = false,
+      hide_empty = true,
+    },
+
+    -- Pickers & Overlays (snacks.picker)
+    picker = {
+      layout = "ivy",              -- telescope, ivy, dropdown, vertical, etc.
+      width = 0.85,
+      height = 0.8,
+      border = "rounded",
+    },
+  },
+
+  -- ── Editor Behavior ────────────────────────────────────────────────────────
+  editor = {
+    highlight_current_line = true,
+    show_line_numbers = true,
+    relative_line_numbers = true,
+    format_on_save = true,
+    tab_size = 2,
+    wrap_lines = true,
+    mouse_support = false,
+  },
+
+  -- ── Extras (Opt-in Language packs) ──────────────────────────────────────────
   extras = {
-    -- "plugins.extras.lang.go",
-    -- "plugins.extras.lang.rust",
-    -- "plugins.extras.lang.sql",
-    -- "plugins.extras.testing.neotest",
+    "plugins.extras.lang.go",
+    "plugins.extras.lang.rust",
+    "plugins.extras.lang.sql",
+    "plugins.extras.testing.neotest",
   },
 }
 ```

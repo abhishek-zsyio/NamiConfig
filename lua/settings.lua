@@ -1,5 +1,5 @@
 -- ==============================================================================
--- 🚀  User Configuration Settings
+-- 🚀  User Configuration Settings (Structured & Grouped)
 -- ==============================================================================
 
 ---@alias Theme
@@ -26,62 +26,76 @@
 ---| "plugins.extras.lang.sql"
 ---| "plugins.extras.testing.neotest"
 
-return {
+local M = {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
-	---@type Theme
-	theme = "rose-pine-main",
-	background = "dark",
-	transparent = true,
-	show_tab_buffer = true, -- Enable/disable the tab buffer bar completely
-	tab_buffer_style = "buffers", -- Options: "buffers", "tabs"
-	tab_buffer_show_icons = true, -- Toggle file-type icons in tabs
-	tab_buffer_show_close = false, -- Toggle close button inside tabs
-	tab_buffer_diagnostics = "nvim_lsp", -- Options: "nvim_lsp", "none"
-	tab_divider_style = "slope", -- Options: "slant", "slope", "thick", "thin", "none", "dotted"
-	tab_buffer_transparent_dividers = true, -- Make vertical divider lines completely transparent
-	hide_empty_tabline = true, -- Hide buffer bar when only 1 file is open
-	show_indent_guides = true,
-	smooth_scroll = true,
-	dim_inactive = false,
-	line_height = 2, -- Additional spacing between lines (GUI only, e.g., Neovide)
-	cmdheight = 0, -- 0 for modern hidden cmdline, 1 for classic
-	neovide_transparency = 0.9, -- Transparency level for Neovide (0.0 to 1.0)
+	ui = {
+		---@type Theme
+		theme = "catppuccin-mocha",
+		background = "dark", -- "dark" or "light"
+		transparent = true,
+		dim_inactive = false,
+		show_indent_guides = true,
+		smooth_scroll = true,
+		cmdheight = 0, -- 0 for modern hidden cmdline, 1 for classic
 
-	-- ── Menus & Pickers (UI) ───────────────────────────────────────────────────
-	picker_layout = "ivy", -- Options: "telescope", "ivy", "dropdown", "default", "vertical", "horizontal", "vscode"
-	picker_width = 0.85,
-	picker_height = 0.8,
-	menu_border = "rounded", -- Options: "rounded", "single", "double", "solid", "shadow", "none"
+		-- Bufferline (Tab bar)
+		-- Layout options: "minimal", "underline", "slant", "bubble", "top_accent", "theme_accent", "bordered", "compact", "centered", "diagnostic_gutter", "devicon_showcase"
+		tab_buffer_layout = "devicon_showcase",
+
+		-- Pickers & Menus (snacks.picker / telescope / fzf-lua)
+		picker = {
+			layout = "default", -- Options: "telescope", "ivy", "dropdown", "default", "vertical", "horizontal", "vscode"
+			width = 0.85,
+			height = 0.8,
+			border = "rounded", -- Options: "rounded", "single", "double", "solid", "shadow", "none"
+		},
+
+		-- GUI Settings (Neovide specific)
+		neovide = {
+			transparency = 0.9, -- Transparency level for Neovide (0.0 to 1.0)
+			line_height = 2, -- Additional spacing between lines (GUI only)
+		},
+	},
 
 	-- ── Editor Behavior ────────────────────────────────────────────────────────
-	highlight_current_line = true,
-	show_line_numbers = true,
-	relative_line_numbers = true,
-	format_on_save = true,
-	tab_size = 2,
-	mouse_support = false,
-	wrap_lines = true,
-	scrolloff = 8,
-	auto_save = false,
-	blink_cursor = true,
-	color_column = "80",
-	split_below = true,
-	split_right = true,
-	ignore_case_search = true,
+	editor = {
+		highlight_current_line = true,
+		show_line_numbers = true,
+		relative_line_numbers = true,
+		format_on_save = true,
+		tab_size = 2,
+		mouse_support = false,
+		wrap_lines = true,
+		scrolloff = 8,
+		auto_save = false,
+		blink_cursor = true,
+		color_column = "80",
+		split_below = true,
+		split_right = true,
+		ignore_case_search = true,
+	},
 
 	-- ── Code Intelligence (LSP) ────────────────────────────────────────────────
-	enable_inlay_hints = true,
-	show_inline_errors = true,
+	lsp = {
+		enable_inlay_hints = true,
+		show_inline_errors = true,
+	},
 
-	-- ── File Explorer ──────────────────────────────────────────────────────────
-	show_hidden_files = true,
-	file_explorer_position = "left",
+	-- ── File Explorer (snacks.explorer) ────────────────────────────────────────
+	explorer = {
+		show_hidden = true,
+		position = "left", -- "left" or "right"
+	},
 
-	-- ── Linting ────────────────────────────────────────────────────────────────
-	enable_linting = true,
+	-- ── Linting (nvim-lint) ────────────────────────────────────────────────────
+	linting = {
+		enable = true,
+	},
 
-	-- ── Project-Local Config ───────────────────────────────────────────────────
-	enable_project_config = true,
+	-- ── Project-Local Configuration ────────────────────────────────────────────
+	project = {
+		enable_config = true, -- Enable project-local config loading (.neoconf.json)
+	},
 
 	-- ── Extras (Opt-in Modules) ────────────────────────────────────────────────
 	---@type Extra[]
@@ -92,14 +106,17 @@ return {
 		"plugins.extras.testing.neotest",
 	},
 
-	-- ── Custom Tools ───────────────────────────────────────────────────────────
-	lsp_servers = {
-		"clangd",
-		"tailwindcss",
-	},
-
-	mason_tools = {
-		"prettier",
-		"stylua",
+	-- ── Custom Tooling Installation ────────────────────────────────────────────
+	custom_tools = {
+		lsp_servers = {
+			"clangd",
+			"tailwindcss",
+		},
+		mason_tools = {
+			"prettier",
+			"stylua",
+		},
 	},
 }
+
+return M

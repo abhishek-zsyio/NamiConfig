@@ -84,10 +84,10 @@ autocmd({ "BufWritePost", "FileChangedShellPost" }, {
   group = augroup("HotReloadSettings", { clear = true }),
   pattern = "*/lua/settings.lua",
   callback = function()
-    -- Clear cached settings
-    package.loaded["settings"] = nil
-    
-    local ok, settings = pcall(require, "settings")
+    -- Reload and wrap settings via settings_loader
+    local ok, settings = pcall(function()
+      return require("core.settings_loader").load()
+    end)
     if not ok then
       vim.notify("Error reloading settings: " .. tostring(settings), vim.log.levels.ERROR)
       return
@@ -104,19 +104,7 @@ autocmd({ "BufWritePost", "FileChangedShellPost" }, {
     if settings.relative_line_numbers ~= nil then vim.wo.relativenumber = settings.relative_line_numbers end
     if settings.wrap_lines ~= nil then vim.wo.wrap = settings.wrap_lines end
     if settings.color_column then vim.wo.colorcolumn = settings.color_column end
-    if settings.show_tab_buffer ~= nil then
-      vim.o.showtabline = settings.show_tab_buffer and 2 or 0
-    end
 
-    -- Hot reload Bufferline so changes to style or layout apply instantly
-    if package.loaded["bufferline"] then
-      pcall(function()
-        local bl_spec = require("plugins.ui.bufferline")
-        if type(bl_spec) == "table" and bl_spec[1] and type(bl_spec[1].config) == "function" then
-          bl_spec[1].config()
-        end
-      end)
-    end
 
     vim.notify("Settings Hot-Reloaded! 🚀", vim.log.levels.INFO, { title = "Config" })
   end,

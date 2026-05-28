@@ -12,7 +12,7 @@ local function catppuccin_setup(flavour)
       integrations = {
         cmp = true, gitsigns = true, nvimtree = true,
         telescope = { enabled = true, style = "classic" },
-        treesitter = true, notify = true, noice = true, bufferline = true,
+        treesitter = true, notify = true, noice = true,
         indent_blankline = { enabled = true, colored_indent_levels = false },
         native_lsp = { enabled = true, inlay_hints = { background = true } },
       },
