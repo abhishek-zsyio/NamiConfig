@@ -30,10 +30,10 @@ local M = {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	ui = {
 		---@type Theme
-		theme = "catppuccin-mocha",
+		theme = "kanagawa-wave",
 
 		background = "dark", -- "dark" or "light"
-		transparent = false,
+		transparent = ture,
 		dim_inactive = false,
 		show_indent_guides = true,
 		smooth_scroll = true,

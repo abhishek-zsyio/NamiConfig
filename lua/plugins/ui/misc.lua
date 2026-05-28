@@ -66,8 +66,94 @@ return {
   },
 
 
+  -- Markdown preview: glow in a real terminal vsplit (full ANSI color + styling)
+  -- No external plugin needed — glow is a system binary (brew install glow)
+  {
+    dir = vim.fn.stdpath("config"),  -- points to ~/.config/nvim; no remote fetch
+    name = "glow-preview",
+    lazy = false,
+    config = function()
+      local glow_win = nil
+      local glow_buf = nil
 
-  -- Which-key: show keybinding hints on leader press
+      local function open_glow()
+        local file = vim.fn.expand("%:p")
+        if file == "" or vim.bo.filetype ~= "markdown" then
+          vim.notify("GlowPreview: not a markdown file", vim.log.levels.WARN)
+          return
+        end
+
+        -- Toggle: close if already open
+        if glow_win and vim.api.nvim_win_is_valid(glow_win) then
+          vim.api.nvim_win_close(glow_win, true)
+          glow_win, glow_buf = nil, nil
+          return
+        end
+
+        local src_win = vim.api.nvim_get_current_win()
+
+        -- Open a vertical split on the right
+        vim.cmd("botright vsplit")
+        glow_win = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_set_width(glow_win, math.floor(vim.o.columns * 0.45))
+
+        -- Run glow inside a real terminal buffer → ANSI colors preserved
+        local width = vim.api.nvim_win_get_width(glow_win) - 2
+        vim.cmd(string.format(
+          "terminal glow --style dark --width %d %s",
+          width, vim.fn.shellescape(file)
+        ))
+        glow_buf = vim.api.nvim_get_current_buf()
+
+        -- Minimal, distraction-free look
+        local wo = vim.wo[glow_win]
+        wo.number         = false
+        wo.relativenumber = false
+        wo.signcolumn     = "no"
+        wo.statuscolumn   = ""
+        wo.winfixwidth    = true
+        vim.bo[glow_buf].buflisted = false
+
+        -- Brief terminal-mode start so glow renders, then return focus
+        vim.cmd("startinsert")
+        vim.defer_fn(function()
+          vim.cmd("stopinsert")
+          if vim.api.nvim_win_is_valid(src_win) then
+            vim.api.nvim_set_current_win(src_win)
+          end
+        end, 80)
+
+        -- q closes the preview
+        vim.keymap.set("n", "q", function()
+          if glow_win and vim.api.nvim_win_is_valid(glow_win) then
+            vim.api.nvim_win_close(glow_win, true)
+          end
+          glow_win, glow_buf = nil, nil
+        end, { buffer = glow_buf, nowait = true, silent = true })
+
+        vim.api.nvim_create_autocmd("WinClosed", {
+          pattern  = tostring(glow_win),
+          once     = true,
+          callback = function() glow_win, glow_buf = nil, nil end,
+        })
+      end
+
+      vim.api.nvim_create_user_command("GlowPreview", open_glow, {})
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern  = "markdown",
+        callback = function()
+          vim.keymap.set("n", "<leader>op", open_glow, {
+            buffer = true,
+            silent = true,
+            desc   = "Toggle Markdown preview (glow split)",
+          })
+        end,
+      })
+    end,
+  },
+
+
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
@@ -158,6 +244,7 @@ return {
 
         -- Misc
         { "<leader>ma", desc = "Find marks" },
+        { "<leader>op", desc = "Preview Markdown (glow)" },
         { "<leader>sc", desc = "Screenshot code" },
         { "<leader>vs", desc = "Select Python venv" },
         { "<leader>/",  desc = "Toggle comment" },
