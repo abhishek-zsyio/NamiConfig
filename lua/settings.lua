@@ -30,7 +30,8 @@ local M = {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	ui = {
 		---@type Theme
-		theme = "catppuccin-mocha",
+		theme = "duskfox",
+
 		background = "dark", -- "dark" or "light"
 		transparent = true,
 		dim_inactive = false,
@@ -38,9 +39,7 @@ local M = {
 		smooth_scroll = true,
 		cmdheight = 0, -- 0 for modern hidden cmdline, 1 for classic
 
-		-- Bufferline (Tab bar)
-		-- Layout options: "minimal", "underline", "slant", "bubble", "top_accent", "theme_accent", "bordered", "compact", "centered", "diagnostic_gutter", "devicon_showcase"
-		tab_buffer_layout = "devicon_showcase",
+
 
 		-- Pickers & Menus (snacks.picker / telescope / fzf-lua)
 		picker = {
@@ -55,6 +54,9 @@ local M = {
 			transparency = 0.9, -- Transparency level for Neovide (0.0 to 1.0)
 			line_height = 2, -- Additional spacing between lines (GUI only)
 		},
+
+		-- Bufferline Style
+		bufferline_style = "nvchad", -- Options: "nvchad" (dark tab, bright accent bar, colored icons), "solid" (bright tab, dark text/icons)
 	},
 
 	-- ── Editor Behavior ────────────────────────────────────────────────────────
