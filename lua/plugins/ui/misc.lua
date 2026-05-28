@@ -65,95 +65,6 @@ return {
     },
   },
 
-  -- Markdown preview (Peek)
-  {
-    "toppair/peek.nvim",
-    event = { "VeryLazy" },
-    build = "deno task --quiet build:fast",
-    config = function()
-      require("peek").setup({
-        app = "webview",
-        theme = vim.o.background == "light" and "light" or "dark",
-      })
-      
-      -- Theme sync generator
-      local function generate_peek_theme()
-        local function get_hex(hlgroup, attr)
-            local hl = vim.api.nvim_get_hl(0, { name = hlgroup, link = false })
-            local color = hl[attr]
-            if color then
-                return string.format("#%06x", color)
-            end
-            return nil
-        end
-        
-        local bg = get_hex("Normal", "bg") or "#0a0a0f"
-        local fg = get_hex("Normal", "fg") or "#d4d4d4"
-        local title = get_hex("Title", "fg") or fg
-        local link = get_hex("String", "fg") or "#82aaff"
-        local code_bg = get_hex("CursorLine", "bg") or "#1a1a24"
-        local code_fg = get_hex("String", "fg") or fg
-        local border = get_hex("FloatBorder", "fg") or "#333333"
-        local accent = get_hex("Keyword", "fg") or "#c678dd"
-        
-        local css = string.format([[
-:root {
-  --nvim-bg: %s;
-  --nvim-fg: %s;
-  --nvim-title: %s;
-  --nvim-link: %s;
-  --nvim-code-bg: %s;
-  --nvim-code-fg: %s;
-  --nvim-border: %s;
-  --nvim-accent: %s;
-}
-]], bg, fg, title, link, code_bg, code_fg, border, accent)
-
-        local file = io.open(vim.fn.stdpath("config") .. "/peek-theme-vars.css", "w")
-        if file then
-          file:write(css)
-          file:close()
-        end
-        
-        -- Tell peek to reload theme if running
-        pcall(function()
-          local peek_app = require("peek.app")
-          if peek_app.update_theme then
-            peek_app.update_theme()
-          end
-        end)
-      end
-      
-      -- Generate immediately
-      generate_peek_theme()
-      
-      -- Generate on ColorScheme change
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        group = vim.api.nvim_create_augroup("PeekThemeSync", { clear = true }),
-        callback = generate_peek_theme,
-      })
-      
-      -- Remove the ugly hardcoded "Peek preview" window title for a clean, frameless look
-      local index_html = vim.fn.stdpath("data") .. "/lazy/peek.nvim/public/index.html"
-      if vim.fn.filereadable(index_html) == 1 then
-        vim.fn.system("sed -i '' \"s/<title>Peek preview<\\/title>/<title> <\\/title>/\" " .. index_html)
-      end
-    end,
-    keys = {
-      {
-        "<leader>op",
-        function()
-          local peek = require("peek")
-          if peek.is_open() then
-            peek.close()
-          else
-            peek.open()
-          end
-        end,
-        desc = "Toggle Markdown Preview",
-      },
-    },
-  },
 
 
   -- Which-key: show keybinding hints on leader press
@@ -247,7 +158,6 @@ return {
 
         -- Misc
         { "<leader>ma", desc = "Find marks" },
-        { "<leader>op", desc = "Toggle Markdown preview" },
         { "<leader>sc", desc = "Screenshot code" },
         { "<leader>vs", desc = "Select Python venv" },
         { "<leader>/",  desc = "Toggle comment" },

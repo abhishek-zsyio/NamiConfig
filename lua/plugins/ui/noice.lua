@@ -18,7 +18,18 @@ return {
       messages  = { enabled = true },
       popupmenu = { enabled = true, backend = "nui" },
 
-
+      views = {
+        cmdline_popup = {
+          position = { row = "97%", col = "50%" },
+          size = { width = 60, height = "auto" },
+          border = { style = "rounded", padding = { 0, 1 } },
+        },
+        mini = {
+          timeout = 2000,
+          reverse = false,
+          position = { row = -2, col = -2 },
+        },
+      },
       notify = {
         enabled = false,
       },

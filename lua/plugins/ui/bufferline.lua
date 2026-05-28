@@ -24,12 +24,13 @@ return {
           show_tab_indicators     = true,
 
           modified_icon      = "●",
-          left_trunc_marker  = "",
-          right_trunc_marker = "",
+          left_trunc_marker  = "",
+          right_trunc_marker = "",
 
-          separator_style = "thin",  -- thin line for NvChad-like look
-          tab_size        = 18,
-          max_name_length = 18,
+          separator_style = "thin",   -- minimal thin line separators
+          tab_size        = 20,
+          max_name_length = 20,
+          show_buffer_default_icon = true,
           truncate_names  = true,
 
           indicator = {
@@ -58,18 +59,21 @@ return {
           hover = { enabled = true, delay = 200, reveal = { "close" } },
 
           offsets = {
-            { filetype = "NvimTree", text = "Explorer", padding = 1, text_align = "left", separator = false },
-            { filetype = "neo-tree", text = "Explorer", padding = 1, text_align = "left", separator = false },
+            { filetype = "NvimTree", text = "󰙅 Explorer", highlight = "Directory", padding = 1, text_align = "left", separator = false },
+            { filetype = "neo-tree", text = "󰙅 Explorer", highlight = "Directory", padding = 1, text_align = "left", separator = false },
+            { filetype = "snacks_picker_list", text = "󰙅 Explorer", highlight = "Directory", padding = 1, text_align = "left", separator = false },
+            { filetype = "snacks_layout_box", text = "󰙅 Explorer", highlight = "Directory", padding = 1, text_align = "left", separator = false },
+            { filetype = "snacks_explorer", text = "󰙅 Explorer", highlight = "Directory", padding = 1, text_align = "left", separator = false },
           },
         },
 
         highlights = {
           fill = {
-            bg = { attribute = "bg", highlight = "TabLineFill" },
+            bg = { attribute = "bg", highlight = "Normal" },
           },
           background = {
             fg = { attribute = "fg", highlight = "TabLine" },
-            bg = { attribute = "bg", highlight = "TabLine" },
+            bg = { attribute = "bg", highlight = "Normal" },
           },
 
           buffer_selected = {

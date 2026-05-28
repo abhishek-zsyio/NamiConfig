@@ -62,7 +62,7 @@ return {
           file = "󰈙 ",
           ui = {
             bar = {
-              separator = "  ",
+              separator = "  ❯  ",
               extends = "…",
             },
             menu = {
@@ -92,6 +92,15 @@ return {
         set_bg("WinBar")
         set_bg("WinBarNC")
         set_bg("DropBarMenuNormalFloat")
+
+        -- Fix icon bg: patch every DropBarIconKind* and DropBarIconUI* group
+        -- so the file-type icon (e.g. the blue Lua dot) shares the same bg
+        local all_hls = vim.api.nvim_get_hl(0, {})
+        for name, _ in pairs(all_hls) do
+          if name:match("^DropBarIcon") then
+            set_bg(name)
+          end
+        end
 
         -- Ensure the separators match the theme's subtle colors
         vim.api.nvim_set_hl(0, "DropBarIconUIIndicator", { link = "Comment" })

@@ -1,4 +1,4 @@
--- lualine.lua — NvChad × VS Code theme (Adapted for Auto Theme)
+-- lualine.lua — Polished Statusline (Auto Theme)
 return {
   {
     "nvim-lualine/lualine.nvim",
@@ -41,19 +41,17 @@ return {
         for _, v in ipairs(names) do
           if not seen[v] then unique[#unique + 1] = v; seen[v] = true end
         end
-        if #unique == 0 then return "No LSP" end
-        -- Replaced the ugly "+2" with a clean bullet-separated list
-        return table.concat(unique, " • ")
+        if #unique == 0 then return "" end
+        return table.concat(unique, " · ")
       end
 
       local function macro_rec()
         local r = vim.fn.reg_recording()
-        return r ~= "" and (" @" .. r) or ""
+        return r ~= "" and ("󰑋 @" .. r) or ""
       end
 
       local function clock()
-        -- Changed to 12-hour format with AM/PM
-        return "⏱ " .. os.date("%I:%M %p")
+        return "󰔠 " .. os.date("%I:%M %p")
       end
 
       local PROSE = { markdown = true, text = true, org = true, norg = true }
@@ -67,10 +65,17 @@ return {
         return (ok and api.is_running()) and "󱚣 SM" or ""
       end
 
+      local function noice_mode()
+        return package.loaded["noice"] and require("noice").api.status.mode.get() or ""
+      end
+      local function noice_mode_cond()
+        return package.loaded["noice"] and require("noice").api.status.mode.has()
+      end
+
       -- ── Setup ──────────────────────────────────────────────────────────────
       require("lualine").setup({
         options = {
-          theme                = "auto", -- 👈 Uses the dynamic Neovim theme now
+          theme                = "auto",
           globalstatus         = true,
           component_separators = { left = "", right = "" },
           section_separators   = { left = "", right = "" },
@@ -94,7 +99,7 @@ return {
           lualine_b = {
             {
               "branch",
-              icon    = "⎇",
+              icon    = " ",
               padding = { left = 1, right = 1 },
               fmt     = function(name)
                 return #name > 20 and name:sub(1, 18) .. "…" or name
@@ -102,7 +107,7 @@ return {
             },
             {
               "diff",
-              symbols = { added = " +", modified = " ~", removed = " -" },
+              symbols = { added = " ", modified = " ", removed = " " },
               padding = { left = 1, right = 1 },
             },
           },
@@ -123,18 +128,17 @@ return {
           },
 
           lualine_x = {
-            -- Macro recording
+            -- Macro recording pill (hidden when not recording)
             {
               macro_rec,
-              color   = { fg = "#cca700" }, -- Only setting foreground so background respects theme
+              cond    = function() return vim.fn.reg_recording() ~= "" end,
+              color   = { fg = "#cca700", gui = "bold" },
               padding = { left = 1, right = 1 },
             },
-            -- Noice command/search mode (optional)
+            -- Noice command/search mode (hidden when not active)
             {
-              function() return require("noice").api.status.mode.get() end,
-              cond  = function()
-                return package.loaded["noice"] and require("noice").api.status.mode.has()
-              end,
+              noice_mode,
+              cond    = noice_mode_cond,
               color   = { fg = "#cca700" },
               padding = { left = 1, right = 1 },
             },
@@ -148,13 +152,15 @@ return {
             -- Word count (prose only)
             {
               word_count,
+              cond    = function() return PROSE[vim.bo.filetype] == true end,
               color   = { fg = "#c586c0" },
               padding = { left = 1, right = 1 },
             },
-            -- LSP / formatters
+            -- LSP / formatters (hidden when none active)
             {
               lsp_clients,
-              icon    = "{}",
+              cond    = function() return lsp_clients() ~= "" end,
+              icon    = "󰒍",
               color   = { fg = "#9cdcfe" },
               padding = { left = 1, right = 1 },
             },
@@ -162,17 +168,19 @@ return {
             {
               "encoding",
               fmt     = function(s) return s ~= "utf-8" and s or "" end,
+              cond    = function() return vim.bo.fileencoding ~= "utf-8" end,
               padding = { left = 1, right = 1 },
             },
-            -- Filetype
+            -- Filetype with icon
             {
               "filetype",
               padding = { left = 1, right = 1 },
             },
-            -- Clock
+            -- Clock (subtle color)
             {
               clock,
-              padding = { left = 1, right = 1 },
+              color   = { fg = "#858585" },
+              padding = { left = 1, right = 2 },
             },
           },
 

@@ -11,7 +11,7 @@ return {
       multiline_threshold = 20, -- Maximum number of lines to show for a single context
       trim_scope = "outer",     -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
       mode = "cursor",          -- Line used to calculate context. Choices: 'cursor', 'topline'
-      separator = nil,
+      separator = "─",          -- visible rule between context and code
       zindex = 20,              -- The Z-index of the context window
       on_attach = nil,          -- (fun(buf: integer): boolean) return false to disable attaching
     },
@@ -21,6 +21,17 @@ return {
       -- Sleek custom highlights for the context bar so it pops elegantly
       vim.api.nvim_set_hl(0, "TreesitterContext", { link = "CursorLine" })
       vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { link = "CursorLineNr" })
+      vim.api.nvim_set_hl(0, "TreesitterContextSeparator", { link = "FloatBorder" })
+
+      -- Re-apply on colorscheme changes
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        pattern = "*",
+        callback = function()
+          vim.api.nvim_set_hl(0, "TreesitterContext", { link = "CursorLine" })
+          vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { link = "CursorLineNr" })
+          vim.api.nvim_set_hl(0, "TreesitterContextSeparator", { link = "FloatBorder" })
+        end,
+      })
     end,
   },
 }

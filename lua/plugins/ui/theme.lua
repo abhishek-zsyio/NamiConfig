@@ -111,6 +111,26 @@ table.insert(plugins, {
             -- Sleek Pmenu (Autocomplete)
             set_hl(0, "Pmenu", { bg = alt_bg, fg = fg })
             set_hl(0, "PmenuSel", { bg = accent, fg = bg, bold = true })
+
+            -- Subtle split separators that don't compete with content
+            local border_fg = get_hl("FloatBorder").fg or get_hl("Comment").fg
+            if border_fg then
+              set_hl(0, "WinSeparator", { fg = border_fg, bg = "NONE" })
+            end
+
+            -- Softer MatchParen: underline + bold instead of jarring background
+            set_hl(0, "MatchParen", { underline = true, bold = true, sp = accent })
+
+            -- Indent guides: active scope uses the accent color so it glows
+            local comment_fg = get_hl("Comment").fg
+            local fn_fg = get_hl("Function").fg
+            if comment_fg then
+              set_hl(0, "SnacksIndent",       { fg = comment_fg })
+            end
+            if fn_fg then
+              set_hl(0, "SnacksIndentScope",  { fg = fn_fg })
+              set_hl(0, "SnacksIndentChunk",  { fg = fn_fg })
+            end
           end
         end,
       })

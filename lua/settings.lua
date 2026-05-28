@@ -30,10 +30,10 @@ local M = {
 	-- ── UI & Aesthetics ────────────────────────────────────────────────────────
 	ui = {
 		---@type Theme
-		theme = "duskfox",
+		theme = "catppuccin-mocha",
 
 		background = "dark", -- "dark" or "light"
-		transparent = true,
+		transparent = false,
 		dim_inactive = false,
 		show_indent_guides = true,
 		smooth_scroll = true,
