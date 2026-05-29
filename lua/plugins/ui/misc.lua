@@ -66,87 +66,229 @@ return {
   },
 
 
-  -- Markdown preview: glow in a real terminal vsplit (full ANSI color + styling)
-  -- No external plugin needed — glow is a system binary (brew install glow)
+  -- Premium Floating Glow Markdown Previewer with real-time autoupdates and fullscreen support
   {
-    dir = vim.fn.stdpath("config"),  -- points to ~/.config/nvim; no remote fetch
+    dir = vim.fn.stdpath("config"),
     name = "glow-preview",
     lazy = false,
     config = function()
-      local glow_win = nil
-      local glow_buf = nil
+      local previews = {} -- active previews indexed by buffer number: { win = win, buf = buf, augroup = augroup, toggle_fs = function }
 
-      local function open_glow()
-        local file = vim.fn.expand("%:p")
-        if file == "" or vim.bo.filetype ~= "markdown" then
-          vim.notify("GlowPreview: not a markdown file", vim.log.levels.WARN)
+      local function toggle_glow()
+        local src_buf = vim.api.nvim_get_current_buf()
+        local file = vim.api.nvim_buf_get_name(src_buf)
+
+        if file == "" or vim.bo[src_buf].filetype ~= "markdown" then
+          vim.notify("GlowPreview: Not a markdown file", vim.log.levels.WARN, { title = "Glow" })
           return
         end
 
-        -- Toggle: close if already open
-        if glow_win and vim.api.nvim_win_is_valid(glow_win) then
-          vim.api.nvim_win_close(glow_win, true)
-          glow_win, glow_buf = nil, nil
+        -- If already open, close it
+        if previews[src_buf] then
+          local p = previews[src_buf]
+          if p.win and vim.api.nvim_win_is_valid(p.win) then
+            pcall(vim.api.nvim_win_close, p.win, true)
+          end
+          pcall(vim.api.nvim_del_augroup_by_id, p.augroup)
+          previews[src_buf] = nil
+          vim.notify("Glow Preview closed", vim.log.levels.INFO, { title = "Glow" })
           return
         end
 
         local src_win = vim.api.nvim_get_current_win()
 
-        -- Open a vertical split on the right
-        vim.cmd("botright vsplit")
-        glow_win = vim.api.nvim_get_current_win()
-        vim.api.nvim_win_set_width(glow_win, math.floor(vim.o.columns * 0.45))
+        -- Geometry for right-side floating HUD panel
+        local columns = vim.o.columns
+        local lines = vim.o.lines
+        local width = math.floor(columns * 0.45)
+        local height = math.floor(lines * 0.82)
+        local row = math.floor((lines - height) / 2) - 1
+        local col = columns - width - 4
 
-        -- Run glow inside a real terminal buffer → ANSI colors preserved
-        local width = vim.api.nvim_win_get_width(glow_win) - 2
-        vim.cmd(string.format(
-          "terminal glow --style dark --width %d %s",
-          width, vim.fn.shellescape(file)
-        ))
-        glow_buf = vim.api.nvim_get_current_buf()
+        -- Unique preview window
+        local glow_win = vim.api.nvim_open_win(0, false, {
+          relative  = "editor",
+          style     = "minimal",
+          border    = "rounded",
+          width     = width,
+          height    = height,
+          row       = row,
+          col       = col,
+          title     = " 📝 Glow Preview [q: Close] ",
+          title_pos = "center",
+        })
 
-        -- Minimal, distraction-free look
-        local wo = vim.wo[glow_win]
-        wo.number         = false
-        wo.relativenumber = false
-        wo.signcolumn     = "no"
-        wo.statuscolumn   = ""
-        wo.winfixwidth    = true
-        vim.bo[glow_buf].buflisted = false
+        local glow_buf = nil
+        local ag = vim.api.nvim_create_augroup("GlowPreview_" .. src_buf, { clear = true })
 
-        -- Brief terminal-mode start so glow renders, then return focus
-        vim.cmd("startinsert")
-        vim.defer_fn(function()
-          vim.cmd("stopinsert")
-          if vim.api.nvim_win_is_valid(src_win) then
-            vim.api.nvim_set_current_win(src_win)
+        local function cleanup()
+          if previews[src_buf] then
+            local p = previews[src_buf]
+            pcall(vim.api.nvim_del_augroup_by_id, p.augroup)
+            if p.win and vim.api.nvim_win_is_valid(p.win) then
+              pcall(vim.api.nvim_win_close, p.win, true)
+            end
+            if glow_buf and vim.api.nvim_buf_is_valid(glow_buf) then
+              pcall(vim.api.nvim_buf_delete, glow_buf, { force = true })
+            end
+            previews[src_buf] = nil
           end
-        end, 80)
+        end
 
-        -- q closes the preview
-        vim.keymap.set("n", "q", function()
-          if glow_win and vim.api.nvim_win_is_valid(glow_win) then
-            vim.api.nvim_win_close(glow_win, true)
+        local function render()
+          if not vim.api.nvim_win_is_valid(glow_win) then
+            return
           end
-          glow_win, glow_buf = nil, nil
-        end, { buffer = glow_buf, nowait = true, silent = true })
+
+          local old_buf = glow_buf
+          glow_buf = vim.api.nvim_create_buf(false, true)
+          vim.bo[glow_buf].buflisted = false
+          vim.api.nvim_win_set_buf(glow_win, glow_buf)
+
+          if old_buf and vim.api.nvim_buf_is_valid(old_buf) then
+            pcall(vim.api.nvim_buf_delete, old_buf, { force = true })
+          end
+
+          local term_width = vim.api.nvim_win_get_width(glow_win) - 4
+          vim.api.nvim_buf_call(glow_buf, function()
+            vim.fn.termopen(string.format(
+              "glow --style dark --width %d %s",
+              term_width, vim.fn.shellescape(file)
+            ))
+          end)
+
+          local wo = vim.wo[glow_win]
+          wo.number         = false
+          wo.relativenumber = false
+          wo.signcolumn     = "no"
+          wo.statuscolumn   = ""
+          wo.foldcolumn     = "0"
+          wo.winhighlight   = "Normal:NormalFloat,FloatBorder:FloatBorder"
+          wo.winfixwidth    = true
+
+          -- Bind local keymaps inside the new terminal scratch buffer
+          local key_opts = { buffer = glow_buf, silent = true, nowait = true }
+          vim.keymap.set("n", "f", function()
+            if previews[src_buf] and previews[src_buf].toggle_fs then
+              previews[src_buf].toggle_fs()
+            end
+          end, key_opts)
+          vim.keymap.set("n", "<C-f>", function()
+            if previews[src_buf] and previews[src_buf].toggle_fs then
+              previews[src_buf].toggle_fs()
+            end
+          end, key_opts)
+
+          -- Fast close keys
+          vim.keymap.set("n", "q", cleanup, key_opts)
+          vim.keymap.set("t", "q", cleanup, key_opts)
+          vim.keymap.set("t", "<Esc>", cleanup, key_opts)
+        end
+
+        -- Initial render
+        render()
+
+        -- Focus back to code window
+        vim.cmd("stopinsert")
+        if vim.api.nvim_win_is_valid(src_win) then
+          vim.api.nvim_set_current_win(src_win)
+        end
+
+        -- Dynamic fullscreen toggler (truly covers the whole editor window)
+        local is_fullscreen = false
+        local function toggle_fs()
+          if not previews[src_buf] or not vim.api.nvim_win_is_valid(glow_win) then
+            return
+          end
+
+          local term_cols = vim.o.columns
+          local term_lines = vim.o.lines
+
+          if not is_fullscreen then
+            vim.api.nvim_win_set_config(glow_win, {
+              relative = "editor",
+              width    = term_cols,
+              height   = term_lines,
+              row      = 0,
+              col      = 0,
+              title    = " 🖥️ Fullscreen Preview [q: Close] ",
+              title_pos = "center",
+            })
+            is_fullscreen = true
+            vim.notify("Glow Preview: Fullscreen Mode 🖥️", vim.log.levels.INFO, { title = "Glow" })
+          else
+            local s_width = math.floor(term_cols * 0.45)
+            local s_height = math.floor(term_lines * 0.82)
+            local s_row = math.floor((term_lines - s_height) / 2) - 1
+            local s_col = term_cols - s_width - 4
+
+            vim.api.nvim_win_set_config(glow_win, {
+              relative = "editor",
+              width    = s_width,
+              height   = s_height,
+              row      = s_row,
+              col      = s_col,
+              title    = " 📝 Glow Preview [q: Close] ",
+              title_pos = "center",
+            })
+            is_fullscreen = false
+            vim.notify("Glow Preview: Sidebar Mode 📋", vim.log.levels.INFO, { title = "Glow" })
+          end
+
+          render()
+        end
+
+        vim.api.nvim_create_autocmd("BufWritePost", {
+          group    = ag,
+          buffer   = src_buf,
+          callback = render,
+        })
+
+        vim.api.nvim_create_autocmd({ "BufUnload", "VimLeave" }, {
+          group    = ag,
+          buffer   = src_buf,
+          callback = cleanup,
+        })
 
         vim.api.nvim_create_autocmd("WinClosed", {
+          group    = ag,
           pattern  = tostring(glow_win),
-          once     = true,
-          callback = function() glow_win, glow_buf = nil, nil end,
+          callback = cleanup,
         })
+
+        previews[src_buf] = { win = glow_win, buf = glow_buf, augroup = ag, toggle_fs = toggle_fs }
+        vim.notify("Glow HUD Preview launched 🚀", vim.log.levels.INFO, { title = "Glow" })
       end
 
-      vim.api.nvim_create_user_command("GlowPreview", open_glow, {})
+      -- Expose a global user command for fullscreen toggle
+      vim.api.nvim_create_user_command("GlowPreviewFullscreen", function()
+        local buf = vim.api.nvim_get_current_buf()
+        if previews[buf] and previews[buf].toggle_fs then
+          previews[buf].toggle_fs()
+        else
+          toggle_glow()
+          vim.defer_fn(function()
+            if previews[buf] and previews[buf].toggle_fs then
+              previews[buf].toggle_fs()
+            end
+          end, 200)
+        end
+      end, {})
+
+      vim.api.nvim_create_user_command("GlowPreview", toggle_glow, {})
 
       vim.api.nvim_create_autocmd("FileType", {
-        pattern  = "markdown",
+        pattern = "markdown",
         callback = function()
-          vim.keymap.set("n", "<leader>op", open_glow, {
+          vim.keymap.set("n", "<leader>op", toggle_glow, {
             buffer = true,
             silent = true,
-            desc   = "Toggle Markdown preview (glow split)",
+            desc   = "Toggle Glow HUD Preview",
+          })
+          vim.keymap.set("n", "<leader>of", "<cmd>GlowPreviewFullscreen<cr>", {
+            buffer = true,
+            silent = true,
+            desc   = "Toggle Glow Fullscreen",
           })
         end,
       })
@@ -169,15 +311,15 @@ return {
       -- ── Register ALL <leader> group prefixes ──────────────────────────────
       wk.add({
         -- Top-level navigation / editor
-        { "<leader>e",  group = "󰙅 Explorer" },
-        { "<leader>x",  group = " Close Buffer" },
-        { "<leader>n",  group = "󰎦 Numbers / Notifications" },
+        { "<leader>e",  group = "\u{f0645} Explorer" },
+        { "<leader>x",  group = "\u{f05ad} Close Buffer" },
+        { "<leader>n",  group = "\u{f03a6} Numbers / Notifications" },
         { "<leader>nh", desc = "Noice message history" },
         { "<leader>nd", desc = "Dismiss Noice messages" },
         { "<leader>nl", desc = "Show last message" },
 
         -- Find / Files / Telescope
-        { "<leader>f",  group = "󰍉 Find" },
+        { "<leader>f",  group = "\u{f0349} Find" },
         { "<leader>ff", desc = "Find files" },
         { "<leader>fw", desc = "Live grep" },
         { "<leader>fb", desc = "Find buffers" },
@@ -186,7 +328,7 @@ return {
         { "<leader>fz", desc = "Fuzzy in buffer" },
 
         -- Git
-        { "<leader>g",  group = " Git" },
+        { "<leader>g",  group = "\u{f02a2} Git" },
         { "<leader>gg", desc = "LazyGit" },
         { "<leader>gd", desc = "Diffview toggle" },
         { "<leader>gt", desc = "Git status" },
@@ -194,19 +336,19 @@ return {
         { "<leader>gT", desc = "Go: Test (Go files only)" },
 
         -- Code / LSP
-        { "<leader>c",  group = " Code / LSP" },
+        { "<leader>c",  group = "\u{f0171} Code / LSP" },
         { "<leader>ca", desc = "Code action" },
         { "<leader>cf", desc = "Format buffer" },
         { "<leader>cl", desc = "Lint file" },
         { "<leader>cn", desc = "Dismiss notification" },
 
         -- Rename / Refactor
-        { "<leader>r",  group = "󰑕 Rename / Refactor" },
+        { "<leader>r",  group = "\u{f0455} Rename / Refactor" },
         { "<leader>ra", desc = "LSP rename" },
         { "<leader>rn", desc = "Toggle relative numbers" },
 
         -- Diagnostics
-        { "<leader>d",  group = "󰃤 Diagnostics / Debug" },
+        { "<leader>d",  group = "\u{f00e4} Diagnostics / Debug" },
         { "<leader>ds", desc = "Diagnostics list" },
         { "<leader>db", desc = "DAP: Toggle breakpoint" },
         { "<leader>dc", desc = "DAP: Continue" },
@@ -218,12 +360,12 @@ return {
         { "<leader>fm", desc = "LSP format" },
 
         -- Toggle / UI
-        { "<leader>t",  group = "󰔡 Toggles" },
+        { "<leader>t",  group = "\u{f0521} Toggles" },
         { "<leader>tl", desc = "Toggle linting" },
         { "<leader>th", desc = "Select theme" },
 
         -- Testing (neotest extra)
-        { "<leader>T",  group = "󰙨 Tests" },
+        { "<leader>T",  group = "\u{f0668} Tests" },
         { "<leader>Tr", desc = "Run nearest test" },
         { "<leader>Tf", desc = "Run file tests" },
         { "<leader>Ta", desc = "Run all tests" },
@@ -234,20 +376,21 @@ return {
         { "<leader>Tw", desc = "Watch file tests" },
 
         -- Database (sql extra)
-        { "<leader>D",  group = "󰆼 Database" },
+        { "<leader>D",  group = "\u{f01bc} Database" },
         { "<leader>Du", desc = "DB: Toggle UI" },
         { "<leader>Da", desc = "DB: Add connection" },
         { "<leader>Df", desc = "DB: Find buffer" },
 
         -- Session
-        { "<leader>q",  group = "󰆓 Session" },
+        { "<leader>q",  group = "\u{f04ce} Session" },
 
         -- Zen Mode
         { "<leader>z",  desc = "Toggle Zen Mode" },
 
         -- Misc
         { "<leader>ma", desc = "Find marks" },
-        { "<leader>op", desc = "Preview Markdown (glow)" },
+        { "<leader>op", desc = "Toggle Glow HUD Preview" },
+        { "<leader>of", desc = "Toggle Glow Fullscreen" },
         { "<leader>sc", desc = "Screenshot code" },
         { "<leader>vs", desc = "Select Python venv" },
         { "<leader>/",  desc = "Toggle comment" },

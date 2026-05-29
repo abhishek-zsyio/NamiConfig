@@ -5,21 +5,107 @@ local function catppuccin_setup(flavour)
   return function(transparent)
     vim.o.background = flavour == "latte" and "light" or "dark"
     require("catppuccin").setup({
-      flavour = flavour,
+      flavour                = flavour,
       transparent_background = transparent,
-      show_end_of_buffer = false,
-      term_colors = true,
-      integrations = {
-        cmp = true, gitsigns = true, nvimtree = true,
-        telescope = { enabled = true, style = "classic" },
-        treesitter = true, notify = true, noice = true,
-        indent_blankline = { enabled = true, colored_indent_levels = false },
-        native_lsp = { enabled = true, inlay_hints = { background = true } },
+      show_end_of_buffer     = false,
+      term_colors            = true,
+      dim_inactive = {
+        enabled    = false,
+        shade      = "dark",
+        percentage = 0.15,
       },
-      custom_highlights = function(colors)
+      styles = {
+        comments     = { "italic" },
+        conditionals = { "italic" },
+        keywords     = { "bold" },
+        functions    = { "bold" },
+        strings      = {},
+        variables    = {},
+        numbers      = {},
+        booleans     = { "bold", "italic" },
+        properties   = {},
+        types        = { "bold" },
+        operators    = {},
+      },
+      integrations = {
+        cmp              = true,
+        blink_cmp        = true,
+        gitsigns         = true,
+        nvimtree         = true,
+        snacks           = true,
+        treesitter       = true,
+        notify           = true,
+        noice            = true,
+        which_key        = true,
+        mason            = true,
+        lsp_trouble      = true,
+        neotest          = true,
+        dashboard        = true,
+        diffview         = true,
+        telescope        = { enabled = true, style = "nvchad" },
+        indent_blankline = { enabled = true, colored_indent_levels = false },
+        native_lsp = {
+          enabled = true,
+          virtual_text = {
+            errors      = { "italic" },
+            hints       = { "italic" },
+            warnings    = { "italic" },
+            information = { "italic" },
+          },
+          underlines = {
+            errors      = { "underline" },
+            hints       = { "underline" },
+            warnings    = { "underline" },
+            information = { "underline" },
+          },
+          inlay_hints = { background = true },
+        },
+      },
+      custom_highlights = function(C)
         return {
-          NormalFloat = { bg = colors.mantle },
-          FloatBorder = { bg = colors.mantle, fg = colors.surface1 },
+          -- Editor chrome
+          NormalFloat  = { bg = C.mantle },
+          FloatBorder  = { bg = C.mantle, fg = C.surface1 },
+          WinSeparator = { fg = C.surface1, bg = "NONE" },
+
+          -- Cursor & line
+          CursorLine   = { bg = C.surface0 },
+          CursorLineNr = { fg = C.lavender, bold = true },
+          LineNr       = { fg = C.surface1, italic = true },
+
+          -- Pmenu / autocomplete
+          Pmenu      = { bg = C.mantle },
+          PmenuSel   = { bg = C.surface1, fg = C.text, bold = true },
+          PmenuSbar  = { bg = C.surface0 },
+          PmenuThumb = { bg = C.overlay0 },
+
+          -- Snacks indent guides
+          SnacksIndent      = { fg = C.surface1 },
+          SnacksIndentScope = { fg = C.lavender },
+          SnacksIndentChunk = { fg = C.lavender },
+          SnacksPickerTree  = { fg = C.surface1 },
+
+          -- Dashboard highlights
+          SnacksDashboardHeader = { fg = C.lavender, bold = true },
+          SnacksDashboardDesc   = { fg = C.subtext0 },
+          SnacksDashboardKey    = { fg = C.peach,    bold = true },
+          SnacksDashboardIcon   = { fg = C.blue },
+          SnacksDashboardFooter = { fg = C.surface1,  italic = true },
+
+          -- Dropbar breadcrumbs
+          WinBar   = { bg = C.mantle, fg = C.subtext1 },
+          WinBarNC = { bg = C.mantle, fg = C.surface2 },
+
+          -- Match paren: subtle underline instead of jarring bg
+          MatchParen = { fg = C.peach, bold = true, underline = true, sp = C.peach },
+
+          -- Fold
+          Folded = { bg = C.surface0, fg = C.subtext0, italic = true },
+
+          -- Treesitter context sticky header
+          TreesitterContext           = { bg = C.surface0 },
+          TreesitterContextLineNumber = { fg = C.lavender, bold = true },
+          TreesitterContextSeparator  = { fg = C.surface1 },
         }
       end,
     })

@@ -1,16 +1,20 @@
+-- plugins/ui/theme.lua
+-- Dynamically loads ALL theme plugins from the central registry.
+-- Only the active theme is loaded eagerly (priority = 1000); others are lazy.
+
 local registry = require("core.theme_registry")
 local plugins = {}
 
--- 1. Dynamically load all themes from the registry
+-- ── 1. Load theme plugins ───────────────────────────────────────────────────
 local unique_plugins = {}
 local ok, settings = pcall(require, "settings")
-local current = ok and settings.theme or "catppuccin"
+local current = ok and settings.theme or "catppuccin-mocha"
+
 for _, theme in ipairs(registry) do
   local repo = theme.plugin
   if not unique_plugins[repo] then
     unique_plugins[repo] = { is_active = false }
   end
-  
   if current == theme.id then
     unique_plugins[repo].is_active = true
   end
@@ -19,14 +23,13 @@ end
 for repo, data in pairs(unique_plugins) do
   table.insert(plugins, {
     repo,
-    lazy = not data.is_active,
+    lazy     = not data.is_active,
     priority = 1000,
     config = function()
       local ok2, s2 = pcall(require, "settings")
-      local current_theme = s2 and s2.theme or "catppuccin"
-      local transparent = (ok2 and s2.transparent == true)
-      
-      -- Find the active theme object for this repository
+      local current_theme = ok2 and s2.theme or "catppuccin-mocha"
+      local transparent   = ok2 and s2.transparent == true
+
       local target_theme = nil
       for _, t in ipairs(require("core.theme_registry")) do
         if t.id == current_theme then
@@ -34,7 +37,7 @@ for repo, data in pairs(unique_plugins) do
           break
         end
       end
-      
+
       if target_theme and target_theme.plugin == repo then
         if target_theme.setup then
           target_theme.setup(transparent)
@@ -45,138 +48,123 @@ for repo, data in pairs(unique_plugins) do
   })
 end
 
--- 2. Inject the Universal Theme Overrides (applies after whichever theme loads)
+-- ── 2. Universal highlight overrides (run after any colorscheme loads) ──────
+-- These fill gaps not covered by individual theme integrations.
 table.insert(plugins, {
-    "theme-overrides",
-    name = "theme-overrides",
-    -- virtual = true is sufficient; no dir needed
-    virtual = true,
-    lazy = false,
-    priority = 1001, -- run after themes
-    config = function()
-      local ok, settings = pcall(require, "settings")
-      
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "*",
-        callback = function()
-          -- 1. Apply transparency to main editor if requested
-          if ok and settings.transparent == true then
-            local hl_groups = {
-              "Normal", "NormalNC", "Comment", "Constant", "Special", "Identifier",
-              "Statement", "PreProc", "Type", "Underlined", "Todo", "String", "Function",
-              "Conditional", "Repeat", "Operator", "Structure", "LineNr", "NonText",
-              "SignColumn", "CursorLineNr", "EndOfBuffer", 
-            }
-            for _, name in ipairs(hl_groups) do
-              vim.cmd(string.format("hi %s ctermbg=NONE guibg=NONE", name))
-            end
-          end
+  "theme-overrides",
+  name    = "theme-overrides",
+  virtual = true,
+  lazy    = false,
+  priority = 1001,
+  config = function()
+    local function apply_overrides()
+      local ok2, s2 = pcall(require, "settings")
 
-          -- 2. Ensure popups and borders perfectly match the editor background
-          -- by removing any special dark backgrounds they might have by default
-          local popup_groups = { "FloatBorder", "Pmenu", "NormalFloat" }
-          for _, name in ipairs(popup_groups) do
-            vim.cmd(string.format("hi %s guibg=NONE ctermbg=NONE", name))
-          end
+      -- Transparency pass (only if transparent = true)
+      if ok2 and s2.transparent == true then
+        local transparent_groups = {
+          "Normal", "NormalNC", "SignColumn", "LineNr", "NonText",
+          "EndOfBuffer", "CursorLineNr",
+        }
+        for _, name in ipairs(transparent_groups) do
+          pcall(vim.cmd, ("hi %s ctermbg=NONE guibg=NONE"):format(name))
+        end
+      end
 
-          -- 3. Universal Highlight Adjustments
-          local function get_hl(name)
-            local ok_hl, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
-            return ok_hl and hl or {}
-          end
-          local bg = get_hl("Normal").bg
-          local fg = get_hl("Normal").fg
-          local alt_bg = get_hl("CursorLine").bg or get_hl("StatusLine").bg or bg
-          local accent = get_hl("Statement").fg or get_hl("Function").fg or fg
+      -- Helpers
+      local function get_hl(name)
+        local ok_hl, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+        return ok_hl and hl or {}
+      end
+      local set_hl = vim.api.nvim_set_hl
 
-          if bg and fg and alt_bg then
-            local set_hl = vim.api.nvim_set_hl
+      local bg      = get_hl("Normal").bg
+      local fg      = get_hl("Normal").fg
+      local alt_bg  = get_hl("CursorLine").bg or get_hl("StatusLine").bg or bg
+      local accent  = get_hl("Function").fg or get_hl("Statement").fg or fg
+      local comment = get_hl("Comment").fg
 
-            -- Make line numbers subtle but the active line number pop out
-            set_hl(0, "LineNr", { fg = get_hl("Comment").fg or "#5c6370", italic = true })
-            set_hl(0, "CursorLineNr", { fg = accent, bold = true })
-            
-            -- Blend virtual text diagnostics elegantly into the background
-            local function make_diag_bg(diag_name)
-              local diag_fg = get_hl(diag_name).fg
-              if diag_fg then
-                set_hl(0, diag_name .. "VirtualText", { fg = diag_fg, bg = "NONE", italic = true })
-              end
-            end
-            make_diag_bg("DiagnosticError")
-            make_diag_bg("DiagnosticWarn")
-            make_diag_bg("DiagnosticInfo")
-            make_diag_bg("DiagnosticHint")
-            
-            -- Sleek Pmenu & Borderless nvim-cmp overrides
-            local function cmp_hl(name, val)
-              set_hl(0, name, val)
-            end
-            
-            local cmp_bg = alt_bg
-            local fallback_fg = bg or "#1e1e2e"
-            
-            cmp_hl("CmpPmenu", { bg = cmp_bg })
-            cmp_hl("CmpPmenuBorder", { bg = cmp_bg, fg = cmp_bg })
-            cmp_hl("CmpPmenuSel", { bg = accent, fg = fallback_fg, bold = true })
-            
-            cmp_hl("CmpItemAbbr", { fg = fg })
-            cmp_hl("CmpItemAbbrDeprecated", { fg = get_hl("Comment").fg or "#5c6370", strikethrough = true })
-            cmp_hl("CmpItemAbbrMatch", { fg = accent, bold = true })
-            cmp_hl("CmpItemAbbrMatchFuzzy", { fg = accent, bold = true })
-            cmp_hl("CmpItemMenu", { fg = get_hl("Comment").fg or "#5c6370", italic = true })
-            
-            -- Color-code autocomplete item kinds dynamically
-            local colors_map = {
-              Function = get_hl("Function").fg or "#89b4fa",
-              Method = get_hl("Function").fg or "#89b4fa",
-              Variable = get_hl("Identifier").fg or "#cdd6f4",
-              Constant = get_hl("Constant").fg or "#f9e2af",
-              Keyword = get_hl("Keyword").fg or "#cba6f7",
-              Snippet = get_hl("Special").fg or "#f5c2e7",
-              Class = get_hl("Type").fg or "#f9e2af",
-              Interface = get_hl("Type").fg or "#f9e2af",
-              Module = get_hl("PreProc").fg or "#a6e3a1",
-              Property = get_hl("Identifier").fg or "#f38ba8",
-              Field = get_hl("Identifier").fg or "#f38ba8",
-              Enum = get_hl("Type").fg or "#f9e2af",
-              EnumMember = get_hl("Constant").fg or "#f9e2af",
-              Struct = get_hl("Type").fg or "#f9e2af",
-              Event = get_hl("Special").fg or "#f5c2e7",
-              Operator = get_hl("Operator").fg or "#89dceb",
-              TypeParameter = get_hl("Type").fg or "#89dceb",
-            }
-            
-            for kind, k_color in pairs(colors_map) do
-              cmp_hl("CmpItemKind" .. kind, { fg = k_color })
-            end
+      if not (bg and fg) then return end
 
-            set_hl(0, "Pmenu", { bg = alt_bg, fg = fg })
-            set_hl(0, "PmenuSel", { bg = accent, fg = fallback_fg, bold = true })
+      -- Line numbers
+      if comment then
+        set_hl(0, "LineNr", { fg = comment, italic = true })
+      end
+      set_hl(0, "CursorLineNr", { fg = accent, bold = true })
 
-            -- Subtle split separators that don't compete with content
-            local border_fg = get_hl("FloatBorder").fg or get_hl("Comment").fg
-            if border_fg then
-              set_hl(0, "WinSeparator", { fg = border_fg, bg = "NONE" })
-            end
+      -- Diagnostics virtual text — italic, no background
+      for _, kind in ipairs({ "Error", "Warn", "Info", "Hint" }) do
+        local diag_fg = get_hl("Diagnostic" .. kind).fg
+        if diag_fg then
+          set_hl(0, "Diagnostic" .. kind .. "VirtualText",
+            { fg = diag_fg, bg = "NONE", italic = true })
+        end
+      end
 
-            -- Softer MatchParen: underline + bold instead of jarring background
-            set_hl(0, "MatchParen", { underline = true, bold = true, sp = accent })
+      -- Autocomplete menu
+      local cmp_bg   = alt_bg or bg
+      local label_bg = bg
+      set_hl(0, "Pmenu",       { bg = cmp_bg, fg = fg })
+      set_hl(0, "PmenuSel",    { bg = accent, fg = label_bg, bold = true })
+      set_hl(0, "PmenuSbar",   { bg = cmp_bg })
+      set_hl(0, "PmenuThumb",  { bg = accent })
 
-            -- Indent guides: active scope uses the accent color so it glows
-            local comment_fg = get_hl("Comment").fg
-            local fn_fg = get_hl("Function").fg
-            if comment_fg then
-              set_hl(0, "SnacksIndent",       { fg = comment_fg })
-            end
-            if fn_fg then
-              set_hl(0, "SnacksIndentScope",  { fg = fn_fg })
-              set_hl(0, "SnacksIndentChunk",  { fg = fn_fg })
-            end
-          end
-        end,
-      })
-    end,
+      -- CMP item kind colors (dynamic, using theme tokens)
+      local kind_colors = {
+        Function      = get_hl("Function").fg,
+        Method        = get_hl("Function").fg,
+        Variable      = get_hl("Identifier").fg,
+        Constant      = get_hl("Constant").fg,
+        Keyword       = get_hl("Keyword").fg,
+        Snippet       = get_hl("Special").fg,
+        Class         = get_hl("Type").fg,
+        Interface     = get_hl("Type").fg,
+        Module        = get_hl("PreProc").fg,
+        Property      = get_hl("Identifier").fg,
+        Field         = get_hl("Identifier").fg,
+        Enum          = get_hl("Type").fg,
+        EnumMember    = get_hl("Constant").fg,
+        Struct        = get_hl("Type").fg,
+        Event         = get_hl("Special").fg,
+        Operator      = get_hl("Operator").fg,
+        TypeParameter = get_hl("Type").fg,
+      }
+      for kind, color in pairs(kind_colors) do
+        if color then
+          set_hl(0, "CmpItemKind" .. kind, { fg = color })
+        end
+      end
+
+      -- CMP match highlights
+      if accent then
+        set_hl(0, "CmpItemAbbrMatch",      { fg = accent, bold = true })
+        set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = accent, bold = true })
+      end
+      if comment then
+        set_hl(0, "CmpItemAbbrDeprecated", { fg = comment, strikethrough = true })
+        set_hl(0, "CmpItemMenu",           { fg = comment, italic = true })
+        -- Indent guides fallback (catppuccin sets these, but other themes need it)
+        set_hl(0, "SnacksIndent",      { fg = comment })
+      end
+      if accent then
+        set_hl(0, "SnacksIndentScope", { fg = accent })
+        set_hl(0, "SnacksIndentChunk", { fg = accent })
+      end
+
+      -- Window separator — use FloatBorder fg color
+      local border_fg = get_hl("FloatBorder").fg or comment
+      if border_fg then
+        set_hl(0, "WinSeparator", { fg = border_fg, bg = "NONE" })
+      end
+    end
+
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      pattern  = "*",
+      callback = apply_overrides,
+    })
+    -- Also apply immediately (the first colorscheme may already be loaded)
+    apply_overrides()
+  end,
 })
 
 return plugins

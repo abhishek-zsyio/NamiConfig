@@ -3,22 +3,16 @@ return {
   {
     "folke/noice.nvim",
     event        = "VeryLazy",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      -- Snacks notifier is used instead of nvim-notify
-    },
+    dependencies = { "MunifTanjim/nui.nvim" },
     keys = {
-      { "<leader>nh", "<cmd>Noice history<cr>", desc = "Noice message history" },
-      { "<leader>nd", "<cmd>Noice dismiss<cr>", desc = "Dismiss Noice messages" },
-      { "<leader>nl", "<cmd>Noice last<cr>", desc = "Show last message" },
+      { "<leader>nh", "<cmd>Noice history<cr>",  desc = "Noice message history" },
+      { "<leader>nd", "<cmd>Noice dismiss<cr>",  desc = "Dismiss Noice messages" },
+      { "<leader>nl", "<cmd>Noice last<cr>",     desc = "Show last message" },
     },
     opts = {
       cmdline = {
         enabled = true,
         view    = "cmdline_popup",
-        opts = {
-          border = { style = require("settings").menu_border or "rounded" },
-        },
       },
       messages  = { enabled = true },
       popupmenu = { enabled = true, backend = "nui" },
@@ -26,18 +20,17 @@ return {
       views = {
         cmdline_popup = {
           position = { row = "97%", col = "50%" },
-          size = { width = 60, height = "auto" },
-          border = { style = "rounded", padding = { 0, 1 } },
+          size     = { width = 60, height = "auto" },
+          border   = { style = "rounded", padding = { 0, 1 } },
         },
         mini = {
-          timeout = 2000,
-          reverse = false,
+          timeout  = 2000,
+          reverse  = false,
           position = { row = -2, col = -2 },
         },
       },
-      notify = {
-        enabled = false,
-      },
+
+      notify = { enabled = false },   -- Snacks notifier handles notifications
 
       lsp = {
         override = {
@@ -54,40 +47,34 @@ return {
         },
       },
 
-      -- ── Route filters: silence common noise ──────────────────────────────
+      -- ── Route filters: silence common noise ────────────────────────────────
       routes = {
         -- Silence Pyright LSP progress spam
         {
           filter = {
-            event = "lsp",
-            kind = "progress",
-            cond = function(message)
-              local client = vim.tbl_get(message.opts, "progress", "client")
-              return client == "pyright"
+            event = "lsp", kind = "progress",
+            cond  = function(msg)
+              return vim.tbl_get(msg.opts, "progress", "client") == "pyright"
             end,
           },
           opts = { skip = true },
         },
-        -- Skip written/read file messages ("14L, 42B")
-        { filter = { event = "msg_show", find = "%d+L, %d+B" },           opts = { skip = true } },
-        { filter = { event = "msg_show", find = "; after #%d+" },          opts = { skip = true } },
-        { filter = { event = "msg_show", find = "; before #%d+" },         opts = { skip = true } },
-        { filter = { event = "msg_show", find = "%d fewer lines" },         opts = { skip = true } },
-        { filter = { event = "msg_show", find = "%d more lines" },          opts = { skip = true } },
+        -- Written/read file byte-count messages
+        { filter = { event = "msg_show", find = "%d+L, %d+B" },             opts = { skip = true } },
+        { filter = { event = "msg_show", find = "; after #%d+" },           opts = { skip = true } },
+        { filter = { event = "msg_show", find = "; before #%d+" },          opts = { skip = true } },
+        { filter = { event = "msg_show", find = "%d fewer lines" },          opts = { skip = true } },
+        { filter = { event = "msg_show", find = "%d more lines" },           opts = { skip = true } },
         { filter = { event = "msg_show", find = "already at newest change" }, opts = { skip = true } },
-        { filter = { event = "msg_show", find = "^/" },                    opts = { skip = true } }, -- search count
-        -- Silence the noice self-warning about vim.notify (no longer needed but kept as safety)
-        { filter = { event = "notify",   find = "vim%.notify" },            opts = { skip = true } },
-        { filter = { event = "msg_show", find = "vim%.notify" },            opts = { skip = true } },
-        { filter = { find = "overwritten by another plugin" },             opts = { skip = true } },
-        -- Silence lazy.nvim "Config Change Detected / Reloading" spam
-        { filter = { event = "notify",   find = "Config Change Detected" }, opts = { skip = true } },
-        { filter = { event = "notify",   find = "Reloading" },             opts = { skip = true } },
-        -- Silence lualine notices
-        { filter = { event = "notify",   find = "lualine" },               opts = { skip = true } },
-        -- Silence mason-lspconfig warnings about server names
-        { filter = { event = "notify",   find = "mason%-lspconfig" },      opts = { skip = true } },
-        -- Note: long messages handled by presets.long_message_to_split below
+        { filter = { event = "msg_show", find = "^/" },                      opts = { skip = true } },
+        -- Plugin spam
+        { filter = { event = "notify",   find = "vim%.notify" },             opts = { skip = true } },
+        { filter = { event = "msg_show", find = "vim%.notify" },             opts = { skip = true } },
+        { filter = { find  = "overwritten by another plugin" },              opts = { skip = true } },
+        { filter = { event = "notify",   find = "Config Change Detected" },  opts = { skip = true } },
+        { filter = { event = "notify",   find = "Reloading" },               opts = { skip = true } },
+        { filter = { event = "notify",   find = "lualine" },                 opts = { skip = true } },
+        { filter = { event = "notify",   find = "mason%-lspconfig" },        opts = { skip = true } },
       },
 
       presets = {
