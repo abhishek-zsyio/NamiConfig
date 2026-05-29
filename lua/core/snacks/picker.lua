@@ -1,6 +1,7 @@
 -- ╔══════════════════════════════════════════════════════════════════════════╗
--- ║  snacks/picker.lua  ·  Obsidian Pro Edition                              ║
--- ║  Precision-tuned, zero-noise, dynamic settings, hot-reload supported     ║
+-- ║  snacks/picker.lua  ·  Unified flat edition                              ║
+-- ║  Same visual language as bufferline + lualine: flat, no chrome, accent   ║
+-- ║  via fg weight only. Explorer is clean — no chevron prefix clutter.      ║
 -- ╚══════════════════════════════════════════════════════════════════════════╝
 
 local function get_settings()
@@ -18,52 +19,36 @@ local PRESET_MAP = {
   vscode     = "vscode",
 }
 
---- Returns a complete layout table, with optional per-call overrides.
 local function L(opts)
   local settings = get_settings()
-  local picker_settings = (settings.ui and settings.ui.picker) or {}
-
-  local user_preset = picker_settings.layout or settings.picker_layout or "telescope"
+  local ps = (settings.ui and settings.ui.picker) or {}
+  local user_preset = ps.layout or settings.picker_layout or "telescope"
   local preset = PRESET_MAP[user_preset] or user_preset or "telescope"
-
-  local width = picker_settings.width or settings.picker_width or 0.85
-  local height = picker_settings.height or settings.picker_height or 0.80
-
   return vim.tbl_deep_extend("force", {
     preset   = preset,
-    width    = width,
-    height   = height,
+    width    = ps.width  or settings.picker_width  or 0.85,
+    height   = ps.height or settings.picker_height or 0.80,
     backdrop = 60,
   }, opts or {})
 end
 
 -- ── Shared window config ──────────────────────────────────────────────────
---- @param extra_keys table?  Additional key mappings merged into list win.
---- @return table
 local function win_config(extra_keys)
   local settings = get_settings()
-  local picker_settings = (settings.ui and settings.ui.picker) or {}
-  local border = picker_settings.border or settings.menu_border or "rounded"
-
+  local ps = (settings.ui and settings.ui.picker) or {}
+  local border = ps.border or settings.menu_border or "rounded"
   return {
     border = border,
     input = {
       border = border,
       keys = {
-        ["<Esc>"]   = "close",
-        ["<C-c>"]   = "close",
-        ["<C-j>"]   = "list_down",
-        ["<C-k>"]   = "list_up",
-        ["<C-u>"]   = "preview_scroll_up",
-        ["<C-d>"]   = "preview_scroll_down",
-        ["<C-s>"]   = "flash",            -- flash.nvim jump
-        ["<C-t>"]   = "tab",              -- open in new tab
-        ["<C-v>"]   = "vertical",         -- vertical split
-        ["<C-x>"]   = "horizontal",       -- horizontal split
-        ["<C-q>"]   = "qflist",           -- send to quickfix
-        ["<M-p>"]   = "toggle_preview",
-        ["<M-h>"]   = "toggle_hidden",
-        ["<M-i>"]   = "toggle_ignored",
+        ["<Esc>"] = "close",   ["<C-c>"] = "close", ["ZZ"] = "close",
+        ["<C-j>"] = "list_down", ["<C-k>"] = "list_up",
+        ["<C-u>"] = "preview_scroll_up", ["<C-d>"] = "preview_scroll_down",
+        ["<C-s>"] = "flash",   ["<C-t>"] = "tab",
+        ["<C-v>"] = "vertical", ["<C-x>"] = "horizontal",
+        ["<C-q>"] = "qflist",  ["<M-p>"] = "toggle_preview",
+        ["<M-h>"] = "toggle_hidden", ["<M-i>"] = "toggle_ignored",
       },
     },
     list = {
@@ -72,6 +57,7 @@ local function win_config(extra_keys)
         ["<Tab>"]   = "select_and_next",
         ["<S-Tab>"] = "select_and_prev",
         ["<C-a>"]   = "select_all",
+        ["ZZ"]      = "close",
       }, extra_keys or {}),
     },
     preview = { border = border },
@@ -81,68 +67,50 @@ end
 -- ── Icon definitions ──────────────────────────────────────────────────────
 local ICONS = {
   kinds = {
-    Array          = "󰅪 ",   Class    = "󰌗 ",   Constant = "󰏿 ",
-    Constructor    = "󰆧 ",   Enum     = "󰖽 ",   EnumMember = "󰖽 ",
-    Event          = "󱐋 ",   Field    = "󰜢 ",   File     = "󰈔 ",
-    Folder         = "󰉋 ",   Function = "󰊕 ",   Interface = "󰌗 ",
-    Key            = "󰌋 ",   Keyword  = "󰌻 ",   Method   = "󰆧 ",
-    Module         = "󰏗 ",   Namespace = "󰦮 ", Null     = "󰟢 ",
-    Number         = "󰎠 ",   Object   = "󰅩 ",   Operator = "󰆕 ",
-    Package        = "󰏗 ",   Property = "󰖷 ",   Reference = "󰈇 ",
-    Snippet        = "󰘦 ",   String   = "󰉾 ",   Struct   = "󰌼 ",
-    TypeParameter  = "󰊄 ",   Unit     = "󰑭 ",   Value    = "󰎠 ",
-    Variable       = "󰀫 ",   Boolean  = "󰨙 ",   Color    = "󰏘 ",
+    Array         = "󰅪 ", Class       = "󰌗 ", Constant    = "󰏿 ",
+    Constructor   = "󰆧 ", Enum        = "󰖽 ", EnumMember  = "󰖽 ",
+    Event         = "󱐋 ", Field       = "󰜢 ", File        = "󰈔 ",
+    Folder        = "󰉋 ", Function    = "󰊕 ", Interface   = "󰌗 ",
+    Key           = "󰌋 ", Keyword     = "󰌻 ", Method      = "󰆧 ",
+    Module        = "󰏗 ", Namespace   = "󰦮 ", Null        = "󰟢 ",
+    Number        = "󰎠 ", Object      = "󰅩 ", Operator    = "󰆕 ",
+    Package       = "󰏗 ", Property    = "󰖷 ", Reference   = "󰈇 ",
+    Snippet       = "󰘦 ", String      = "󰉾 ", Struct      = "󰌼 ",
+    TypeParameter = "󰊄 ", Unit        = "󰑭 ", Value       = "󰎠 ",
+    Variable      = "󰀫 ", Boolean     = "󰨙 ", Color       = "󰏘 ",
   },
-
   selected   = "󰄬 ",
   unselected = "󰄱 ",
-
   ui = {
-    live     = "󱐋 ",  hidden  = "󰵛 ",  ignored  = "󰷎 ",
-    follow   = "󰓾 ",  modified = "󰝶 ", readonly = "󰌾 ",
+    live = "󱐋 ", hidden = "󰵛 ", ignored = "󰷎 ",
+    follow = "󰓾 ", modified = "󰝶 ", readonly = "󰌾 ",
   },
-
   git = {
-    untracked = "󰇶 ",
-    modified  = "󰏬 ",
-    staged    = "󰄬 ",
-    conflict  = "󰅙 ",
-    deleted   = "󰍵 ",
-    renamed   = "󰅂 ",
-    ignored   = "󰛐 ",
-    added     = "󰄬 ",
+    untracked = "󰇶 ", modified = "󰏬 ", staged   = "󰄬 ",
+    conflict  = "󰅙 ", deleted  = "󰍵 ", renamed  = "󰅂 ",
+    ignored   = "󰛐 ", added    = "󰄬 ",
   },
-
   diagnostics = {
-    error = "󰅙 ",
-    warn  = "󰗖 ",
-    info  = "󰋼 ",
-    hint  = "󰌶 ",
+    error = "󰅙 ", warn = "󰗖 ", info = "󰋼 ", hint = "󰌶 ",
   },
 }
 
--- ── File explorer: custom transform + formatter ───────────────────────────
-local function explorer_transform(item)
-  -- Hide virtual root node that snacks renders as a blank line
-  if item.dir and item.parent == nil then return false end
-  return item
-end
-
+-- ── Explorer: transform + formatter ──────────────────────────────────────
 local function explorer_format(item, picker)
   local ret = require("snacks.picker.format").file(item, picker)
+
   for _, hl in ipairs(ret) do
     if hl.virtual and type(hl[1]) == "string" and not hl[1]:match("^%s*$") then
       if item.dir then
-        -- ▾ open  ▸ closed — solid filled carets
         local chevron = item.open and "\u{25be}" or "\u{25b8}"
-        hl[1] = chevron .. "  " .. hl[1]   -- two spaces between chevron and dir name
+        hl[1] = chevron .. " " .. hl[1]
       else
-        hl[1] = "    " .. hl[1]            -- align files under dir label
+        hl[1] = "  " .. hl[1]   -- align files under their dir
       end
       break
     end
   end
-  -- Overlay git badge on the icon column when available
+
   if item.git_status then
     local badge = ICONS.git[item.git_status]
     if badge then
@@ -154,26 +122,19 @@ end
 
 local function get_explorer_options()
   local settings = get_settings()
-  local explorer_settings = settings.explorer or {}
-  local show_hidden = explorer_settings.show_hidden
-  if show_hidden == nil then
-    show_hidden = settings.show_hidden_files
-  end
-  if show_hidden == nil then
-    show_hidden = true
-  end
-
-  local position = explorer_settings.position or settings.file_explorer_position or "left"
-
+  local ex = settings.explorer or {}
+  local show_hidden = ex.show_hidden
+  if show_hidden == nil then show_hidden = settings.show_hidden_files end
+  if show_hidden == nil then show_hidden = true end
   return {
     show_hidden = show_hidden,
-    position = position,
+    position    = ex.position or settings.file_explorer_position or "left",
   }
 end
 
--- ── Hot-Reload Autocommand ─────────────────────────────────────────────────
+-- ── Hot-reload on settings.lua save ──────────────────────────────────────
 vim.api.nvim_create_autocmd("BufWritePost", {
-  group = vim.api.nvim_create_augroup("SnacksPickerHotReload", { clear = true }),
+  group   = vim.api.nvim_create_augroup("SnacksPickerHotReload", { clear = true }),
   pattern = "*/settings.lua",
   callback = function()
     vim.schedule(function()
@@ -181,7 +142,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
         package.loaded["core.snacks.picker"] = nil
         local new_cfg = require("core.snacks.picker")
         _G.Snacks.config.picker = vim.tbl_deep_extend("force", _G.Snacks.config.picker, new_cfg)
-        vim.notify("🌊 Snacks Picker config hot-reloaded", vim.log.levels.INFO)
+        vim.notify("󰑓  Snacks Picker reloaded", vim.log.levels.INFO)
       end
     end)
   end,
@@ -192,8 +153,8 @@ return {
   enabled   = true,
   ui_select = true,
 
-  icons = ICONS,
-  win   = win_config(),
+  icons  = ICONS,
+  win    = win_config(),
   layout = L(),
 
   matcher = {
@@ -204,35 +165,136 @@ return {
 
   sources = {
 
-    -- ── File Explorer ──────────────────────────────────────────────────────
+    -- ── File Explorer ────────────────────────────────────────────────────
+    -- Visual contract: same bg as bufferline fill (TabLine), flat, no border.
+    -- Cursor line uses Visual so it shares the accent colour palette.
+    -- WinSeparator is invisible — the bufferline offset creates the boundary.
     explorer = {
-      transform = explorer_transform,
       format    = explorer_format,
       hidden    = get_explorer_options().show_hidden,
       follow    = true,
       layout = {
-        preset  = "sidebar",
-        layout  = { position = get_explorer_options().position },
-        width   = 34,
-        title   = "",        -- remove the "Explorer" heading
-        -- NOTE: "input" is intentionally NOT in hidden = {} so that
-        -- rename / add / delete prompts appear inline in the sidebar.
+        preset = "sidebar",
+        hidden = { "input" },
+        layout = { position = get_explorer_options().position },
+        width  = 32,
+        title  = "",   -- no heading
       },
+
+      -- ── Inline actions: prompts appear in the cmdline bar, no float ───
+      actions = {
+        -- Add a file or directory using vim.fn.input at the cmdline bar.
+        -- End the name with / to create a directory instead of a file.
+        explorer_add_inline = function(picker)
+          local dir = picker:dir()
+          vim.api.nvim_echo({ { " Add (end with / for dir): ", "Question" } }, false, {})
+          local name = vim.fn.input("")
+          vim.api.nvim_echo({ { "", "Normal" } }, false, {})
+          if name == nil or name == "" then return end
+          local uv   = vim.uv or vim.loop
+          local Tree = require("snacks.explorer.tree")
+          local ExA  = require("snacks.explorer.actions")
+          local path = vim.fs.normalize(dir .. "/" .. name)
+          local is_file = name:sub(-1) ~= "/"
+          local target_dir = is_file and vim.fs.dirname(path) or path
+          
+          if uv.fs_stat(path) then
+            vim.notify((is_file and "File" or "Directory") .. " already exists: " .. path, vim.log.levels.WARN)
+            return
+          end
+
+          local stat = uv.fs_stat(target_dir)
+          if stat and stat.type ~= "directory" then
+            vim.notify("Cannot create directory, file exists: " .. target_dir, vim.log.levels.ERROR)
+            return
+          elseif not stat then
+            local ok, err = pcall(vim.fn.mkdir, target_dir, "p")
+            if not ok then
+              vim.notify("Failed to create directory: " .. target_dir .. "\n" .. tostring(err), vim.log.levels.ERROR)
+              return
+            end
+          end
+          
+          if is_file then
+            local f = io.open(path, "w")
+            if f then f:close() end
+          end
+          Tree:open(target_dir)
+          Tree:refresh(target_dir)
+          ExA.update(picker, { target = path })
+        end,
+
+        -- Rename in place: pre-fills current filename at the cmdline bar.
+        explorer_rename_inline = function(picker, item)
+          if not item then return end
+          local old      = item.file
+          local basename = vim.fn.fnamemodify(old, ":t")
+          vim.api.nvim_echo({ { " Rename: ", "Question" } }, false, {})
+          local new_name = vim.fn.input("", basename)
+          vim.api.nvim_echo({ { "", "Normal" } }, false, {})
+          if new_name == nil or new_name == "" or new_name == basename then return end
+          local new_path = vim.fs.normalize(vim.fs.dirname(old) .. "/" .. new_name)
+          local Tree     = require("snacks.explorer.tree")
+          local ExA      = require("snacks.explorer.actions")
+          local ok, err  = pcall(vim.fn.rename, old, new_path)
+          if not ok or err ~= 0 then
+            vim.notify("Rename failed", vim.log.levels.ERROR)
+            return
+          end
+          -- Update any open buffers pointing at the old path
+          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.api.nvim_buf_get_name(buf) == old then
+              vim.api.nvim_buf_set_name(buf, new_path)
+            end
+          end
+          Tree:refresh(vim.fs.dirname(old))
+          Tree:refresh(vim.fs.dirname(new_path))
+          ExA.update(picker, { target = new_path })
+        end,
+
+        -- Delete with a cmdline y/n confirm — no floating dialog.
+        explorer_del_inline = function(picker)
+          local ExA   = require("snacks.explorer.actions")
+          local Tree  = require("snacks.explorer.tree")
+          local items = picker:selected({ fallback = true })
+          local paths = vim.tbl_map(require("snacks.picker.util").path, items)
+          if #paths == 0 then return end
+          local what  = #paths == 1
+            and vim.fn.fnamemodify(paths[1], ":p:~:.") or (#paths .. " files")
+          local choice = vim.fn.confirm("Delete " .. what .. "?", "&Yes\n&No", 2)
+          if choice ~= 1 then return end
+          for _, path in ipairs(paths) do
+            local ok, err = ExA.trash(path)
+            if ok then
+              pcall(function() Snacks.bufdelete({ file = path, force = true }) end)
+            else
+              vim.notify("Delete failed: " .. (err or ""), vim.log.levels.ERROR)
+            end
+            Tree:refresh(vim.fs.dirname(path))
+          end
+          picker.list:set_selected()
+          ExA.update(picker)
+        end,
+      },
+
       win = {
         list = {
           border = "none",
+          -- Matches bufferline fill bg exactly so they read as one surface
           winhighlight = table.concat({
             "Normal:TabLine",
             "NormalNC:TabLine",
             "FloatBorder:TabLine",
             "CursorLine:Visual",
             "WinSeparator:TabLine",
+            "SignColumn:TabLine",
+            "FoldColumn:TabLine",
           }, ","),
           keys = {
             ["<C-n>"]   = "close",
-            ["r"]       = "explorer_rename",
-            ["a"]       = "explorer_add",
-            ["d"]       = "explorer_del",
+            ["r"]       = "explorer_rename_inline",   -- cmdline rename
+            ["a"]       = "explorer_add_inline",      -- cmdline add
+            ["d"]       = "explorer_del_inline",      -- cmdline confirm delete
             ["y"]       = "explorer_yank",
             ["p"]       = "explorer_paste",
             ["c"]       = "explorer_copy",
@@ -250,14 +312,10 @@ return {
           middle   = "  ",
           last     = "  ",
         },
-        dir_open = " ",
-        dir      = " ",
-        file     = " ",
-        symlink  = "󰌷 ",
       },
     },
 
-    -- ── Files ──────────────────────────────────────────────────────────────
+    -- ── Files ────────────────────────────────────────────────────────────
     files = {
       layout  = L(),
       hidden  = true,
@@ -266,7 +324,7 @@ return {
       exclude = { ".git", "node_modules", ".cache", "dist", "build", "__pycache__", ".next" },
     },
 
-    -- ── Grep ───────────────────────────────────────────────────────────────
+    -- ── Grep ─────────────────────────────────────────────────────────────
     grep = {
       layout  = L(),
       hidden  = true,
@@ -274,13 +332,13 @@ return {
       args    = { "--smart-case", "--hidden", "--glob=!.git/*" },
     },
 
-    -- ── LSP sources ────────────────────────────────────────────────────────
+    -- ── LSP ──────────────────────────────────────────────────────────────
     lsp_references        = { layout = L({ height = 0.6 }) },
     lsp_definitions       = { layout = L({ height = 0.6 }) },
     lsp_implementations   = { layout = L({ height = 0.6 }) },
     lsp_type_definitions  = { layout = L({ height = 0.6 }) },
-    lsp_symbols           = { layout = L({ width = 0.7 }) },
-    lsp_workspace_symbols = { layout = L({ width = 0.7 }) },
+    lsp_symbols           = { layout = L({ width  = 0.7 }) },
+    lsp_workspace_symbols = { layout = L({ width  = 0.7 }) },
 
     -- ── Diagnostics ──────────────────────────────────────────────────────
     diagnostics = {
@@ -291,19 +349,17 @@ return {
 
     -- ── Buffers ──────────────────────────────────────────────────────────
     buffers = {
-      layout = L({ height = 0.55, width = 0.65 }),
-      current = false,
+      layout        = L({ height = 0.55, width = 0.65 }),
+      current       = false,
       sort_lastused = true,
     },
 
-    -- ── Git sources ───────────────────────────────────────────────────────
+    -- ── Git ──────────────────────────────────────────────────────────────
     git_status = {
       layout = L(),
       win = win_config({
-        ["gs"] = "git_stage",
-        ["gu"] = "git_unstage",
-        ["gr"] = "git_revert",
-        ["gp"] = "git_diff",
+        ["gs"] = "git_stage", ["gu"] = "git_unstage",
+        ["gr"] = "git_revert", ["gp"] = "git_diff",
       }),
     },
     git_log      = { layout = L() },
@@ -318,7 +374,7 @@ return {
     },
     git_stash = { layout = L({ height = 0.5 }) },
 
-    -- ── Misc sources ──────────────────────────────────────────────────────
+    -- ── Misc ─────────────────────────────────────────────────────────────
     help            = { layout = L() },
     recent          = { layout = L(), filter = { cwd = true } },
     lines           = { layout = L({ preset = "dropdown", height = 0.4 }) },

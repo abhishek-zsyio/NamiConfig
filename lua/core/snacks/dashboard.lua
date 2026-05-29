@@ -41,7 +41,10 @@ return {
       cmd     = string.format(
         "echo '  Neovim %s  ·  %s plugins  ·  %s'",
         vim.version().major .. "." .. vim.version().minor .. "." .. vim.version().patch,
-        #vim.tbl_keys(require("lazy").plugins()),
+        (function()
+          local ok, lazy = pcall(require, "lazy")
+          return ok and #vim.tbl_keys(lazy.plugins()) or "?"
+        end)(),
         current_theme
       ),
       hl      = "SnacksDashboardFooter",

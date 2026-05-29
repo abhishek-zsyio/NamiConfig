@@ -35,14 +35,11 @@ return {
           term    = hex("Special",   "fg") or "#94e2d5",
         }
 
-        -- Mode pill: accent bg, dark fg, bold
         local function pill(color)
           return { bg = color, fg = bg, gui = "bold" }
         end
-        -- Everything else: transparent (matches Normal bg), dimmed fg
         local flat     = { bg = bg, fg = fg_dim }
         local flat_fg  = { bg = bg, fg = fg }
-        -- b-section slightly elevated for branch/diff
         local elevated = { bg = bg_pill, fg = fg }
 
         return {
@@ -62,7 +59,6 @@ return {
 
       -- ── Components ────────────────────────────────────────────────────────
 
-      -- Mode: icon + label, compact on narrow windows
       local MODE = {
         n   = { icon = "󰋜 ", label = "NORMAL"  },
         i   = { icon = "󰏫 ", label = "INSERT"  },
@@ -80,21 +76,17 @@ return {
         local m     = vim.api.nvim_get_mode().mode
         local entry = MODE[m] or { icon = "  ", label = m:upper() }
         if vim.o.columns < 80 then
-          return entry.icon:gsub("%s+$", "")  -- icon only when narrow
+          return entry.icon:gsub("%s+$", "")
         end
         return entry.icon .. entry.label
       end
 
-      -- Filename: icon + smart path + flags
       local function filename_comp()
         local buf  = vim.api.nvim_get_current_buf()
         local name = vim.api.nvim_buf_get_name(buf)
 
-        if name == "" then
-          return "󰈤  [No Name]"
-        end
+        if name == "" then return "󰈤  [No Name]" end
 
-        -- Use devicons for file icon
         local icon = ""
         local ok, devicons = pcall(require, "nvim-web-devicons")
         if ok then
@@ -104,22 +96,19 @@ return {
           icon = (ic or "󰈤") .. "  "
         end
 
-        -- Relative path, truncate deep paths
-        local rel = vim.fn.fnamemodify(name, ":~:.")
+        local rel   = vim.fn.fnamemodify(name, ":~:.")
         local parts = vim.split(rel, "/", { plain = true })
         if #parts > 3 then
           rel = "\u{2026}/" .. parts[#parts - 1] .. "/" .. parts[#parts]
         end
 
-        -- Flags
         local flags = ""
-        if vim.bo[buf].modified  then flags = "  \u{25cf}" end   -- ● modified
-        if vim.bo[buf].readonly  then flags = flags .. "  \u{f023}" end  -- 󰐊 lock
+        if vim.bo[buf].modified then flags = "  \u{25cf}" end
+        if vim.bo[buf].readonly then flags = flags .. "  \u{f023}" end
 
         return icon .. rel .. flags
       end
 
-      -- Search count: 󰍉 3/12
       local function search_count()
         if vim.v.hlsearch == 0 then return "" end
         local ok, r = pcall(vim.fn.searchcount, { maxcount = 999, timeout = 50 })
@@ -128,14 +117,12 @@ return {
         return ("\u{f04b4}  %d/%s"):format(r.current, total)
       end
 
-      -- Macro recording: 󰑊 @q
       local function macro_rec()
         local r = vim.fn.reg_recording()
         if r == "" then return "" end
         return "\u{f044a}  @" .. r
       end
 
-      -- LSP + conform + lint, compact
       local function lsp_comp()
         local names, seen = {}, {}
         for _, cl in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
@@ -163,22 +150,18 @@ return {
         return "\u{f0e8}  " .. table.concat(names, "  ")
       end
 
-      -- Supermaven indicator
       local function supermaven_comp()
         local ok, api = pcall(require, "supermaven-nvim.api")
         if not ok or not api.is_running() then return "" end
         return "\u{f06e8}  SM"
       end
 
-      -- Word count (prose only)
       local PROSE = { markdown = true, text = true, org = true, norg = true }
       local function word_count()
         if not PROSE[vim.bo.filetype] then return "" end
-        local wc = vim.fn.wordcount().words
-        return "\u{f0248}  " .. wc .. "w"
+        return "\u{f0248}  " .. vim.fn.wordcount().words .. "w"
       end
 
-      -- Indent: only shown when non-default
       local function indent_comp()
         if vim.bo.expandtab then
           local sw = vim.bo.shiftwidth
@@ -187,33 +170,19 @@ return {
         return "\u{eb63}  tab"
       end
 
-      -- Noice command echo
       local function noice_cmd()
         if not package.loaded["noice"] then return "" end
         local noice = require("noice")
         return noice.api.status.mode.has() and noice.api.status.mode.get() or ""
       end
 
-      -- Git branch with worktree/detached fallback
-      local function branch_comp()
-        local ok, head = pcall(vim.fn.system, "git rev-parse --abbrev-ref HEAD 2>/dev/null")
-        -- lualine's built-in "branch" is fine; we just wrap it for truncation
-        -- This component is unused — see lualine_b below which uses the builtin
-        return ok and head:gsub("%s+$", "") or ""
-      end
-      _ = branch_comp  -- silence unused warning
-
       -- ── Setup ────────────────────────────────────────────────────────────
       require("lualine").setup({
         options = {
           theme  = build_theme(),
           globalstatus = true,
-
-          -- FLAT design: NO section separators (eliminates the >/( mismatch)
-          -- Component separator is a single thin vertical bar, uniform everywhere
-          section_separators   = { left = "",          right = ""          },
-          component_separators = { left = "\u{2502}",  right = "\u{2502}"  },
-
+          section_separators   = { left = "",         right = ""         },
+          component_separators = { left = "\u{2502}", right = "\u{2502}" },
           refresh            = { statusline = 500 },
           disabled_filetypes = {
             statusline = { "dashboard", "alpha", "snacks_dashboard", "lazy", "mason" },
@@ -221,21 +190,16 @@ return {
         },
 
         sections = {
-          -- [A] Mode pill ────────────────────────────────────────────────────
           lualine_a = {
-            {
-              mode_comp,
-              padding = { left = 2, right = 2 },
-            },
+            { mode_comp, padding = { left = 2, right = 2 } },
           },
 
-          -- [B] Git ──────────────────────────────────────────────────────────
           lualine_b = {
             {
               "branch",
-              icon    = "\u{e725} ",   -- nf-dev-git_branch
+              icon = "\u{e725} ",
               padding = { left = 2, right = 1 },
-              fmt     = function(name)
+              fmt = function(name)
                 if name == "" then return "" end
                 return #name > 24 and (name:sub(1, 22) .. "\u{2026}") or name
               end,
@@ -251,12 +215,8 @@ return {
             },
           },
 
-          -- [C] Left side ────────────────────────────────────────────────────
           lualine_c = {
-            {
-              filename_comp,
-              padding = { left = 2, right = 2 },
-            },
+            { filename_comp, padding = { left = 2, right = 2 } },
             {
               "diagnostics",
               sources = { "nvim_lsp" },
@@ -275,9 +235,8 @@ return {
             },
             {
               macro_rec,
-              cond    = function() return vim.fn.reg_recording() ~= "" end,
-              color   = function()
-                -- Inherit theme fg but use red for recording
+              cond  = function() return vim.fn.reg_recording() ~= "" end,
+              color = function()
                 local bg = hex("Normal", "bg") or "#1e1e2e"
                 return { bg = bg, fg = "#f38ba8", gui = "bold" }
               end,
@@ -285,7 +244,7 @@ return {
             },
             {
               noice_cmd,
-              cond    = function()
+              cond = function()
                 return package.loaded["noice"]
                   and require("noice").api.status.mode.has()
               end,
@@ -293,7 +252,6 @@ return {
             },
           },
 
-          -- [X] Right side ───────────────────────────────────────────────────
           lualine_x = {
             {
               supermaven_comp,
@@ -320,19 +278,15 @@ return {
             },
             {
               "encoding",
-              cond    = function()
+              cond = function()
                 return vim.bo.fileencoding ~= ""
                   and vim.bo.fileencoding ~= "utf-8"
               end,
               padding = { left = 1, right = 1 },
             },
-            {
-              "filetype",
-              padding = { left = 1, right = 2 },
-            },
+            { "filetype", padding = { left = 1, right = 2 } },
           },
 
-          -- [Y] Location ─────────────────────────────────────────────────────
           lualine_y = {
             {
               "location",
@@ -344,21 +298,19 @@ return {
             },
           },
 
-          -- [Z] Progress ─────────────────────────────────────────────────────
           lualine_z = {
             {
               "progress",
               fmt = function(s)
                 if s == "Top" then return "\u{f062}  TOP" end
                 if s == "Bot" then return "\u{f063}  BOT" end
-                return "\u{f0295}  " .. s  -- scroll/percent icon
+                return "\u{f0295}  " .. s
               end,
               padding = { left = 1, right = 2 },
             },
           },
         },
 
-        -- Inactive windows: minimal, just filename + position
         inactive_sections = {
           lualine_a = {},
           lualine_b = {},
@@ -386,7 +338,6 @@ return {
         },
       })
 
-      -- Re-sync theme whenever colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern  = "*",
         callback = function()

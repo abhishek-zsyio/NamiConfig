@@ -1,10 +1,10 @@
 -- plugins/ui/bufferline.lua
--- ── Concept: matches the "Sentence Bar" statusline ───────────────────────
--- • Flat bg throughout — same Normal bg as statusline
--- • Active tab: accent underline (not a pill, not a full bg swap)
--- • Separator style "none" — no glyphs between tabs, breathing room via padding
--- • All highlights are theme-sourced at runtime, zero hardcoded hex
--- ─────────────────────────────────────────────────────────────────────────
+-- ── Design language: flat · no underlines · filename-only · accent via bold+fg ──
+-- • Active tab: fg accent + bold — no underline, no pill, no bg swap
+-- • Inactive: deeply ghosted (Comment fg) so active pops by contrast alone
+-- • Separator: true none — zero glyphs, spacing carries the rhythm
+-- • Filename only — no path noise in the tab bar
+-- ─────────────────────────────────────────────────────────────────────────────
 return {
   {
     "akinsho/bufferline.nvim",
@@ -13,7 +13,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
 
-      -- ── Runtime colour helper ────────────────────────────────────────────
+      -- ── Runtime colour helper ──────────────────────────────────────────────
       local function get_hl(name)
         local ok, h = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
         return ok and h or {}
@@ -23,18 +23,22 @@ return {
         return v and ("#%06x"):format(v) or nil
       end
 
-      -- ── Style flag ───────────────────────────────────────────────────────
-      local ok_s, settings = pcall(require, "settings")
-      local style    = (ok_s and settings.ui and settings.ui.bufferline_style) or "underline"
-      local is_solid = (style == "solid")
+      -- ── Name formatter: filename only, no path ─────────────────────────────
+      -- bufferline passes a table {name, path, bufnr, tabnr}, not a plain string.
+      local function short_name(buf)
+        local path = buf.path or buf.name or ""
+        if path == "" then return "[No Name]" end
+        return vim.fn.fnamemodify(path, ":t")
+      end
 
-      -- ── Setup ────────────────────────────────────────────────────────────
+      -- ── Setup ──────────────────────────────────────────────────────────────
       require("bufferline").setup({
 
-        -- ── Options ──────────────────────────────────────────────────────
         options = {
           mode    = "buffers",
           numbers = "none",
+
+          name_formatter = short_name,   -- ← filename only
 
           close_command        = "bdelete! %d",
           right_mouse_command  = "bdelete! %d",
@@ -44,27 +48,26 @@ return {
           -- Icons
           color_icons              = true,
           show_buffer_icons        = true,
-          show_buffer_close_icons  = true,
+          show_buffer_close_icons  = false,   -- hide ✕ on inactive; reveal on hover
           show_close_icon          = false,
           show_tab_indicators      = true,
           show_buffer_default_icon = true,
 
-          modified_icon      = "\u{25cf}",   -- ● unsaved dot
-          close_icon         = "\u{f00d}",   -- ✕
-          left_trunc_marker  = "\u{f0141}",  -- 󰅁
-          right_trunc_marker = "\u{f0142}",  -- 󰅂
+          modified_icon      = "●",
+          close_icon         = "✕",
+          left_trunc_marker  = "‹",
+          right_trunc_marker = "›",
           truncate_names     = true,
 
-          -- Underline accent on active tab — the one unique visual signal
+          -- No underline — indicator is visually silent; active pops by colour alone
           indicator = {
-            style = is_solid and "icon" or "underline",
-            icon  = "\u{258f}",  -- ▏ (used only in solid mode)
+            style = "none",
           },
 
-          -- No glyphs between tabs — padding does the work
-          separator_style = "thin",
-          tab_size        = 18,
-          max_name_length = 22,
+          -- True separator-free layout — padding breathes for us
+          separator_style = "none",
+          tab_size        = 14,        -- tighter than before
+          max_name_length = 18,
           padding         = 1,
 
           -- LSP diagnostics
@@ -76,6 +79,9 @@ return {
 
           always_show_bufferline = true,
 
+          -- Hover: reveal close button on mouse-over only
+          hover = { enabled = true, delay = 100, reveal = { "close" } },
+
           -- Filter: hide unnamed, terminal, snacks internals
           custom_filter = function(bufnr)
             if vim.api.nvim_buf_get_name(bufnr) == "" then return false end
@@ -86,85 +92,63 @@ return {
             return true
           end,
 
-          hover = { enabled = true, delay = 150, reveal = { "close" } },
-
-          -- Explorer offsets — text removed, just blank space
+          -- Explorer offsets — blank, no labels
           offsets = {
-            {
-              filetype   = "snacks_picker_list",
-              text       = "",
-              separator  = false,
-              padding    = 1,
-            },
-            {
-              filetype   = "snacks_layout_box",
-              text       = "",
-              separator  = false,
-              padding    = 1,
-            },
-            {
-              filetype   = "snacks_explorer",
-              text       = "",
-              separator  = false,
-              padding    = 1,
-            },
-            {
-              filetype   = "neo-tree",
-              text       = "",
-              separator  = false,
-              padding    = 1,
-            },
+            { filetype = "snacks_picker_list",  text = "", separator = false, padding = 1 },
+            { filetype = "snacks_layout_box",   text = "", separator = false, padding = 1 },
+            { filetype = "snacks_explorer",     text = "", separator = false, padding = 1 },
+            { filetype = "neo-tree",            text = "", separator = false, padding = 1 },
           },
         },
 
-        -- ── Highlights ───────────────────────────────────────────────────
+        -- ── Highlights ────────────────────────────────────────────────────────
         -- Strategy:
-        --   inactive  → Normal bg,  Comment fg  (recedes)
-        --   visible   → Normal bg,  TabLine fg  (visible but not active)
-        --   selected  → Normal bg,  Normal fg, bold  (pops via text weight + underline)
-        --   fill      → TabLine bg  (the bar behind everything)
+        --   fill       → TabLine bg (the bar behind everything)
+        --   inactive   → Normal bg + Comment fg  (deeply ghosted, recedes)
+        --   visible    → Normal bg + TabLine fg  (exists, not demanding)
+        --   selected   → Normal bg + Function fg, bold  (pops purely via colour+weight)
         --
-        -- All colours are { attribute, highlight } refs — resolved at render time.
-        -- sp (special/underline colour) uses Function fg for the accent line.
+        -- NO sp / underline anywhere. Active identity comes from:
+        --   1. Function-colour fg (accent) on both the text and icon
+        --   2. bold weight
+        --   3. Surrounding inactive tabs being visually dim
         highlights = {
 
           fill = {
             bg = { attribute = "bg", highlight = "TabLine" },
           },
 
-          -- ── Inactive ────────────────────────────────────────────────────
+          -- ── Inactive ──────────────────────────────────────────────────────
           background = {
             fg = { attribute = "fg", highlight = "Comment" },
             bg = { attribute = "bg", highlight = "Normal"  },
           },
 
-          -- ── Visible (in another split, not focused) ──────────────────────
+          -- ── Visible (in split, not focused) ──────────────────────────────
           buffer_visible = {
             fg = { attribute = "fg", highlight = "TabLine" },
             bg = { attribute = "bg", highlight = "Normal"  },
           },
 
-          -- ── Selected (active) ────────────────────────────────────────────
+          -- ── Selected (active) ─────────────────────────────────────────────
+          -- Accent via fg colour + bold — no underline, no bg change
           buffer_selected = {
-            fg   = { attribute = "fg", highlight = "Normal"   },
+            fg   = { attribute = "fg", highlight = "Function" },
             bg   = { attribute = "bg", highlight = "Normal"   },
-            sp   = { attribute = "fg", highlight = "Function" },  -- underline colour
             bold = true,
           },
 
-          -- ── Indicator ────────────────────────────────────────────────────
+          -- ── Indicator: invisible (style = none) ───────────────────────────
           indicator_selected = {
-            fg = { attribute = "fg", highlight = "Function" },
-            bg = { attribute = "bg", highlight = "Normal"   },
-            sp = { attribute = "fg", highlight = "Function" },
+            fg = { attribute = "bg", highlight = "Normal" },
+            bg = { attribute = "bg", highlight = "Normal" },
           },
           indicator_visible = {
             fg = { attribute = "bg", highlight = "Normal" },
             bg = { attribute = "bg", highlight = "Normal" },
           },
 
-          -- ── Separators ───────────────────────────────────────────────────
-          -- Invisible — same colour as bg so they vanish
+          -- ── Separators: fully invisible ───────────────────────────────────
           separator = {
             fg = { attribute = "bg", highlight = "Normal" },
             bg = { attribute = "bg", highlight = "Normal" },
@@ -178,30 +162,30 @@ return {
             bg = { attribute = "bg", highlight = "Normal" },
           },
 
-          -- ── Modified dot ─────────────────────────────────────────────────
+          -- ── Modified dot ──────────────────────────────────────────────────
           modified = {
-            fg = { attribute = "fg", highlight = "String"  },
-            bg = { attribute = "bg", highlight = "Normal"  },
+            fg = { attribute = "fg", highlight = "String" },
+            bg = { attribute = "bg", highlight = "Normal" },
           },
           modified_selected = {
-            fg = { attribute = "fg", highlight = "String"  },
-            bg = { attribute = "bg", highlight = "Normal"  },
-            sp = { attribute = "fg", highlight = "Function" },
+            fg   = { attribute = "fg", highlight = "String"   },
+            bg   = { attribute = "bg", highlight = "Normal"   },
+            bold = true,
           },
           modified_visible = {
-            fg = { attribute = "fg", highlight = "String"  },
-            bg = { attribute = "bg", highlight = "Normal"  },
+            fg = { attribute = "fg", highlight = "String" },
+            bg = { attribute = "bg", highlight = "Normal" },
           },
 
-          -- ── Close button ─────────────────────────────────────────────────
+          -- ── Close button ──────────────────────────────────────────────────
           close_button = {
             fg = { attribute = "fg", highlight = "Comment" },
             bg = { attribute = "bg", highlight = "Normal"  },
           },
           close_button_selected = {
-            fg = { attribute = "fg", highlight = "ErrorMsg" },
-            bg = { attribute = "bg", highlight = "Normal"   },
-            sp = { attribute = "fg", highlight = "Function" },
+            fg   = { attribute = "fg", highlight = "ErrorMsg" },
+            bg   = { attribute = "bg", highlight = "Normal"   },
+            bold = true,
           },
           close_button_visible = {
             fg = { attribute = "fg", highlight = "Comment" },
@@ -210,14 +194,14 @@ return {
 
           -- ── Duplicate names ───────────────────────────────────────────────
           duplicate = {
-            fg     = { attribute = "fg", highlight = "Comment" },
-            bg     = { attribute = "bg", highlight = "Normal"  },
+            fg     = { attribute = "fg", highlight = "Comment"  },
+            bg     = { attribute = "bg", highlight = "Normal"   },
             italic = true,
           },
           duplicate_selected = {
             fg     = { attribute = "fg", highlight = "Function" },
             bg     = { attribute = "bg", highlight = "Normal"   },
-            sp     = { attribute = "fg", highlight = "Function" },
+            bold   = true,
             italic = true,
           },
           duplicate_visible = {
@@ -240,7 +224,6 @@ return {
           numbers_selected = {
             fg   = { attribute = "fg", highlight = "Function" },
             bg   = { attribute = "bg", highlight = "Normal"   },
-            sp   = { attribute = "fg", highlight = "Function" },
             bold = true,
           },
           numbers_visible = {
@@ -248,15 +231,14 @@ return {
             bg = { attribute = "bg", highlight = "Normal"  },
           },
 
-          -- ── Tab (vim tabs, not buffers) ───────────────────────────────────
+          -- ── Vim tabs ──────────────────────────────────────────────────────
           tab = {
             fg = { attribute = "fg", highlight = "Comment" },
             bg = { attribute = "bg", highlight = "TabLine" },
           },
           tab_selected = {
-            fg   = { attribute = "fg", highlight = "Normal"   },
+            fg   = { attribute = "fg", highlight = "Function" },
             bg   = { attribute = "bg", highlight = "Normal"   },
-            sp   = { attribute = "fg", highlight = "Function" },
             bold = true,
           },
           tab_separator = {
@@ -273,131 +255,47 @@ return {
           },
 
           -- ── Diagnostics ───────────────────────────────────────────────────
-          error = {
-            fg = { attribute = "fg", highlight = "DiagnosticError" },
-            bg = { attribute = "bg", highlight = "Normal"          },
-          },
-          error_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticError" },
-            bg   = { attribute = "bg", highlight = "Normal"          },
-            sp   = { attribute = "fg", highlight = "Function"        },
-            bold = true,
-          },
-          error_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticError" },
-            bg = { attribute = "bg", highlight = "Normal"          },
-          },
-          error_diagnostic = {
-            fg = { attribute = "fg", highlight = "DiagnosticError" },
-            bg = { attribute = "bg", highlight = "Normal"          },
-          },
-          error_diagnostic_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticError" },
-            bg   = { attribute = "bg", highlight = "Normal"          },
-            sp   = { attribute = "fg", highlight = "Function"        },
-            bold = true,
-          },
-          error_diagnostic_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticError" },
-            bg = { attribute = "bg", highlight = "Normal"          },
-          },
+          -- Pattern: inactive/visible use raw diag colour, selected adds bold
+          error                     = { fg = { attribute = "fg", highlight = "DiagnosticError" }, bg = { attribute = "bg", highlight = "Normal" } },
+          error_selected            = { fg = { attribute = "fg", highlight = "DiagnosticError" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          error_visible             = { fg = { attribute = "fg", highlight = "DiagnosticError" }, bg = { attribute = "bg", highlight = "Normal" } },
+          error_diagnostic          = { fg = { attribute = "fg", highlight = "DiagnosticError" }, bg = { attribute = "bg", highlight = "Normal" } },
+          error_diagnostic_selected = { fg = { attribute = "fg", highlight = "DiagnosticError" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          error_diagnostic_visible  = { fg = { attribute = "fg", highlight = "DiagnosticError" }, bg = { attribute = "bg", highlight = "Normal" } },
 
-          warning = {
-            fg = { attribute = "fg", highlight = "DiagnosticWarn" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          warning_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticWarn" },
-            bg   = { attribute = "bg", highlight = "Normal"         },
-            sp   = { attribute = "fg", highlight = "Function"       },
-            bold = true,
-          },
-          warning_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticWarn" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          warning_diagnostic = {
-            fg = { attribute = "fg", highlight = "DiagnosticWarn" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          warning_diagnostic_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticWarn" },
-            bg   = { attribute = "bg", highlight = "Normal"         },
-            sp   = { attribute = "fg", highlight = "Function"       },
-            bold = true,
-          },
-          warning_diagnostic_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticWarn" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
+          warning                     = { fg = { attribute = "fg", highlight = "DiagnosticWarn" }, bg = { attribute = "bg", highlight = "Normal" } },
+          warning_selected            = { fg = { attribute = "fg", highlight = "DiagnosticWarn" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          warning_visible             = { fg = { attribute = "fg", highlight = "DiagnosticWarn" }, bg = { attribute = "bg", highlight = "Normal" } },
+          warning_diagnostic          = { fg = { attribute = "fg", highlight = "DiagnosticWarn" }, bg = { attribute = "bg", highlight = "Normal" } },
+          warning_diagnostic_selected = { fg = { attribute = "fg", highlight = "DiagnosticWarn" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          warning_diagnostic_visible  = { fg = { attribute = "fg", highlight = "DiagnosticWarn" }, bg = { attribute = "bg", highlight = "Normal" } },
 
-          info = {
-            fg = { attribute = "fg", highlight = "DiagnosticInfo" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          info_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticInfo" },
-            bg   = { attribute = "bg", highlight = "Normal"         },
-            sp   = { attribute = "fg", highlight = "Function"       },
-            bold = true,
-          },
-          info_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticInfo" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          info_diagnostic = {
-            fg = { attribute = "fg", highlight = "DiagnosticInfo" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          info_diagnostic_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticInfo" },
-            bg   = { attribute = "bg", highlight = "Normal"         },
-            sp   = { attribute = "fg", highlight = "Function"       },
-            bold = true,
-          },
-          info_diagnostic_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticInfo" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
+          info                     = { fg = { attribute = "fg", highlight = "DiagnosticInfo" }, bg = { attribute = "bg", highlight = "Normal" } },
+          info_selected            = { fg = { attribute = "fg", highlight = "DiagnosticInfo" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          info_visible             = { fg = { attribute = "fg", highlight = "DiagnosticInfo" }, bg = { attribute = "bg", highlight = "Normal" } },
+          info_diagnostic          = { fg = { attribute = "fg", highlight = "DiagnosticInfo" }, bg = { attribute = "bg", highlight = "Normal" } },
+          info_diagnostic_selected = { fg = { attribute = "fg", highlight = "DiagnosticInfo" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          info_diagnostic_visible  = { fg = { attribute = "fg", highlight = "DiagnosticInfo" }, bg = { attribute = "bg", highlight = "Normal" } },
 
-          hint = {
-            fg = { attribute = "fg", highlight = "DiagnosticHint" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          hint_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticHint" },
-            bg   = { attribute = "bg", highlight = "Normal"         },
-            sp   = { attribute = "fg", highlight = "Function"       },
-            bold = true,
-          },
-          hint_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticHint" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          hint_diagnostic = {
-            fg = { attribute = "fg", highlight = "DiagnosticHint" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
-          hint_diagnostic_selected = {
-            fg   = { attribute = "fg", highlight = "DiagnosticHint" },
-            bg   = { attribute = "bg", highlight = "Normal"         },
-            sp   = { attribute = "fg", highlight = "Function"       },
-            bold = true,
-          },
-          hint_diagnostic_visible = {
-            fg = { attribute = "fg", highlight = "DiagnosticHint" },
-            bg = { attribute = "bg", highlight = "Normal"         },
-          },
+          hint                     = { fg = { attribute = "fg", highlight = "DiagnosticHint" }, bg = { attribute = "bg", highlight = "Normal" } },
+          hint_selected            = { fg = { attribute = "fg", highlight = "DiagnosticHint" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          hint_visible             = { fg = { attribute = "fg", highlight = "DiagnosticHint" }, bg = { attribute = "bg", highlight = "Normal" } },
+          hint_diagnostic          = { fg = { attribute = "fg", highlight = "DiagnosticHint" }, bg = { attribute = "bg", highlight = "Normal" } },
+          hint_diagnostic_selected = { fg = { attribute = "fg", highlight = "DiagnosticHint" }, bg = { attribute = "bg", highlight = "Normal" }, bold = true },
+          hint_diagnostic_visible  = { fg = { attribute = "fg", highlight = "DiagnosticHint" }, bg = { attribute = "bg", highlight = "Normal" } },
         },
       })
 
-      -- ── Re-apply on colorscheme change ───────────────────────────────────
+      -- ── Re-apply on colorscheme change ─────────────────────────────────────
+      -- bufferline v3+ refreshes highlights automatically on ColorScheme;
+      -- no manual call needed. The autocmd is kept as a safety net only.
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern  = "*",
         callback = function()
           vim.defer_fn(function()
-            local ok2, bl = pcall(require, "bufferline")
-            if ok2 then bl.setup_commands() end
+            pcall(function()
+              require("bufferline.highlights").reset()
+            end)
           end, 10)
         end,
       })

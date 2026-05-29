@@ -92,24 +92,32 @@ autocmd({ "BufWritePost", "FileChangedShellPost" }, {
     end
 
     -- Re-apply colorscheme
-    if settings.theme then
+    local theme_id = settings.ui and settings.ui.theme or settings.theme
+    if theme_id then
       local reg = require("core.theme_registry")
       for _, t in ipairs(reg) do
-        if t.id == settings.theme then
-          if t.setup then t.setup(settings.transparent == true) end
+        if t.id == theme_id then
+          local transparent = settings.ui and settings.ui.transparent or settings.transparent
+          if t.setup then t.setup(transparent == true) end
           pcall(vim.cmd, "colorscheme " .. (t.colorscheme or t.id))
           break
         end
       end
     end
 
-    if settings.background then vim.o.background = settings.background end
+    local bg = settings.ui and settings.ui.background or settings.background
+    if bg then vim.o.background = bg end
 
-    -- Live-update common window options
-    if settings.show_line_numbers      ~= nil then vim.wo.number         = settings.show_line_numbers end
-    if settings.relative_line_numbers  ~= nil then vim.wo.relativenumber = settings.relative_line_numbers end
-    if settings.wrap_lines             ~= nil then vim.wo.wrap           = settings.wrap_lines end
-    if settings.color_column                  then vim.wo.colorcolumn    = settings.color_column end
+    -- Live-update common window options (support both flat and nested keys)
+    local ed = settings.editor or {}
+    local show_nums    = ed.show_line_numbers    ~= nil and ed.show_line_numbers    or settings.show_line_numbers
+    local rel_nums     = ed.relative_line_numbers~= nil and ed.relative_line_numbers or settings.relative_line_numbers
+    local wrap         = ed.wrap_lines           ~= nil and ed.wrap_lines           or settings.wrap_lines
+    local col_col      = ed.color_column or settings.color_column
+    if show_nums  ~= nil then vim.wo.number         = show_nums  end
+    if rel_nums   ~= nil then vim.wo.relativenumber = rel_nums   end
+    if wrap       ~= nil then vim.wo.wrap           = wrap       end
+    if col_col           then vim.wo.colorcolumn    = col_col    end
 
     vim.notify("Settings reloaded 🚀", vim.log.levels.INFO, { title = "Config" })
   end,

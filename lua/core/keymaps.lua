@@ -35,6 +35,13 @@ map("i", "<C-k>", "<Up>",    { desc = "Move up" })
 map("n", "<C-s>", "<cmd>w<CR>",  { desc = "Save file" })
 map("n", "<C-q>", "<cmd>q<CR>",  { desc = "Quit" })
 map("n", "<leader>q", "<cmd>qa<CR>", { desc = "Quit Neovim" })
+map("n", "ZZ", function()
+  if _G.Snacks then
+    _G.Snacks.bufdelete()
+  else
+    require("snacks").bufdelete()
+  end
+end, { desc = "Close buffer" })
 
 -- ── Move Lines (Alt + j/k) ───────────────────────────────────────────────
 map("i", "<A-j>", "<Esc>:m .+1<CR>==gi", opts)

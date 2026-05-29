@@ -3,7 +3,30 @@ local ok, settings = pcall(require, "settings")
 local s = ok and settings or {}
 
 return {
-  zen      = { enabled = true },
+  zen      = { 
+    enabled = true,
+    win = { width = 0 },
+    on_open = function(win)
+      win.zen_indicator = Snacks.win({
+        text = " 󱗼 ZEN MODE ",
+        minimal = true,
+        enter = false,
+        focusable = false,
+        width = 14,
+        height = 1,
+        row = 0,
+        col = -1,
+        backdrop = false,
+        zindex = win.opts.zindex + 1,
+        wo = { winhighlight = "NormalFloat:DiagnosticInfo" },
+      })
+    end,
+    on_close = function(win)
+      if win.zen_indicator then
+        win.zen_indicator:close()
+      end
+    end,
+  },
   dim      = { enabled = s.dim_inactive == true },
   explorer = { enabled = true },
 
