@@ -296,7 +296,9 @@ return {
             ["a"]       = "explorer_add_inline",      -- cmdline add
             ["d"]       = "explorer_del_inline",      -- cmdline confirm delete
             ["y"]       = "explorer_yank",
-            ["p"]       = "explorer_paste",
+            ["x"]       = "select_and_next",          -- NvChad 'cut' (marks for move)
+            ["p"]       = "explorer_move",            -- NvChad 'paste' (moves marked files)
+            ["P"]       = "explorer_paste",           -- System clipboard paste
             ["c"]       = "explorer_copy",
             ["m"]       = "explorer_move",
             ["o"]       = "explorer_open",
@@ -377,7 +379,7 @@ return {
     -- ── Misc ─────────────────────────────────────────────────────────────
     help            = { layout = L() },
     recent          = { layout = L(), filter = { cwd = true } },
-    lines           = { layout = L({ preset = "dropdown", height = 0.4 }) },
+    lines           = { layout = L({ preset = "ivy" }) },
     marks           = { layout = L({ height = 0.5 }) },
     jumps           = { layout = L({ height = 0.5 }) },
     registers       = { layout = L({ preset = "dropdown", height = 0.5, width = 0.55 }) },

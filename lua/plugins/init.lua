@@ -14,6 +14,7 @@ return {
   { import = "plugins.editor.autopairs" },
   { import = "plugins.editor.comment" },
   { import = "plugins.editor.utils" },
+  { import = "plugins.editor.autosave" },
   { import = "plugins.editor.neoconf" },   -- project-local LSP config
   { import = "plugins.editor.persistence" },
   { import = "plugins.editor.leetcode" },

@@ -153,10 +153,8 @@ table.insert(plugins, {
       end
 
       -- ── Window separator ───────────────────────────────────────────────────
-      local border_fg = get_hl("FloatBorder").fg or comment
-      if border_fg then
-        set(0, "WinSeparator", { fg = border_fg, bg = "NONE" })
-      end
+      -- Flat design: perfectly blend the vertical split with a subtle solid color
+      set(0, "WinSeparator", { fg = alt_bg, bg = bg })
     end
 
     vim.api.nvim_create_autocmd("ColorScheme", {

@@ -28,7 +28,7 @@ opt.fillchars = {
   foldopen  = "▾",
   foldsep   = " ",
   foldclose = "▸",
-  vert      = "│",    -- subtle vertical split line
+  vert      = " ",    -- seamless flat vertical splits
   diff      = "╱",
 }
 
